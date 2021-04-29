@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ${spring.profiles.active}-acc-loan
+  profiles:
+    active: dev
+
+
+service:
+  acc-repay-service: ${spring.profiles.active}-acc-repay
+
+host:
+  acc-repay-host: 127.0.0.1:9004/repay

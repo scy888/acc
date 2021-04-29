@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: ${spring.profiles.active}-acc-repay
+  profiles:
+    active: dev
+
+
+
