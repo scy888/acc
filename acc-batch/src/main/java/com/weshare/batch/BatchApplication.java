@@ -1,10 +1,12 @@
 package com.weshare.batch;
 
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
  * @author: scyang
@@ -14,6 +16,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @describe:
  */
 @SpringBootApplication
+@EnableBatchProcessing
+@EnableJpaAuditing//自动加载时间的
 @EnableEurekaClient
 @EnableFeignClients
 @EnableDiscoveryClient
@@ -22,7 +26,7 @@ public class BatchApplication {
         long start = System.currentTimeMillis();
         SpringApplication.run(BatchApplication.class);
         long end = System.currentTimeMillis();
-        System.out.println(String.format("batch服务启动耗时:%d 毫秒",end-start));
+        System.out.println(String.format("batch服务启动耗时:%d 毫秒", end - start));
     }
 }
 

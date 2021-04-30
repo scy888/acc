@@ -1,5 +1,5 @@
 server:
-  port: 9010
+  port: 9002
   servlet:
     context-path: /batch
 
@@ -10,3 +10,29 @@ eureka:
   instance:
     prefer-ip-address: true
     #ip-address: 127.0.0.1
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    jdbc-url: jdbc:mysql://localhost/tensquare?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+    username: root
+    password: root
+
+  second:
+    datasource:
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://47.112.110.71:3306/test?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+      username: root
+      password: 123456
+      type: com.zaxxer.hikari.HikariDataSource
+  main:
+    allow-bean-definition-overriding: true
+
+
+
+  mail:
+    host: smtp.qq.com
+    port: 25
+    username: 348691356@qq.com
+    password: rjivwjbadxuxcahf
+    default-encoding: UTF-8
