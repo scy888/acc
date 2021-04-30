@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: acc-batch
+
+  profiles:
+    active: dev

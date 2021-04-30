@@ -1,9 +1,7 @@
 package com.weshare.repay.provider;
 
-import com.alibaba.fastjson.JSON;
 import com.weshare.client.RepayClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -19,7 +17,6 @@ public class RepayProvider implements RepayClient {
 
     @Override
     public String getRepayClient(String repayClient, Boolean isInvoking) {
-
         if (isInvoking) {
             repayClient = "放款服务远程调用了还款服务==>" + repayClient;
             log.info(repayClient);

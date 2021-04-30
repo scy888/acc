@@ -1,0 +1,12 @@
+server:
+  port: 9010
+  servlet:
+    context-path: /batch
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8686/eureka/eureka
+  instance:
+    prefer-ip-address: true
+    #ip-address: 127.0.0.1
