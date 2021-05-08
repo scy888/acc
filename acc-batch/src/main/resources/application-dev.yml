@@ -33,6 +33,11 @@ spring:
   mail:
     host: smtp.qq.com
     port: 25
-    username: 348691356@qq.com
+    username: 348691356
     password: rjivwjbadxuxcahf
     default-encoding: UTF-8
+
+sendMessage:
+  send-from: 348691356@qq.com
+  send-to: 348691356@qq.com,61906806@qq.com
+

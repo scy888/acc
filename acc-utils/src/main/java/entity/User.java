@@ -1,5 +1,8 @@
 package entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -19,7 +22,7 @@ public class User implements Serializable {
     @Id
     private Long id;
     private String username;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    //@JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
     private Date birthday;
     private int age;
     private String sex;
@@ -80,23 +83,6 @@ public class User implements Serializable {
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        return sdf.format(birthday);
 //    }
-
-
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("username='" + username + "'")
-                .add("birthday=" + birthday)
-                .add("age=" + age)
-                .add("sex='" + sex + "'")
-                .add("address='" + address + "'")
-                .add("password='" + password + "'")
-                .add("mobile='" + mobile + "'")
-                .add("money=" + money)
-                .toString();
-    }
 
     @Getter
     public enum Status {
