@@ -14,7 +14,7 @@ eureka:
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    jdbc-url: jdbc:mysql://localhost/tensquare?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+    jdbc-url: jdbc:mysql://localhost/batch?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
     username: root
     password: root
 
@@ -28,8 +28,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-
-
   mail:
     host: smtp.qq.com
     port: 25
@@ -40,4 +38,16 @@ spring:
 sendMessage:
   send-from: 348691356@qq.com
   send-to: 348691356@qq.com,61906806@qq.com
+
+  #项目启动时不调用 Job
+  batch:
+    job:
+     enabled: false
+    initialize-schema: always
+
+  jpa:
+    database: MySQL
+    show-sql: true
+    hibernate:
+     ddl-auto: update
 

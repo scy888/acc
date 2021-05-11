@@ -6,12 +6,17 @@ import common.JsonUtil;
 import entity.Result;
 import entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
@@ -29,6 +34,10 @@ import java.util.*;
 @RestController
 @Slf4j
 public class BatchController {
+    @Autowired
+    private JobRegistry jobRegistry;
+    @Autowired
+    private JobLauncher jobLauncher;
     @Autowired
     private JavaMailSender javaMailSender;
     @Value("${sendMessage.send-from}")
@@ -72,5 +81,15 @@ public class BatchController {
         javaMailSender.send(mimeMessage);
 
         return "success";
+    }
+
+    @GetMapping("testBatch/{jobName}")
+    public String testBatch(@PathVariable String jobName, @RequestParam String remark) throws Exception {
+        Job job = jobRegistry.getJob(jobName);//注册job名
+        JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+        jobParametersBuilder.addString("remark", remark);
+        JobParameters jobParameters = jobParametersBuilder.toJobParameters();
+        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+        return jobExecution.toString();
     }
 }
