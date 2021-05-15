@@ -1,15 +1,13 @@
 package com.weshare.batch.test;
 
-import com.weshare.batch.Person;
+import com.weshare.batch.entity.Person;
 import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
-import org.apache.tomcat.jni.Thread;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +19,6 @@ import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.file.Files.*;

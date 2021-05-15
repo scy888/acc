@@ -1,6 +1,6 @@
 package com.weshare.batch.job;
 
-import com.weshare.batch.Person;
+import com.weshare.batch.entity.Person;
 import com.weshare.batch.enums.BatchJobEnum;
 import com.weshare.batch.enums.JobStepName;
 import com.weshare.batch.tasklet.PersonTasklet;

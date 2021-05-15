@@ -1,4 +1,4 @@
-package com.weshare.batch;
+package com.weshare.batch.entity;
 
 import lombok.*;
 import lombok.experimental.Accessors;

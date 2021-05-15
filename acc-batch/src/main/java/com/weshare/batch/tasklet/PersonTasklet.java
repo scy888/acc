@@ -1,6 +1,6 @@
 package com.weshare.batch.tasklet;
 
-import com.weshare.batch.Person;
+import com.weshare.batch.entity.Person;
 import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
 import common.ReflectUtils;
 import common.SnowFlake;
