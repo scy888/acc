@@ -17,9 +17,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.file.Files.*;
@@ -124,5 +126,41 @@ public class TestBatch {
         }
         //Files.writeString(Paths.get(String.valueOf(concatPath),"concat.csv"),String.join(System.lineSeparator(),list),StandardCharsets.UTF_8,StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(concatPath), "concat.csv"), list, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+    }
+
+    @Test
+    public void test03() {
+        List<Person> personList = List.of(new Person().setId(SnowFlake.getInstance().nextId() + "").setName("赵敏").setAddress("蒙古").setAge(20).setBirthday(LocalDate.parse("1992-06-18")).setSalary(new BigDecimal("1992.0618")).setStatus(Person.Status.F),
+                new Person().setId(SnowFlake.getInstance().nextId() + "").setName("周芷若").setAddress("峨嵋").setAge(19).setBirthday(LocalDate.parse("1992-05-12")).setSalary(new BigDecimal("1992.0512")).setStatus(Person.Status.M),
+                new Person().setId(SnowFlake.getInstance().nextId() + "").setName("小昭").setAddress("波斯").setAge(18).setBirthday(LocalDate.parse("1994-10-10")).setSalary(new BigDecimal("1994.1010")).setStatus(Person.Status.O),
+                new Person().setId(SnowFlake.getInstance().nextId() + "").setName("阿离").setAddress("灵蛇岛").setAge(17).setBirthday(LocalDate.parse("1995-12-16")).setSalary(new BigDecimal("1995.1216")).setStatus(Person.Status.N));
+        Long integer = personList.stream().map(e -> new Long(e.getAge())).reduce(0L, Long::sum);
+        System.out.println(integer);
+        IntSummaryStatistics statistics = personList.stream().mapToInt(Person::getAge).summaryStatistics();
+        IntSummaryStatistics statistics1 = personList.stream().collect(Collectors.summarizingInt(Person::getAge));
+        System.out.println(statistics.getCount());
+        System.out.println(statistics.getSum());
+        System.out.println(statistics.getMax());
+        System.out.println(statistics.getMin());
+        System.out.println(statistics.getAverage());
+        System.out.println("=================================================");
+
+        List<BigDecimal> bigDecimals = List.of(
+                new BigDecimal("1.00"),
+                new BigDecimal("2.00"),
+                new BigDecimal("3.00"),
+                new BigDecimal("4.00"));
+        BigDecimal sum = bigDecimals.stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+        System.out.println(sum);
+        BigDecimal max = bigDecimals.stream().reduce( BigDecimal::max).orElse(BigDecimal.ZERO);
+        System.out.println(max);
+        BigDecimal min = bigDecimals.stream().reduce( BigDecimal::min).orElse(BigDecimal.ZERO);
+        System.out.println(min);
+        BigDecimal avg = bigDecimals.stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(bigDecimals.size()));
+        System.out.println(avg);
+        System.out.println("===============================================");
+        int size = personList.size();
+        Integer reduce = personList.stream().map(Person::getAge).reduce(0, Integer::sum)/size;
+
     }
 }

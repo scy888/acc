@@ -81,7 +81,7 @@ public class Md5Utils {
         System.out.println(byteArrayToHexString(new byte[]{2, 5, 8}));
     }
 
-    public static String MD5Encode(String origin) throws Exception {
+    public static String algorithmEncode(String origin,String algorithm) throws Exception {
         /**
          * @Description: 签名对象
          * @methodName: MD5Encode
@@ -90,7 +90,7 @@ public class Md5Utils {
          * @Author: scyang
          * @Date: 2019/10/28 21:25
          */
-        MessageDigest md = MessageDigest.getInstance(SHA_256);
+        MessageDigest md = MessageDigest.getInstance(algorithm);
         // md.update(origin.getBytes("UTF-8"));
         byte[] digest = md.digest(origin.getBytes(CHARSET_CODING));
         origin = byteArrayToHexString(digest);
@@ -99,7 +99,9 @@ public class Md5Utils {
 
     @Test
     public void test03() throws Exception {
-        System.out.println(MD5Encode("盛重阳"));
+        System.out.println(algorithmEncode("盛重阳",MD5));
+        System.out.println(algorithmEncode("盛重阳",SHA_1));
+        System.out.println(algorithmEncode("盛重阳",SHA_256));
     }
 
     private static PrivateKey getPrivateKey(String privateKeyStr) throws Exception {
@@ -155,8 +157,8 @@ public class Md5Utils {
        String encryptByPublic = encryptByPublic(context, publicKey);
        System.out.println(encryptByPublic);
        /** 私钥解密 */
-      // String decryptByPrivate = decryptByPrivate(encryptByPublic, privateKey);
-      // System.out.println(decryptByPrivate);
+//       String decryptByPrivate = decryptByPrivate(encryptByPublic, privateKey);
+//       System.out.println(decryptByPrivate);
    }
     private static PublicKey getPublicKey(String publicKeyStr) throws Exception {
         /**
