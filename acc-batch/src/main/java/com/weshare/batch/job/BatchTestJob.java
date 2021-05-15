@@ -61,7 +61,7 @@ public class BatchTestJob {
     @Bean(value = "batchTestJob_")
     //@Qualifier("batchTestJob")
     public Job batchTestJob( Step stepTwo) {
-        return jobBuilderFactory.get(BatchJobEnum.TATCHTESTJOB.name())
+        return jobBuilderFactory.get(BatchJobEnum.testJob.name())
                 .incrementer(new RunIdIncrementer())
                 .listener(new JobExecutionListener() {
                     @Override

@@ -14,4 +14,9 @@ public class JobStepName {
         public static final String BATCHONE = "BATCHONE";
         public static final String BATCHTWO = "BATCHTWO";
     }
+
+    public static class PersonTestJob {
+        public static final String 创建personCsv步骤 = "创建personCsv步骤";
+        public static final String 读取personCsv步骤 = "读取personCsv步骤";
+    }
 }

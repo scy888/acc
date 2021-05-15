@@ -207,15 +207,6 @@ public class StringUtils {
         for (Field field : fields) {
             fieldList.add(field);
         }
-//        for (int i = 0; i < fieldList.size(); i++) {
-//            String name = fieldList.get(i).getName();
-//            for (int j = 0; j < fieldNames.length; j++) {
-//                String fieldName = fieldNames[j];
-//                if (name.equals(fieldName)) {
-//                    fieldList.remove(fieldList.get(i));
-//                }
-//            }
-//        }
 
         for (String fieldName : fieldNames) {
             fieldList.removeIf(e -> e.getName().equals(fieldName));

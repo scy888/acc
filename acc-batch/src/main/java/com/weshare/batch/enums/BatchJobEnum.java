@@ -8,5 +8,6 @@ package com.weshare.batch.enums;
  * @describe:
  */
 public enum BatchJobEnum {
-    TATCHTESTJOB,
+    testJob,
+    personJob,
 }

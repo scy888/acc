@@ -92,4 +92,18 @@ public class BatchController {
         JobExecution jobExecution = jobLauncher.run(job, jobParameters);
         return jobExecution.toString();
     }
+
+    @GetMapping("/personBatch/{jobName}")
+    public String personBatch(@PathVariable String jobName,
+                              @RequestParam String batchDate,
+                              @RequestParam String remark,
+                              @RequestParam String pathStr) throws Exception {
+        Job job = jobRegistry.getJob(jobName);
+        JobParametersBuilder parametersBuilder = new JobParametersBuilder()
+                .addString("batchDate", batchDate)
+                .addString("remark", remark)
+                .addString("pathStr", pathStr);
+        JobExecution jobExecution = jobLauncher.run(job, parametersBuilder.toJobParameters());
+        return jobExecution.toString();
+    }
 }
