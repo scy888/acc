@@ -1,6 +1,6 @@
 package com.weshare.loan.feignClient;
 
-import com.weshare.client.RepayClient;
+import com.weshare.service.api.client.RepayClient;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**
