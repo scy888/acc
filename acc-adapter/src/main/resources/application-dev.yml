@@ -1,7 +1,7 @@
 server:
-  port: 9004
+  port: 9001
   servlet:
-    context-path: /repay
+    context-path: /adapter
 
 eureka:
   client:
@@ -13,7 +13,7 @@ eureka:
 spring:
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost/acc_repay?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost/acc_adapter?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
     username: root
     password: root
 
@@ -23,4 +23,8 @@ spring:
     hibernate:
       ddl-auto: update
 
-
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: link

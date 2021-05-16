@@ -100,6 +100,9 @@ public class Md5Utils {
     @Test
     public void test03() throws Exception {
         System.out.println(algorithmEncode("盛重阳",MD5));
+        System.out.println(algorithmEncode("13297053048",MD5));
+        System.out.println(algorithmEncode("422202199109093496",MD5));
+        System.out.println(algorithmEncode("湖北省应城市城北办事处柳林村圣湾26",MD5));
         System.out.println(algorithmEncode("盛重阳",SHA_1));
         System.out.println(algorithmEncode("盛重阳",SHA_256));
     }

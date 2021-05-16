@@ -241,24 +241,24 @@ public class RsaUtil {
     public static void main(String[] args) {
         //String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDg3Zq4TgR4Isb5+cbYawiDQ5DH3BJ5v7OXZmiDen/G5Y41wKSxbSJQTJqFe7e7ODPB2I/ATmRX6D6u9dqcjMnlWJeZQWjWkQhRUlwcV+oolL+GnY+VTMAYiD2UJhVK86vgyUOkdo0PVgX1yp7lRdrZyIOnjaIIyMwHpLYR0j6xuQIDAQAB";
         //String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAODdmrhOBHgixvn5xthrCINDkMfcEnm/s5dmaIN6f8bljjXApLFtIlBMmoV7t7s4M8HYj8BOZFfoPq712pyMyeVYl5lBaNaRCFFSXBxX6iiUv4adj5VMwBiIPZQmFUrzq+DJQ6R2jQ9WBfXKnuVF2tnIg6eNogjIzAekthHSPrG5AgMBAAECgYEAjVk/pJMGJC5YPVJROEEvvLOAEuG3i2iBj64EDIG4SGKMHiXWYOFlLGy6xSWbvMf7YOKsmgms8cU/geNxY+7sCV0W0u/3f0BjTKYL7ZbhJYf0bcNi2z+bQDInzHNUfDApVSPPbGHsca2FWlxXja0uiqFU36CIcze2abIoFm3HogECQQDzk+JOk8xCtQL0ueDfSRTmvXhtcTHdVLNpRJg99SxJTglooy8Byrqu8TV/FuYZYiqislkwAsKdFDSIi4fLwPYJAkEA7FVrMU6YQ4WPYfrmEhpTYXyWs9sVsVlZpzzNTkGUe41CjYO/fv611JmPyfc+QXL+PifNQDdTGGTrJJs8delKMQJBAOvLhnHQ7BTLjEACzSj6Y2x3kORJhx8fBstqJwMbm7KfA8ay6ieO7Ke8Q7BzJ279NA7qHiK3GVTcoXppsJzTgJkCQHB7V0Foft/kOZIQsF/9V6IWgkOoCnMWa61FKxIL9He5i+t+wS3YXQKK8/zUSDUuXgOHPhFKQ6pgneoWWHhmSIECQBFKsU2WN/KvVq0/KJ/MvLa2nhcBIpZmoW5s83GZ3K6+Z/ECOfK33c2GgG1ezFfYmB2QS0JU9pWH4vy9c6Q/sUo=";
-        String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIrqrul6CDngRBh6Yuy+2hIVOj\n" +
-                "sx2FmqvTH0FmmL2NUI4jtqmAkHxUTxmGzztexmo/IFD6WOJZYsAU2+Fba26RtFMb\n" +
-                "/8CHKb5ZrnKs8CEQY0XfgJsp07LmBXN45C+q60WtrKFJHH2Fp8odwpXiKaCMeMoG\n" +
-                "jGf9R2DrVLm+v/+juQIDAQAB";
-        String privateKey = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAMiuqu6XoIOeBEGH\n" +
-                "pi7L7aEhU6OzHYWaq9MfQWaYvY1QjiO2qYCQfFRPGYbPO17Gaj8gUPpY4lliwBTb\n" +
-                "4VtrbpG0Uxv/wIcpvlmucqzwIRBjRd+AmynTsuYFc3jkL6rrRa2soUkcfYWnyh3C\n" +
-                "leIpoIx4ygaMZ/1HYOtUub6//6O5AgMBAAECgYB1urp+dCdvb1ER3HFqfKowX+vA\n" +
-                "WkDUc1Of7HMirDJvZ7WrT+qKiLjXgPv5sTMkO4Ry+hNneqN3Ss5irke7qP/YopBz\n" +
-                "y2T8gX1ZglyNhbQI8Wuin0IBt0Jt6rTDJRi8+Fprm4EaMsy/DtKVr8rv/GpYTM5Q\n" +
-                "IU/21kUOVVpsSYDwsQJBAOdk5yT+rb0dQeWpJLLfAJSoAHQ9xnQ8vjsbi64zd2Sg\n" +
-                "jJrWP6lU2OLjNxO3GzehyO1KlfCEptO2sIPt9+l/R60CQQDeBbcduS/vbh2E7Ff7\n" +
-                "ulY+mIR+QSmzozZijXmzKoLEsyb7lsGXfqn2Tcqx4C79KnxN74y8rIfL6TceDnAB\n" +
-                "Mb29AkEAjslkHR8PJOi99jMm0z3rBNCa3yATqzykgqLf0dIudajgutdEl4AlCfT9\n" +
-                "0qumHvE1pL/mwHGK5JASYobg+XQyTQJBAL16zTN9x04kgObfOZtpBI+5ZGHHxQo9\n" +
-                "QX3MVc+1eRLb/mn62E8tV2oQK+uwcwm2x41P4qFm8SHycAqjsa0jQVUCQQDZXxvA\n" +
-                "epSRmG0QRTpx/1GXbYQxoQuWys+JAP3pSkKZ1HX/xeh2MnXArTNS4gsPPqaGHw1z\n" +
-                "di1WsC8zc2PR8er2";
+        String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDH5SB7flrPNDDZY1axTlKyBDJ8\n" +
+                "4LUioTc8CgxDOcqbfBzlvZT1Lb62rLr4aaUfKd5Mq/o/has0zwUecdHaxCFWFzHD\n" +
+                "dYLx1sFnExvXjajs9ea4d6cPr7pCh21AzBxNuBsZQGldtIU9HqSHGM6dIuaZ0lvQ\n" +
+                "SHnJRbiD2tVHMC1G3wIDAQAB";
+        String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMflIHt+Ws80MNlj\n" +
+                "VrFOUrIEMnzgtSKhNzwKDEM5ypt8HOW9lPUtvrasuvhppR8p3kyr+j+FqzTPBR5x\n" +
+                "0drEIVYXMcN1gvHWwWcTG9eNqOz15rh3pw+vukKHbUDMHE24GxlAaV20hT0epIcY\n" +
+                "zp0i5pnSW9BIeclFuIPa1UcwLUbfAgMBAAECgYEAxHBy32lorD9J0hhBVbT2p2Jg\n" +
+                "iz/4QbPUp/fn3Rip9uqdK1iHTfpKdRKCGyUW0+09PHO1VT9y5E6dZTHNXQNpDYff\n" +
+                "6x0abJ5IjIudqImNYsFwvz178VqKsbAREKyJThPvKaAyuBUaVlIKOwZzFkTuZ4vz\n" +
+                "O1H8rdCbaSejSqF75WECQQDxqSuJekxgRhmAACwl8ICdHFQ/z3CqC7fTV/0TEVkU\n" +
+                "1VEUV1bJ2GWVroqQKd5fQveV7IILfLOG+weC0+sn6lh7AkEA08GIt8gOIJZSN3hA\n" +
+                "pGrlOHPlD1VP+alXetFKaQMXPxFzNQEwLU0IdOjFBoM1wcrK6fPM15i+PolcFlJ4\n" +
+                "bQoH7QJAEO3H5f6SQSBIAwaAETxS1i643Ct8+fyOKRj92osZkXMMFf+0TbmCDEVI\n" +
+                "4aZ9NHEthOwnhAR9UxRcx1ZvH8Gz5wJAfAdVft+sdqXVTiwfIK6DyAcJ2WtMxpzL\n" +
+                "YmKHxO5MhWJBKoChqUb/dwqHrILZz8JqC5IDHxyWAacOyvxPEP7ZGQJBAJPgscnM\n" +
+                "kPEKNUSClYb576tXBBx6eIS4SfP/0RsLdt+5dcFstKkD1ItJQyR8wjyOmFjP6Bdi\n" +
+                "02HSsidUepaZdW4=";
         //String content = "{\"service\":\"SETUP_CUST_CREDIT\",\"service_version\":\"1\",\"partner\":\"1001\",\"product_no\":\"001503\",\"service_sn\" :\"UUID\",\"product_name\" : \"xx项目\",\"content\" :\"GllcmVzaXMvRXRoL050aWxkZS9PZ3JhdmUvT2FjdXRlL09jaXJjd\",\"sign\":\"vZWFjdXRlL2VjaXJj}";
         String content = "{\"reqData\":{\"ifCar\":\"2\",\"country\":\"CHN\",\"dbBankCode\":\"403100000004\",\"lnRate\":0.000180,\"endDate\":\"2020-06-05\",\"workDuty\":\"3\",\"homeAddr\":\"湖南省怀化市靖州苗族侗族自治县渠阳镇渠阳中路214号\",\"idNo\":\"411321198608288156\",\"sales\":\"01\",\"homeCode\":\"000000\",\"ifCarCred\":\"2\",\"payType\":\"02\",\"isBelowRisk\":\"1\",\"children\":\"2\",\"workCode\":\"000000\",\"vouType\":\"4\",\"cardAmt\":0.00,\"homeTel\":\"13431386064\",\"profession\":\"06\",\"idType\":\"0\",\"authNo\":\"1120040208133512324016\",\"mincome\":25000.00,\"postAddr\":\"湖南省怀化市靖州苗族侗族自治县渠阳镇渠阳中路214号\",\"workTitle\":\"1\",\"ifCard\":\"2\",\"degree\":\"9\",\"ifAgent\":\"02\",\"birth\":\"19860828\",\"ifId\":\"1\",\"workName\":\"地球公司\",\"pactAmt\":1000.00,\"ifPact\":\"0\",\"ifApp\":\"0\",\"edu\":\"20\",\"custType\":\"99\",\"loanDate\":\"2020-04-02\",\"postCode\":\"000000\",\"hasOverdueLoan\":\"0\",\"income\":\"02\",\"appUse\":\"07\",\"riskLevel\":\"P3\",\"zxhomeIncome\":300000.00,\"rpyMethod\":\"03\",\"launder\":\"03\",\"dbAccountName\":\"郑茂栋\",\"phoneNo\":\"13431386064\",\"ifMort\":\"1\",\"loanTime\":\"2020-04-02 15:52:30\",\"marriage\":\"20\",\"idEndDate\":\"2038-08-10\",\"idPreDate\":\"2018-08-10\",\"sex\":\"1\",\"ifRoom\":\"1\",\"appArea\":\"000000\",\"ifLaunder\":\"02\",\"custName\":\"郑茂栋\",\"homeIncome\":\"01\",\"dbBankName\":\"邮储银行\",\"homeArea\":\"000000\",\"homeSts\":\"2\",\"loanTerm\":1,\"trade\":\"26\",\"applyNo\":\"1120040208133512324016\",\"dbBankAccount\":\"6210985770765003240\",\"workType\":\"1\",\"workWay\":\"G\",\"payDay\":15,\"dbOpenBankName\":\"邮储银行\",\"age\":34}}";
         try {
@@ -266,10 +266,10 @@ public class RsaUtil {
             System.out.println("encryptStr: " + encryptStr);
             System.out.println(decrypt(encryptStr, privateKey));
 
-            String signStr = generateSign(content, privateKey, "MD5withRSA");
+            String signStr = generateSign(content, privateKey, SHA256withRSA);
             System.out.println("signStr: " + signStr);
 
-            System.out.println(verifyWithMd5(content, signStr, publicKey, "MD5withRSA"));
+            System.out.println(verifyWithMd5(content, signStr, publicKey, SHA256withRSA));
         } catch (Exception e) {
             e.printStackTrace();
         }

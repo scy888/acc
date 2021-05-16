@@ -11,4 +11,16 @@ eureka:
     prefer-ip-address: true
     #ip-address: 127.0.0.1
 
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost/acc_loan?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+    username: root
+    password: root
+
+  jpa:
+    database: MySQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
 

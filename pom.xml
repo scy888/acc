@@ -14,6 +14,7 @@
         <module>acc-service-api</module>
         <module>acc-eureka</module>
         <module>acc-batch</module>
+        <module>acc-adapter</module>
 
     </modules>
 

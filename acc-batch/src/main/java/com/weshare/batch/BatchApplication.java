@@ -26,7 +26,7 @@ public class BatchApplication {
         long start = System.currentTimeMillis();
         SpringApplication.run(BatchApplication.class);
         long end = System.currentTimeMillis();
-        System.out.println(String.format("batch服务启动耗时:%d 毫秒", end - start));
+        System.out.println(String.format("acc-batch服务启动耗时:%d 毫秒", end - start));
     }
 }
 

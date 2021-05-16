@@ -1,6 +1,6 @@
 spring:
   application:
-    name: acc-batch
+    name: ${spring.profiles.active}-acc-batch
 
   profiles:
     active: dev

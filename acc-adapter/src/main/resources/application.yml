@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: ${spring.profiles.active}-acc-adapter
+  profiles:
+    active: dev

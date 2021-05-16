@@ -5,6 +5,7 @@ import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -159,5 +160,13 @@ public class TestBatch {
         int size = personList.size();
         Integer reduce = personList.stream().map(Person::getAge).reduce(0, Integer::sum)/size;
 
+    }
+    @Test
+    public void test04(){
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String password = encoder.encode("scy199109091016");
+        System.out.println(password);
+        boolean matches = encoder.matches("scy199109091016", password);
+        System.out.println(matches);
     }
 }
