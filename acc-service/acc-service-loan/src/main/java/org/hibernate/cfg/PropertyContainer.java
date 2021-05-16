@@ -1,4 +1,4 @@
-package com.weshare.batch.org.hibernate.cfg;
+package org.hibernate.cfg;
 
 import org.hibernate.AnnotationException;
 import org.hibernate.MappingException;
@@ -36,32 +36,32 @@ class PropertyContainer {
      * Holds the AccessType indicated for use at the class/container-level for cases where persistent attribute
      * did not specify.
      */
-    private final org.hibernate.cfg.AccessType classLevelAccessType;
+    private final AccessType classLevelAccessType;
 
     private final LinkedHashMap<String, XProperty> persistentAttributeMap;
 
-    PropertyContainer(XClass clazz, XClass entityAtStake, org.hibernate.cfg.AccessType defaultClassLevelAccessType) {
+    PropertyContainer(XClass clazz, XClass entityAtStake, AccessType defaultClassLevelAccessType) {
         this.xClass = clazz;
         this.entityAtStake = entityAtStake;
 
-        if (defaultClassLevelAccessType == org.hibernate.cfg.AccessType.DEFAULT) {
+        if (defaultClassLevelAccessType == AccessType.DEFAULT) {
             // this is effectively what the old code did when AccessType.DEFAULT was passed in
             // to getProperties(AccessType) from AnnotationBinder and InheritanceState
-            defaultClassLevelAccessType = org.hibernate.cfg.AccessType.PROPERTY;
+            defaultClassLevelAccessType = AccessType.PROPERTY;
         }
 
-        org.hibernate.cfg.AccessType localClassLevelAccessType = determineLocalClassDefinedAccessStrategy();
+        AccessType localClassLevelAccessType = determineLocalClassDefinedAccessStrategy();
         assert localClassLevelAccessType != null;
 
-        this.classLevelAccessType = localClassLevelAccessType != org.hibernate.cfg.AccessType.DEFAULT
+        this.classLevelAccessType = localClassLevelAccessType != AccessType.DEFAULT
                 ? localClassLevelAccessType
                 : defaultClassLevelAccessType;
-        assert classLevelAccessType == org.hibernate.cfg.AccessType.FIELD || classLevelAccessType == org.hibernate.cfg.AccessType.PROPERTY;
+        assert classLevelAccessType == AccessType.FIELD || classLevelAccessType == AccessType.PROPERTY;
 
         this.persistentAttributeMap = new LinkedHashMap<String, XProperty>();
 
-        final List<XProperty> fields = xClass.getDeclaredProperties(org.hibernate.cfg.AccessType.FIELD.getType());
-        final List<XProperty> getters = xClass.getDeclaredProperties(org.hibernate.cfg.AccessType.PROPERTY.getType());
+        final List<XProperty> fields = xClass.getDeclaredProperties(AccessType.FIELD.getType());
+        final List<XProperty> getters = xClass.getDeclaredProperties(AccessType.PROPERTY.getType());
 
         preFilter(fields, getters);
 
@@ -111,7 +111,7 @@ class PropertyContainer {
             final XProperty xProperty = propertyIterator.next();
             final Access localAccessAnnotation = xProperty.getAnnotation(Access.class);
             if (localAccessAnnotation == null
-                    || localAccessAnnotation.value() != AccessType.FIELD) {
+                    || localAccessAnnotation.value() != javax.persistence.AccessType.FIELD) {
                 continue;
             }
 
@@ -125,7 +125,7 @@ class PropertyContainer {
             final XProperty xProperty = propertyIterator.next();
             final Access localAccessAnnotation = xProperty.getAnnotation(Access.class);
             if (localAccessAnnotation == null
-                    || localAccessAnnotation.value() != AccessType.PROPERTY) {
+                    || localAccessAnnotation.value() != javax.persistence.AccessType.PROPERTY) {
                 continue;
             }
 
@@ -156,7 +156,7 @@ class PropertyContainer {
             Map<String, XProperty> persistentAttributesFromGetters,
             List<XProperty> fields,
             List<XProperty> getters) {
-        if (classLevelAccessType == org.hibernate.cfg.AccessType.FIELD) {
+        if (classLevelAccessType == AccessType.FIELD) {
             for (XProperty field : fields) {
                 if (persistentAttributeMap.containsKey(field.getName())) {
                     continue;
@@ -199,7 +199,7 @@ class PropertyContainer {
         return xClass;
     }
 
-    public org.hibernate.cfg.AccessType getClassLevelAccessType() {
+    public AccessType getClassLevelAccessType() {
         return classLevelAccessType;
     }
 
@@ -220,31 +220,31 @@ class PropertyContainer {
     }
 
     @SuppressWarnings("deprecation")
-	private org.hibernate.cfg.AccessType determineLocalClassDefinedAccessStrategy() {
-        org.hibernate.cfg.AccessType classDefinedAccessType;
+	private AccessType determineLocalClassDefinedAccessStrategy() {
+        AccessType classDefinedAccessType;
 
-        org.hibernate.cfg.AccessType hibernateDefinedAccessType = org.hibernate.cfg.AccessType.DEFAULT;
-        org.hibernate.cfg.AccessType jpaDefinedAccessType = org.hibernate.cfg.AccessType.DEFAULT;
+        AccessType hibernateDefinedAccessType = AccessType.DEFAULT;
+        AccessType jpaDefinedAccessType = AccessType.DEFAULT;
 
         org.hibernate.annotations.AccessType accessType = xClass.getAnnotation(org.hibernate.annotations.AccessType.class);
         if (accessType != null) {
-            hibernateDefinedAccessType = org.hibernate.cfg.AccessType.getAccessStrategy(accessType.value());
+            hibernateDefinedAccessType = AccessType.getAccessStrategy(accessType.value());
         }
 
         Access access = xClass.getAnnotation(Access.class);
         if (access != null) {
-            jpaDefinedAccessType = org.hibernate.cfg.AccessType.getAccessStrategy(access.value());
+            jpaDefinedAccessType = AccessType.getAccessStrategy(access.value());
         }
 
-        if (hibernateDefinedAccessType != org.hibernate.cfg.AccessType.DEFAULT
-                && jpaDefinedAccessType != org.hibernate.cfg.AccessType.DEFAULT
+        if (hibernateDefinedAccessType != AccessType.DEFAULT
+                && jpaDefinedAccessType != AccessType.DEFAULT
                 && hibernateDefinedAccessType != jpaDefinedAccessType) {
             throw new MappingException(
                     "@AccessType and @Access specified with contradicting values. Use of @Access only is recommended. "
             );
         }
 
-        if (hibernateDefinedAccessType != org.hibernate.cfg.AccessType.DEFAULT) {
+        if (hibernateDefinedAccessType != AccessType.DEFAULT) {
             classDefinedAccessType = hibernateDefinedAccessType;
         } else {
             classDefinedAccessType = jpaDefinedAccessType;

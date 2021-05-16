@@ -1,4 +1,4 @@
-package com.weshare.adapter.org.hibernate.cfg;
+package org.hibernate.cfg;
 
 import org.hibernate.AnnotationException;
 import org.hibernate.MappingException;
@@ -111,7 +111,7 @@ class PropertyContainer {
             final XProperty xProperty = propertyIterator.next();
             final Access localAccessAnnotation = xProperty.getAnnotation(Access.class);
             if (localAccessAnnotation == null
-                    || localAccessAnnotation.value() != AccessType.FIELD) {
+                    || localAccessAnnotation.value() != javax.persistence.AccessType.FIELD) {
                 continue;
             }
 
@@ -125,7 +125,7 @@ class PropertyContainer {
             final XProperty xProperty = propertyIterator.next();
             final Access localAccessAnnotation = xProperty.getAnnotation(Access.class);
             if (localAccessAnnotation == null
-                    || localAccessAnnotation.value() != AccessType.PROPERTY) {
+                    || localAccessAnnotation.value() != javax.persistence.AccessType.PROPERTY) {
                 continue;
             }
 
