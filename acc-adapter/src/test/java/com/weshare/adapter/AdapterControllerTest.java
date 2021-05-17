@@ -2,10 +2,8 @@ package com.weshare.adapter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.entity.IncomeApply;
-import com.weshare.service.api.enums.ProjectEnum;
+import com.weshare.service.api.entity.UserBaseReq;
 import common.JsonUtil;
-import common.SnowFlake;
-import jdk.swing.interop.SwingInterOpUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +13,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author: scyang
@@ -50,7 +47,7 @@ class AdapterControllerTest {
         System.out.println("================================================================================");
 
         List<String> readAllLines = Files.readAllLines(Paths.get("/incomeApply", "incomeApply.json"), StandardCharsets.UTF_8);
-
+        incomeApplyList.clear();
         incomeApplyList = JsonUtil.fromJson(String.join(System.lineSeparator(), readAllLines), new TypeReference<List<IncomeApply>>() {
         });
         System.out.println(JsonUtil.toJson(incomeApplyList, true));
@@ -72,5 +69,29 @@ class AdapterControllerTest {
         IncomeApply apply2 = mongoTemplate.findOne(Query.query(Criteria.where("dueBillNo").is("YX-102")), IncomeApply.class);
         System.out.println("apply:" + apply1);
         System.out.println("apply:" + apply2);
+
+        System.out.println("============================================================");
+        incomeApplyList.clear();
+        //incomeApplyList = mongoTemplate.find(Query.query(Criteria.where("due_bill_no").regex(Pattern.compile("^.*" + "YX-" + "*.$",Pattern.CASE_INSENSITIVE))), IncomeApply.class);
+        incomeApplyList = mongoTemplate.find(Query.query(Criteria.where("due_bill_no").in("YX-101", "YX-102")), IncomeApply.class);
+        System.out.println(JsonUtil.toJson(incomeApplyList, true));
+
+        List<UserBaseReq> userBaseReqList = incomeApplyList.stream().map(e -> new UserBaseReq()
+                .setId(e.getId())
+                .setUserId(e.getUserId())
+                .setUserName(e.getUserName())
+                .setIdCardType(e.getIdCardType())
+                .setIdCardNum(e.getIdCardNum())
+                .setIphone(e.getIphone())
+                .setSex(e.getSex())
+                .setProjectNo(e.getProjectNo())
+                .setDueBillNo(e.getDueBillNo())
+                .setBatchDate(e.getBatchDate())
+                .setLinkManList(JsonUtil.fromJson(e.getLinkMan(), new TypeReference<List<UserBaseReq.LinkManReq>>() {
+                }))
+                .setBackCardList(JsonUtil.fromJson(e.getBackCard(), new TypeReference<List<UserBaseReq.BackCardReq>>() {
+                }))).collect(Collectors.toList());
+
+        System.out.println("aaaa"+JsonUtil.toJson(userBaseReqList,true));
     }
 }
