@@ -6,8 +6,18 @@ import common.JsonUtil;
 import common.SnowFlake;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: scyang
@@ -46,14 +56,14 @@ public class DomeTest {
     }
 
     @Test
-    public void test01() {
+    public void test01() throws Exception {
         IncomeApply incomeApplyOne = new IncomeApply().setId(SnowFlake.getInstance().nextId() + "")
                 .setUserId("348691356")
                 .setUserName("张三")
                 .setIdCardType(IncomeApply.IdCardType.S)
                 .setIdCardNum("422202199506063496")
                 .setIphone("13297053058")
-                .setIdCardNum("粤*B6685k")
+                .setCarNum("粤*B6685k")
                 .setSex(IncomeApply.Sex.M)
                 .setProjectNo(ProjectEnum.YXMS.getProjectNo())
                 .setDueBillNo("YX-101")
@@ -74,7 +84,7 @@ public class DomeTest {
                 .setIdCardType(IncomeApply.IdCardType.H)
                 .setIdCardNum("422202199608083466")
                 .setIphone("13597054456")
-                .setIdCardNum("粤*B3596f")
+                .setCarNum("粤*B3596f")
                 .setSex(IncomeApply.Sex.W)
                 .setProjectNo(ProjectEnum.YXMS.getProjectNo())
                 .setDueBillNo("YX-102")
@@ -89,9 +99,20 @@ public class DomeTest {
                         new IncomeApply.BackCard("316613046", "YX-102", "李四", IncomeApply.BackName.中国建农业银行, IncomeApply.BackName.中国建农业银行.getCode(), IncomeApply.BackName.中国建农业银行.getNum()),
                         new IncomeApply.BackCard("316613046", "YX-102", "李四", IncomeApply.BackName.中国建工商银行, IncomeApply.BackName.中国建工商银行.getCode(), IncomeApply.BackName.中国建工商银行.getNum()))));
 
-        List<IncomeApply> list=List.of(incomeApplyOne,incomeApplyTwo);
+        List<IncomeApply> list = List.of(incomeApplyOne, incomeApplyTwo);
         System.out.println(JsonUtil.toJson(list, true));
 
+        Path path = Paths.get("/incomeApply");
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
 
+        Files.writeString(Paths.get(String.valueOf(path), "incomeApply.json"), String.join(System.lineSeparator(), JsonUtil.toJson(list, true)), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+        Files.write(Paths.get(String.valueOf(path), "incomeApply_.json"), Arrays.stream(JsonUtil.toJson(list, true).split(System.lineSeparator())).collect(Collectors.toList()), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+
+        List<String> collect = list.stream().map(e -> JsonUtil.toJson(e, true)).collect(Collectors.toList());
+
+        Files.writeString(Paths.get(String.valueOf(path), "incomeApply__.json"), collect.stream().collect(Collectors.joining(",","[","]")), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+        Files.write(Paths.get(String.valueOf(path), "incomeApply___.json"), Arrays.stream(collect.stream().collect(Collectors.joining(",", "[", "]")).split(System.lineSeparator())).collect(Collectors.toList()), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
     }
 }

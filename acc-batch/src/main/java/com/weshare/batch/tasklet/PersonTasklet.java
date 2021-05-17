@@ -1,7 +1,7 @@
 package com.weshare.batch.tasklet;
 
-import com.weshare.batch.entity.Person;
 import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
+import com.weshare.batch.entity.Person;
 import common.ReflectUtils;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
@@ -112,16 +112,18 @@ public class PersonTasklet {
         return new ItemWriter<Person>() {
             @Override
             public void write(List<? extends Person> personList) throws Exception {
-                log.info("personWriter:{}条", personList.size());
+                log.info("当前的线程名字:{},personWriter:{}条,内容:{}", Thread.currentThread().getName(), personList.size(), personList);
                 List<String> list = personList.stream().map(e -> ReflectUtils.getFieldValues(e))
                         .collect(Collectors.toList());
-
                 Path path = Paths.get("/batch", "write");
                 if (Files.notExists(path)) {
                     Files.createDirectories(path);
+                    path = Paths.get(String.valueOf(path), "person.csv");
+                    Files.write(path, list, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+                } else {
+                    path = Paths.get(String.valueOf(path), "person.csv");
+                    Files.write(path, list, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
                 }
-                path = Paths.get(String.valueOf(path), "person.csv");
-                Files.write(path, list, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
             }
         };
     }
