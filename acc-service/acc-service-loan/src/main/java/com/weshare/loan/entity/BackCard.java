@@ -3,6 +3,7 @@ package com.weshare.loan.entity;
 import com.weshare.service.api.entity.UserBaseReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.Table;
 
 import javax.persistence.*;
 
@@ -17,8 +18,7 @@ import javax.persistence.*;
 @Accessors(chain = true)
 @Entity
 //@EntityListeners(AuditingEntityListener.class)
-@Table(indexes = {@Index(name = "back_card_due_bill_no",unique = true,columnList = "dueBillNo")})
-@org.hibernate.annotations.Table(appliesTo = "back_card",comment = "银行卡号信息")
+@Table(appliesTo = "back_card",comment = "银行卡号信息")
 public class BackCard {
 
     @Id
@@ -30,6 +30,7 @@ public class BackCard {
     @Column(columnDefinition = "varchar(50) not null comment '用户名'")
     private String userName;
     @Column(columnDefinition = "varchar(50) not null comment '银行名'")
+    @Enumerated(EnumType.STRING)
     private UserBaseReq.BackName backName;
     @Column(columnDefinition = "varchar(50) not null comment '银行代码'")
     private String backCode;
