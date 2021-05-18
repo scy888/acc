@@ -82,6 +82,7 @@ class AdapterControllerTest {
                 .setUserName(e.getUserName())
                 .setIdCardType(e.getIdCardType())
                 .setIdCardNum(e.getIdCardNum())
+                .setCarNum(e.getCarNum())
                 .setIphone(e.getIphone())
                 .setSex(e.getSex())
                 .setProjectNo(e.getProjectNo())
@@ -92,6 +93,13 @@ class AdapterControllerTest {
                 .setBackCardList(JsonUtil.fromJson(e.getBackCard(), new TypeReference<List<UserBaseReq.BackCardReq>>() {
                 }))).collect(Collectors.toList());
 
-        System.out.println("aaaa"+JsonUtil.toJson(userBaseReqList,true));
+        System.out.println("aaaa" + JsonUtil.toJson(userBaseReqList, true));
+
+        Files.writeString(Paths.get("/incomeApply", "userbase.json"), JsonUtil.toJson(userBaseReqList, true));
+    }
+
+    @Test
+    public void jdbcTest() {
+
     }
 }
