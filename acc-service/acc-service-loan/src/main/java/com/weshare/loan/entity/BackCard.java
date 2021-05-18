@@ -1,6 +1,5 @@
-package com.weshare.adapter.entity;
+package com.weshare.loan.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.weshare.service.api.entity.UserBaseReq;
 import lombok.Data;
 import lombok.experimental.Accessors;

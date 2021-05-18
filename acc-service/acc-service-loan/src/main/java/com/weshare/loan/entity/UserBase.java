@@ -1,9 +1,8 @@
-package com.weshare.adapter.entity;
+package com.weshare.loan.entity;
 
 import com.weshare.service.api.entity.UserBaseReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDate;
