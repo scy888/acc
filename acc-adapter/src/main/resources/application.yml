@@ -3,3 +3,9 @@ spring:
     name: ${spring.profiles.active}-acc-adapter
   profiles:
     active: dev
+
+
+service:
+  acc-loan-service: ${spring.profiles.active}-acc-loan
+host:
+  acc-loan-host: 127.0.0.1:9003/loan

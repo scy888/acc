@@ -5,6 +5,7 @@ import lombok.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,10 +38,48 @@ public enum ProjectEnum {
         this.maxDate = maxDate;
     }
 
-   @Value
+    @Value
     public static class Product {
         private String productNo;
-        private String projectName;
+        private String productName;
     }
 
+    /**
+     * 通过项目编号和产品编号获取产品名称
+     */
+    public static String getProductName(String projectNo, String productNo) {
+        for (ProjectEnum projectEnum : ProjectEnum.values()) {
+            if (projectEnum.getProjectNo().equals(projectNo)) {
+                List<Product> productList = projectEnum.getProducts();
+                for (Product product : productList) {
+                    if (product.getProductNo().equals(productNo)) {
+                        return product.getProductName();
+                    }
+                }
+            }
+        }
+        return "未知";
+    }
+
+    public static String getProductName_(String projectNo, String productNo) {
+
+//        Optional<List<Product>> optionalList = Arrays.stream(ProjectEnum.values())
+//                .filter(project -> project.getProjectNo().equals(projectNo))
+//                .findFirst().map(ProjectEnum::getProducts);
+//
+//        if (!optionalList.isEmpty()) {
+//            return optionalList.get().stream().filter(product -> product.getProductNo().equals(productNo))
+//                    .findFirst()
+//                    .map(Product::getProductName)
+//                    .orElse("未知");
+//        }
+//        return "未知";
+
+      return Arrays.stream(ProjectEnum.values())
+               .filter(project->project.getProjectNo().equals(projectNo))
+               .findFirst()
+               .flatMap(project->project.getProducts().stream().filter(product->product.getProductNo().equals(productNo)).findFirst())
+               .map(Product::getProductName)
+               .orElse("未知");
+    }
 }
