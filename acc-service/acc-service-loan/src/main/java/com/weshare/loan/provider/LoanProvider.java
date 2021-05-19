@@ -2,9 +2,12 @@ package com.weshare.loan.provider;
 
 import com.weshare.loan.dao.LoanDao;
 import com.weshare.loan.entity.BackCard;
+import com.weshare.loan.entity.CriticalDataHash;
 import com.weshare.loan.entity.LinkMan;
 import com.weshare.loan.entity.UserBase;
+import com.weshare.loan.enums.HashPrefix;
 import com.weshare.loan.repo.BackCardRepo;
+import com.weshare.loan.repo.CriticalDataHashRepo;
 import com.weshare.loan.repo.LinkManRepo;
 import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.entity.UserBaseReq;
@@ -17,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +45,9 @@ public class LoanProvider implements LoanClient {
     private LinkManRepo linkManRepo;
     @Autowired
     private BackCardRepo backCardRepo;
-
+    @Autowired
+    private CriticalDataHashRepo criticalDataHashRepo;
+    private String MD5 = "MD5";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -65,7 +72,32 @@ public class LoanProvider implements LoanClient {
             }
             if (!insertList.isEmpty()) {
                 log.info("走批量新增逻辑...");
-                loanDao.addUserBaseList(insertList);
+                //保存hash表
+                criticalDataHashRepo.saveAll(
+                        insertList.stream().map(e -> new CriticalDataHash()
+                                .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
+                                .setUserName(e.getUserName())
+                                .setUserNameHash(HashPrefix.用户姓名哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getUserName(), MD5))
+                                .setIdCardNum(e.getIdCardNum())
+                                .setIdCardNumHash(HashPrefix.证件号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIdCardNum(), MD5))
+                                .setIphone(e.getIphone())
+                                .setIphoneHash(HashPrefix.手机号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIphone(), MD5))
+                                .setCarNum(e.getCarNum())
+                                .setCarNumHash(HashPrefix.车牌号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getCarNum(), MD5))
+                                .setDueBillNo(e.getDueBillNo())
+                                .setProjectNo(e.getProjectNo())
+                                .setCreateDate(LocalDate.now())
+                                .setLastModifyDate(LocalDateTime.now()))
+                                .collect(Collectors.toList())
+                );
+                loanDao.addUserBaseList(insertList.stream().map(e -> {
+                    CriticalDataHash criticalDataHash = criticalDataHashRepo.findByDueBillNo(e.getDueBillNo());
+                    return e.setUserId(criticalDataHash.getUserId())
+                            .setUserName(criticalDataHash.getUserNameHash())
+                            .setIdCardNum(criticalDataHash.getIdCardNumHash())
+                            .setIphone(criticalDataHash.getIphoneHash())
+                            .setCarNum(criticalDataHash.getCarNumHash());
+                }).collect(Collectors.toList()));
                 //新增联系人信息,银行卡信息
                 for (UserBaseReq userBaseReq : insertList) {
                     List<UserBaseReq.LinkManReq> linkManReqList = userBaseReq.getLinkManList();
@@ -90,7 +122,31 @@ public class LoanProvider implements LoanClient {
             }
             if (!updateList.isEmpty()) {
                 log.info("走批量更新逻辑...");
-                loanDao.updateUserBaseList(updateList);
+                //更新hash表
+                criticalDataHashRepo.saveAll(
+                        updateList.stream().map(e -> new CriticalDataHash()
+                                    .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
+                                    .setUserName(e.getUserName())
+                                    .setUserNameHash(HashPrefix.用户姓名哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getUserName(), MD5))
+                                    .setIdCardNum(e.getIdCardNum())
+                                    .setIdCardNumHash(HashPrefix.证件号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIdCardNum(), MD5))
+                                    .setIphone(e.getIphone())
+                                    .setIphoneHash(HashPrefix.手机号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIphone(), MD5))
+                                    .setCarNum(e.getCarNum())
+                                    .setCarNumHash(HashPrefix.车牌号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getCarNum(), MD5))
+                                    .setDueBillNo(e.getDueBillNo())
+                                    .setProjectNo(e.getProjectNo())
+                                    .setCreateDate(LocalDate.now())
+                                    .setLastModifyDate(LocalDateTime.now()))
+                                .collect(Collectors.toList()));
+                loanDao.updateUserBaseList(updateList.stream().map(e -> {
+                    CriticalDataHash criticalDataHash = criticalDataHashRepo.findByDueBillNo(e.getDueBillNo());
+                    return e.setUserId(criticalDataHash.getUserId())
+                            .setUserName(criticalDataHash.getUserNameHash())
+                            .setIdCardNum(criticalDataHash.getIdCardNumHash())
+                            .setIphone(criticalDataHash.getIphoneHash())
+                            .setCarNum(criticalDataHash.getCarNumHash());
+                }).collect(Collectors.toList()));
                 //更新联系人信息,银行卡信息
                 for (UserBaseReq userBaseReq : updateList) {
                     List<UserBaseReq.LinkManReq> linkManReqList = userBaseReq.getLinkManList();

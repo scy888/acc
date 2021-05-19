@@ -49,6 +49,6 @@ public class CriticalDataHash {
     private String dueBillNo;
     @Column(columnDefinition = "date not null comment '创建日期'")
     private LocalDate createDate;
-    @Column(columnDefinition = "date not null comment '修改时间'")
+    @Column(columnDefinition = "datetime not null comment '修改时间'")
     private LocalDateTime lastModifyDate;
 }
