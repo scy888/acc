@@ -5,7 +5,12 @@ import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -35,9 +40,13 @@ public class TestBatch {
 
     @Test
     public void test01() {
-        for (int i = 0; i < 10; i++) {
-            System.out.println(SnowFlake.getInstance().nextId());
-        }
+        String url="http://10.10.19.72:9004/riskClient/repayMakeCsv/2021-04-30/WS001020000?path=/YXMS/";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+        String body = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class).getBody();
+        System.out.println(body);
     }
 
     @Test
