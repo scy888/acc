@@ -2,6 +2,7 @@ package com.weshare.loan.dao;
 
 import com.weshare.loan.entity.UserBase;
 import com.weshare.service.api.entity.UserBaseReq;
+import common.Md5Utils;
 import common.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -62,7 +63,7 @@ public class LoanDao {
                 e.getIdCardType().name(), e.getIdCardNum(),
                 e.getIphone(), e.getCarNum(),
                 e.getSex().name(), e.getProjectNo(),
-                e.getUserId(), e.getBatchDate(),
+                e.getId(), e.getBatchDate(),
                 e.getDueBillNo()
         }).collect(Collectors.toList()));
     }

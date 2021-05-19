@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -81,7 +82,7 @@ public class Md5Utils {
         System.out.println(byteArrayToHexString(new byte[]{2, 5, 8}));
     }
 
-    public static String algorithmEncode(String origin,String algorithm) throws Exception {
+    public static String algorithmEncode(String origin,String algorithm)  {
         /**
          * @Description: 签名对象
          * @methodName: MD5Encode
@@ -90,10 +91,17 @@ public class Md5Utils {
          * @Author: scyang
          * @Date: 2019/10/28 21:25
          */
-        MessageDigest md = MessageDigest.getInstance(algorithm);
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance(algorithm);
+            byte[] digest = new byte[0];
+            digest = md.digest(origin.getBytes(CHARSET_CODING));
+            origin = byteArrayToHexString(digest);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // md.update(origin.getBytes("UTF-8"));
-        byte[] digest = md.digest(origin.getBytes(CHARSET_CODING));
-        origin = byteArrayToHexString(digest);
+
         return origin;
     }
 

@@ -9,6 +9,7 @@ import com.weshare.loan.repo.LinkManRepo;
 import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
+import common.Md5Utils;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;

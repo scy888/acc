@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class UserBaseReq {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class LinkManReq {
+    public static class LinkManReq implements Serializable{
         @JsonProperty(value = "user_id", index = 1)
         private String userId;
         @JsonProperty(value = "due_bill_no", index = 2)
@@ -77,7 +78,7 @@ public class UserBaseReq {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class BackCardReq {
+    public static class BackCardReq implements Serializable{
 
         @JsonProperty(value = "user_id", index = 1)
         private String userId;

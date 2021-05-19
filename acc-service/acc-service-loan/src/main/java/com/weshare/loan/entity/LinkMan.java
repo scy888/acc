@@ -17,6 +17,7 @@ import javax.persistence.*;
 @Accessors(chain = true)
 @Entity
 //@EntityListeners(AuditingEntityListener.class)
+@Table(indexes = {@Index(name = "link_man_id_card_num",unique = true,columnList = "idCardNum")})
 @org.hibernate.annotations.Table(appliesTo = "link_man", comment = "联系人信息表")
 public class LinkMan {
 
