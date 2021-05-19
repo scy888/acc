@@ -10,6 +10,7 @@ import com.weshare.loan.repo.BackCardRepo;
 import com.weshare.loan.repo.CriticalDataHashRepo;
 import com.weshare.loan.repo.LinkManRepo;
 import com.weshare.service.api.client.LoanClient;
+import com.weshare.service.api.entity.User;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
 import common.Md5Utils;
@@ -150,6 +151,15 @@ public class LoanProvider implements LoanClient {
 
     @Override
     public Result tesGettUrl(String name, Integer age) {
+        String msg = String.format("用户名:%s,年龄:%d", name, age);
+        System.out.println(msg);
+        return Result.result(true,msg);
+    }
+
+    @Override
+    public Result tesPostUrl( User user) {
+        String name = user.getName();
+        Integer age = user.getAge();
         String msg = String.format("用户名:%s,年龄:%d", name, age);
         System.out.println(msg);
         return Result.result(true,msg);
