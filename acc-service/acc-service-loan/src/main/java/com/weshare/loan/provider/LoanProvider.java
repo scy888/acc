@@ -74,21 +74,7 @@ public class LoanProvider implements LoanClient {
                 log.info("走批量新增逻辑...");
                 //保存hash表
                 criticalDataHashRepo.saveAll(
-                        insertList.stream().map(e -> new CriticalDataHash()
-                                .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
-                                .setUserName(e.getUserName())
-                                .setUserNameHash(HashPrefix.用户姓名哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getUserName(), MD5))
-                                .setIdCardNum(e.getIdCardNum())
-                                .setIdCardNumHash(HashPrefix.证件号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIdCardNum(), MD5))
-                                .setIphone(e.getIphone())
-                                .setIphoneHash(HashPrefix.手机号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIphone(), MD5))
-                                .setCarNum(e.getCarNum())
-                                .setCarNumHash(HashPrefix.车牌号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getCarNum(), MD5))
-                                .setDueBillNo(e.getDueBillNo())
-                                .setProjectNo(e.getProjectNo())
-                                .setCreateDate(LocalDate.now())
-                                .setLastModifyDate(LocalDateTime.now()))
-                                .collect(Collectors.toList())
+                        getCollect(insertList)
                 );
                 loanDao.addUserBaseList(insertList.stream().map(e -> {
                     CriticalDataHash criticalDataHash = criticalDataHashRepo.findByDueBillNo(e.getDueBillNo());
@@ -124,21 +110,8 @@ public class LoanProvider implements LoanClient {
                 log.info("走批量更新逻辑...");
                 //更新hash表
                 criticalDataHashRepo.saveAll(
-                        updateList.stream().map(e -> new CriticalDataHash()
-                                    .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
-                                    .setUserName(e.getUserName())
-                                    .setUserNameHash(HashPrefix.用户姓名哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getUserName(), MD5))
-                                    .setIdCardNum(e.getIdCardNum())
-                                    .setIdCardNumHash(HashPrefix.证件号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIdCardNum(), MD5))
-                                    .setIphone(e.getIphone())
-                                    .setIphoneHash(HashPrefix.手机号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIphone(), MD5))
-                                    .setCarNum(e.getCarNum())
-                                    .setCarNumHash(HashPrefix.车牌号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getCarNum(), MD5))
-                                    .setDueBillNo(e.getDueBillNo())
-                                    .setProjectNo(e.getProjectNo())
-                                    .setCreateDate(LocalDate.now())
-                                    .setLastModifyDate(LocalDateTime.now()))
-                                .collect(Collectors.toList()));
+                        getCollect(updateList)
+                );
                 loanDao.updateUserBaseList(updateList.stream().map(e -> {
                     CriticalDataHash criticalDataHash = criticalDataHashRepo.findByDueBillNo(e.getDueBillNo());
                     return e.setUserId(criticalDataHash.getUserId())
@@ -173,5 +146,23 @@ public class LoanProvider implements LoanClient {
             log.error("e:", e);
             return Result.result(false, "调用失败");
         }
+    }
+
+    private List<CriticalDataHash> getCollect(List<UserBaseReq> userBaseReqList) {
+        return userBaseReqList.stream().map(e -> new CriticalDataHash()
+                .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
+                .setUserName(e.getUserName())
+                .setUserNameHash(HashPrefix.用户姓名哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getUserName(), MD5))
+                .setIdCardNum(e.getIdCardNum())
+                .setIdCardNumHash(HashPrefix.证件号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIdCardNum(), MD5))
+                .setIphone(e.getIphone())
+                .setIphoneHash(HashPrefix.手机号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getIphone(), MD5))
+                .setCarNum(e.getCarNum())
+                .setCarNumHash(HashPrefix.车牌号码哈希值.getPrefix() + Md5Utils.algorithmEncode(e.getCarNum(), MD5))
+                .setDueBillNo(e.getDueBillNo())
+                .setProjectNo(e.getProjectNo())
+                .setCreateDate(LocalDate.now())
+                .setLastModifyDate(LocalDateTime.now()))
+                .collect(Collectors.toList());
     }
 }
