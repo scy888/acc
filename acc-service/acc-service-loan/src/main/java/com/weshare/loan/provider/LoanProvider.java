@@ -148,6 +148,13 @@ public class LoanProvider implements LoanClient {
         }
     }
 
+    @Override
+    public Result tesGettUrl(String name, Integer age) {
+        String msg = String.format("用户名:%s,年龄:%d", name, age);
+        System.out.println(msg);
+        return Result.result(true,msg);
+    }
+
     private List<CriticalDataHash> getCollect(List<UserBaseReq> userBaseReqList) {
         return userBaseReqList.stream().map(e -> new CriticalDataHash()
                 .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))

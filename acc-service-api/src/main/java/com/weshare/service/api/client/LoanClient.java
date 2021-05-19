@@ -2,9 +2,7 @@ package com.weshare.service.api.client;
 
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,4 +18,7 @@ public interface LoanClient {
 
     @PostMapping("/saveListUserBase")
     Result saveListUserBase(@RequestBody List<UserBaseReq> userBaseReqList) throws Exception;
+
+    @GetMapping("/tesGetUrl")
+    Result tesGettUrl(@RequestParam("name") String name,@RequestParam("age") Integer age);
 }
