@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -90,9 +89,7 @@ public class AsyncController {
         }).exceptionally(ex -> {
             throw new RuntimeException("ex:" + ex.getMessage());
         });
-        CompletableFuture future3 = CompletableFuture.runAsync(() -> {
-            asyncControllerTest_();
-        }).exceptionally(ex -> {
+        CompletableFuture future3 = CompletableFuture.runAsync(this::asyncControllerTest_).exceptionally(ex -> {
             throw new RuntimeException("ex:" + ex.getMessage());
         });
 

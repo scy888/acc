@@ -1,16 +1,17 @@
 package com.weshare.adapter.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.feignCilent.LoanFeignClient;
 import com.weshare.service.api.entity.User;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
-import common.HttpClientUtil;
 import common.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,9 +54,9 @@ public class AdapterController {
     @GetMapping("/tesGetUrl")
     Result tesGettUrl(@RequestParam String name, @RequestParam Integer age) {
 
-        restTemplate=new RestTemplate();
-       String url= "http://localhost:9003/loan/client/tesGetUrl?name=" + name + "&age=" + age;
-       // return loanFeignClient.tesGettUrl(name, age);
+        restTemplate = new RestTemplate();
+        String url = "http://localhost:9003/loan/client/tesGetUrl?name=" + name + "&age=" + age;
+        // return loanFeignClient.tesGettUrl(name, age);
 
 //        String msg = HttpClientUtil.get(url);
 //        System.out.println(msg);
@@ -78,8 +79,8 @@ public class AdapterController {
     @GetMapping("/tesPostUrl")
     Result tesPostUrl(@RequestParam String name, @RequestParam Integer age) {
 
-        restTemplate=new RestTemplate();
-        String url= "http://localhost:9003/loan/client/tesPostUrl";
+        restTemplate = new RestTemplate();
+        String url = "http://localhost:9003/loan/client/tesPostUrl";
         // return loanFeignClient.tesPostUrl(name, age);
 
 //        User user=new User(name,age);
@@ -95,10 +96,17 @@ public class AdapterController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        //String json="{\"name\",name,\"age\":age}";
-        User user=new User(name,age);
-        HttpEntity<Object> httpEntity = new HttpEntity<>(user,headers);
+        //String s="{\"name\":\"scy\",\"age\":25}";
+        User user = new User(name, age);
+        // MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+//        HashMap<String, Object> map = new HashMap<>();
+//        map.put("name",name);
+//        map.put("age",age);
+        Map<String, Object> map = Map.ofEntries(
+                Map.entry("name", name),
+                Map.entry("age", age)
+        );
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(map, headers);
         Result result = restTemplate.exchange(url, HttpMethod.POST, httpEntity, Result.class).getBody();
         System.out.println(result);
         return result;
