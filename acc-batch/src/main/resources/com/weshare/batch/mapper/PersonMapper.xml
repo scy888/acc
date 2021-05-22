@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.weshare.batch.mapper.PersonMapper">
+    <insert id="addPerson" parameterType="person">
+        insert into tb_person (id,name,address,age,status,batch_date,create_date) values (#{id},#{name},#{address},#{age},#{status},#{batchDate},#{createDate})
+    </insert>
+</mapper>

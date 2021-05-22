@@ -56,5 +56,13 @@ swagger:
     username: scy
     password: scy
 
+mybatis:
+  type-aliases-package: com.weshare.batch.entity
+  mapper-locations: classpath:com/weshare/batch/mapper/*Mapper.xml
+  #type-handlers-package: org.apache.ibatis.type.LocalDateTypeHandler
+
+
+
+
 
 

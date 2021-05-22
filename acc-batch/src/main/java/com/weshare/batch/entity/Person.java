@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author: scyang
@@ -26,11 +27,21 @@ public class Person {
     private BigDecimal salary;
     private Status status;
     private LocalDate batchDate;
+    private LocalDateTime createDate;
 
     public enum Status {
         N,
         O,
         F,
         M;
+    }
+
+    public Person(String id, String name, String address, Integer age, Status status, LocalDate batchDate) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.age = age;
+        this.status = status;
+        this.batchDate = batchDate;
     }
 }

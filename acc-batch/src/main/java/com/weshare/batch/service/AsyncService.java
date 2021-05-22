@@ -1,8 +1,11 @@
 package com.weshare.batch.service;
 
+import com.weshare.batch.entity.Person;
+import com.weshare.batch.mapper.PersonMapper;
 import com.weshare.service.api.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Timeout;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class AsyncService {
+    @Autowired
+    private PersonMapper personMapper;
+
     @Async
     public void asyncServiceOne() {
         try {
@@ -97,5 +103,9 @@ public class AsyncService {
             throw new RuntimeException("e:" + e.getMessage());
         }
         return "successTwo";
+    }
+
+    public void addPerson(Person person) {
+        personMapper.addPerson(person);
     }
 }

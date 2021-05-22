@@ -1,14 +1,19 @@
 package com.weshare.batch.controller;
 
+import com.weshare.batch.entity.Person;
 import com.weshare.batch.service.AsyncService;
 import com.weshare.service.api.result.Result;
+import common.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -98,5 +103,13 @@ public class AsyncController {
         future3.get();
         long end = System.currentTimeMillis();
         log.info("主方法asyncControlleTest...执行了...,当前主线程名:{},耗时:{} 毫秒,msg1:{},msg2:{}", Thread.currentThread().getName(), end - start, msg1, msg2);
+    }
+
+    @PostMapping("/addPerson")
+    public Result addPerson(@RequestBody Person person) {
+        person.setCreateDate(LocalDateTime.now());
+        log.info("addPerson:{}", JsonUtil.toJson(person, true));
+        asyncService.addPerson(person);
+        return Result.result(true, "success");
     }
 }
