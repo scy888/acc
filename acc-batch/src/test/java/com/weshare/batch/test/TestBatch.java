@@ -12,7 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,10 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -40,7 +38,7 @@ public class TestBatch {
 
     @Test
     public void test01() {
-        String url="http://10.10.19.72:9004/riskClient/repayMakeCsv/2021-04-30/WS001020000?path=/YXMS/";
+        String url = "http://10.10.19.72:9004/riskClient/repayMakeCsv/2021-04-30/WS001020000?path=/YXMS/";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -159,19 +157,20 @@ public class TestBatch {
                 new BigDecimal("4.00"));
         BigDecimal sum = bigDecimals.stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
         System.out.println(sum);
-        BigDecimal max = bigDecimals.stream().reduce( BigDecimal::max).orElse(BigDecimal.ZERO);
+        BigDecimal max = bigDecimals.stream().reduce(BigDecimal::max).orElse(BigDecimal.ZERO);
         System.out.println(max);
-        BigDecimal min = bigDecimals.stream().reduce( BigDecimal::min).orElse(BigDecimal.ZERO);
+        BigDecimal min = bigDecimals.stream().reduce(BigDecimal::min).orElse(BigDecimal.ZERO);
         System.out.println(min);
         BigDecimal avg = bigDecimals.stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(bigDecimals.size()));
         System.out.println(avg);
         System.out.println("===============================================");
         int size = personList.size();
-        Integer reduce = personList.stream().map(Person::getAge).reduce(0, Integer::sum)/size;
+        Integer reduce = personList.stream().map(Person::getAge).reduce(0, Integer::sum) / size;
 
     }
+
     @Test
-    public void test04(){
+    public void test04() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String password = encoder.encode("scy199109091016");
         System.out.println(password);

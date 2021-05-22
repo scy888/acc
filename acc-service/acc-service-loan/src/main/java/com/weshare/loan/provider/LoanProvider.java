@@ -52,7 +52,7 @@ public class LoanProvider implements LoanClient {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result saveListUserBase(List<UserBaseReq> userBaseReqList) throws Exception {
+    public Result saveListUserBase(List<UserBaseReq> userBaseReqList) {
         //log.info("userBaseReqList:{}", JsonUtil.toJson(userBaseReqList, true));
         //批量保存用户信息,先根据借据号查询是否有,有就更新,没有就新增
 
@@ -62,7 +62,6 @@ public class LoanProvider implements LoanClient {
         List<UserBaseReq> insertList = new ArrayList<>();
         List<UserBaseReq> updateList = new ArrayList<>();
         try {
-            //int a = 5 / 0;
             for (UserBaseReq userBaseReq : userBaseReqList) {
                 UserBase dbUserBase = map.get(userBaseReq.getDueBillNo());
                 if (dbUserBase == null) {
@@ -141,11 +140,13 @@ public class LoanProvider implements LoanClient {
                     );
                 }
             }
+            //int a = 5 / 0;
             return Result.result(true, "调用成功");
         } catch (Exception e) {
             e.printStackTrace();
             log.error("e:", e);
-            return Result.result(false, "调用失败");
+            throw new RuntimeException("e:" + e.getMessage());
+            //return Result.result(false, "调用失败");
         }
     }
 
@@ -153,16 +154,16 @@ public class LoanProvider implements LoanClient {
     public Result tesGettUrl(String name, Integer age) {
         String msg = String.format("用户名:%s,年龄:%d", name, age);
         System.out.println(msg);
-        return Result.result(true,msg);
+        return Result.result(true, msg);
     }
 
     @Override
-    public Result tesPostUrl( User user) {
+    public Result tesPostUrl(User user) {
         String name = user.getName();
         Integer age = user.getAge();
         String msg = String.format("用户名:%s,年龄:%d", name, age);
         System.out.println(msg);
-        return Result.result(true,msg);
+        return Result.result(true, msg);
     }
 
     private List<CriticalDataHash> getCollect(List<UserBaseReq> userBaseReqList) {

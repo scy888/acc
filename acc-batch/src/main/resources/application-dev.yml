@@ -37,10 +37,11 @@ spring:
   #项目启动时不调用 Job
   batch:
     job:
-      enabled: true
+      enabled: false
     initialize-schema: always
   jpa:
     database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: true
     hibernate:
       ddl-auto: update
@@ -48,6 +49,12 @@ spring:
 sendMessage:
   send-from: 348691356@qq.com
   send-to: 348691356@qq.com,61906806@qq.com
+
+swagger:
+  basic:
+    enable: true
+    username: scy
+    password: scy
 
 
 
