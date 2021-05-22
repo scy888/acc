@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -112,4 +113,12 @@ public class AsyncController {
         asyncService.addPerson(person);
         return Result.result(true, "success");
     }
+
+    @GetMapping("/selectAllPerson")
+    public Result selectAllPerson() {
+        List<Person> personList = asyncService.selectAllPerson();
+        System.out.println(Person.Status.N.equals(personList.get(0).getStatus()));
+        return Result.result(true, personList);
+    }
+
 }

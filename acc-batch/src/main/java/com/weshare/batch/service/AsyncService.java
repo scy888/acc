@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -107,5 +108,10 @@ public class AsyncService {
 
     public void addPerson(Person person) {
         personMapper.addPerson(person);
+    }
+
+    public List<Person> selectAllPerson() {
+        return personMapper.selectAllPerson();
+
     }
 }

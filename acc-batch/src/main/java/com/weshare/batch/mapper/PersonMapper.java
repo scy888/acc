@@ -2,6 +2,9 @@ package com.weshare.batch.mapper;
 
 import com.weshare.batch.entity.Person;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 
 /**
@@ -14,4 +17,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface PersonMapper {
     void addPerson(Person person);
+
+    @Select("select batch_date batchDate,create_date createDate,status from tb_person")
+    List<Person> selectAllPerson();
+
 }

@@ -21,6 +21,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
@@ -176,5 +179,14 @@ public class TestBatch {
         System.out.println(password);
         boolean matches = encoder.matches("scy199109091016", password);
         System.out.println(matches);
+    }
+
+    @Test
+    public void test05() {
+        System.out.println(LocalDateTime.now().with(ChronoField.DAY_OF_MONTH, 12).withNano(0));
+        System.out.println(LocalDateTime.of(2021, 5, 12, 15, 30, 30));
+
+        System.out.println(LocalDate.parse("2020-03-12").until(LocalDate.parse("2020-06-12"), ChronoUnit.DAYS));
+        System.out.println(LocalDate.parse("2020-06-12").toEpochDay() - LocalDate.parse("2020-03-12").toEpochDay());
     }
 }
