@@ -4,8 +4,8 @@ import com.weshare.batch.entity.Person;
 import com.weshare.batch.mapper.PersonMapper;
 import com.weshare.service.api.result.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 public class AsyncService {
     @Autowired
     private PersonMapper personMapper;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Async
     public void asyncServiceOne() {
@@ -106,12 +108,22 @@ public class AsyncService {
         return "successTwo";
     }
 
+    //@Transactional
     public void addPerson(Person person) {
         personMapper.addPerson(person);
+        //int a = 5 / 0;
+    }
+
+    //@Transactional
+    public void addPersonInner(Person person) {
+        personMapper.addPerson(person.setId("service_inner"));
+         //this.addPerson(person.setId("service"));
+        applicationContext.getBean(AsyncService.class).addPerson(person.setId("service"));
+        //int a = 5 / 0;
     }
 
     public List<Person> selectAllPerson() {
-        return personMapper.selectAllPerson();
-
+        List<Person> personList = personMapper.selectAllPerson();
+        return personList;
     }
 }

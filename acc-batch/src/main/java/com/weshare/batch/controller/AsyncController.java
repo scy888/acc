@@ -1,6 +1,7 @@
 package com.weshare.batch.controller;
 
 import com.weshare.batch.entity.Person;
+import com.weshare.batch.mapper.PersonMapper;
 import com.weshare.batch.service.AsyncService;
 import com.weshare.service.api.result.Result;
 import common.JsonUtil;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +33,8 @@ import java.util.concurrent.Future;
 public class AsyncController {
     @Autowired
     private AsyncService asyncService;
+    @Autowired
+    private PersonMapper personMapper;
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -107,10 +111,17 @@ public class AsyncController {
     }
 
     @PostMapping("/addPerson")
+    @Transactional
     public Result addPerson(@RequestBody Person person) {
         person.setCreateDate(LocalDateTime.now());
         log.info("addPerson:{}", JsonUtil.toJson(person, true));
-        asyncService.addPerson(person);
+
+        personMapper.addPerson(person.setId("controller"));
+
+        asyncService.addPersonInner(person.setId("service"));
+
+        int a = 5 / 0;
+
         return Result.result(true, "success");
     }
 

@@ -189,4 +189,18 @@ public class TestBatch {
         System.out.println(LocalDate.parse("2020-03-12").until(LocalDate.parse("2020-06-12"), ChronoUnit.DAYS));
         System.out.println(LocalDate.parse("2020-06-12").toEpochDay() - LocalDate.parse("2020-03-12").toEpochDay());
     }
+
+    @Test
+    public void test00() {
+        int j=0;
+        for (int i = 0; i < 3; i++) {
+            new Thread(){
+                @Override
+                public void run() {
+                    Thread.currentThread().setName(Thread.currentThread().getName()+"--");
+                    System.out.println("当前线程名字: "+Thread.currentThread().getName());
+                }
+            }.start();
+        }
+    }
 }

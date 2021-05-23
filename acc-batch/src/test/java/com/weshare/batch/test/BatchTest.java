@@ -45,7 +45,7 @@ public class BatchTest {
     }
 
     @Test
-    public void test02(){
+    public void test02() {
         asyncController.asyncController();
     }
 
@@ -53,6 +53,7 @@ public class BatchTest {
     public void test03() throws Exception {
         asyncController.asyncControllerValue();
     }
+
     @Test
     public void test04() throws Exception {
         asyncController.asyncControlleTest();
