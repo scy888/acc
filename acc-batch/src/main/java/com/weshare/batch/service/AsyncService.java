@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Random;
@@ -108,16 +109,15 @@ public class AsyncService {
         return "successTwo";
     }
 
-    //@Transactional
+    @Transactional
     public void addPerson(Person person) {
         personMapper.addPerson(person);
-        //int a = 5 / 0;
+        int a = 5 / 0;
     }
-
-    //@Transactional
+     //@Transactional
     public void addPersonInner(Person person) {
         personMapper.addPerson(person.setId("service_inner"));
-         //this.addPerson(person.setId("service"));
+        //this.addPerson(person.setId("service"));
         applicationContext.getBean(AsyncService.class).addPerson(person.setId("service"));
         //int a = 5 / 0;
     }

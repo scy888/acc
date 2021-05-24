@@ -111,7 +111,7 @@ public class AsyncController {
     }
 
     @PostMapping("/addPerson")
-    @Transactional
+    //@Transactional
     public Result addPerson(@RequestBody Person person) {
         person.setCreateDate(LocalDateTime.now());
         log.info("addPerson:{}", JsonUtil.toJson(person, true));
@@ -120,7 +120,7 @@ public class AsyncController {
 
         asyncService.addPersonInner(person.setId("service"));
 
-        int a = 5 / 0;
+        //int a = 5 / 0;
 
         return Result.result(true, "success");
     }

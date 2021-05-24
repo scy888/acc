@@ -6,5 +6,7 @@ create table if not exists acc_batch.tb_person(
      batch_date   date        null comment '生日',
      status       varchar(50) null comment '状态'
 ) comment '用户表', engine=innodb;
-create unique index tb_person_name_index on tb_user(name);
+create unique index tb_person_name_index on tb_person(name);
+drop index tb_person_name_index on tb_person;
+show index from tb_person;
 
