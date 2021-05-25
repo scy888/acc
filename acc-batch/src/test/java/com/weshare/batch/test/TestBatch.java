@@ -1,6 +1,8 @@
 package com.weshare.batch.test;
 
 import com.weshare.batch.entity.Person;
+import com.weshare.service.api.enums.TermStatusEnum;
+import common.ChangeEnumUtils;
 import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
@@ -192,15 +194,22 @@ public class TestBatch {
 
     @Test
     public void test00() {
-        int j=0;
+        int j = 0;
         for (int i = 0; i < 3; i++) {
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName(Thread.currentThread().getName()+"--");
-                    System.out.println("当前线程名字: "+Thread.currentThread().getName());
+                    Thread.currentThread().setName(Thread.currentThread().getName() + "--");
+                    System.out.println("当前线程名字: " + Thread.currentThread().getName());
                 }
             }.start();
         }
+    }
+
+    @Test
+    public void test001() {
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "提前结清", TermStatusEnum.class));
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "正常结清", TermStatusEnum.class));
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "逾期结清", TermStatusEnum.class));
     }
 }
