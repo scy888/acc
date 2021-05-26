@@ -6,18 +6,19 @@ import lombok.Getter;
  * @author: scyang
  * @program: acc
  * @package: com.weshare.service.api.enums
- * @date: 2021-05-25 16:17:19
+ * @date: 2021-05-26 17:02:36
  * @describe:
  */
 @Getter
-public enum TermStatusEnum {
-    UNDUE("本期未还"),
-    REPAID("本期已还"),
-    OVERDUE("逾期");
+public enum TermPaidOutTypeEnum {
+
+    PRE_PAIDOUT("提前还清本期"),
+    NORMAL_PAIDOUT("正常还清本期"),
+    OVERDUE_PAIDOUT("逾期还清本期");
 
     private String desc;
 
-    TermStatusEnum(String desc) {
+    TermPaidOutTypeEnum(String desc) {
         this.desc = desc;
     }
 }

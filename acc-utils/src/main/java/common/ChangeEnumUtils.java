@@ -19,7 +19,21 @@ public enum ChangeEnumUtils {
     YXMS("WS121212", List.of(
             new TransferEnum("termStatus", "提前结清", "PRE"),
             new TransferEnum("termStatus", "正常结清", "NORMAL"),
-            new TransferEnum("termStatus", "逾期结清", "OVERDUE")));
+            new TransferEnum("termStatus", "逾期结清", "OVERDUE"),
+
+            new TransferEnum("loanStatus", "01", "成功"),
+            new TransferEnum("loanStatus", "02", "失败"),
+
+            new TransferEnum("transactionResult", "01", "成功"),
+            new TransferEnum("transactionResult", "02", "失败"),
+            new TransferEnum("transactionResult", "03", "处理中"),
+
+            new TransferEnum("debitType", "01", "正常扣款"),
+            new TransferEnum("debitType", "02", "提前结清扣款")
+
+
+
+    ));
 
     private String projectNo;
     private List<TransferEnum> transferEnumList;

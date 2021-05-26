@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
@@ -211,5 +212,19 @@ public class TestBatch {
         System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "提前结清", TermStatusEnum.class));
         System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "正常结清", TermStatusEnum.class));
         System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "逾期结清", TermStatusEnum.class));
+    }
+
+    @Test
+    public void test002() {
+        DecimalFormat decimalFormat = new DecimalFormat("0.00%");
+        String format = decimalFormat.format(new BigDecimal("0.12564"));
+        System.out.println(format);
+        System.out.println(format.substring(0,format.lastIndexOf("%")));
+
+        LocalDateTime localDateTime = LocalDateTime.of(2021, 5, 24, 12, 12, 12);
+        System.out.println(localDateTime);
+        LocalDateTime localDateTime1 = LocalDateTime.now();
+        System.out.println(localDateTime.with(ChronoField.MILLI_OF_SECOND,0).toString().replace("T", " "));
+        System.out.println(localDateTime1.with(ChronoField.MILLI_OF_SECOND,0).toString().replace("T", " "));
     }
 }

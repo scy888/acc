@@ -5,6 +5,7 @@ import jodd.io.ZipUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 import java.beans.*;
 import java.io.File;
@@ -19,6 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
@@ -168,7 +171,13 @@ public class ReflectUtils {
                 String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                 Method getMethod = clazz.getDeclaredMethod(methodName);
                 Object value = getMethod.invoke(t);
-                sb.append(Objects.isNull(value) ? "" : value).append(",");
+                if (value instanceof LocalDateTime) {
+                    sb.append(((LocalDateTime) value).with(ChronoField.MILLI_OF_SECOND, 0).toString().replace("T", " ")).append(",");
+                } else if (value instanceof Enum) {
+                    sb.append(((Enum) value).name()).append(",");
+                } else {
+                    sb.append(Objects.isNull(value) ? "" : value).append(",");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -199,6 +208,22 @@ public class ReflectUtils {
             e.printStackTrace();
         }
         return str;
+    }
+
+    public static <K, V> List<V> getBeanUtils(List<K> kList, Class<V> vClass, String... fields) {
+        List<V> vList = new ArrayList<>();
+        for (K k : kList) {
+            V v = null;
+            try {
+                v = vClass.newInstance();
+                BeanUtils.copyProperties(k, v, fields);
+                vList.add(v);
+            } catch (Exception e) {
+                //e.printStackTrace();
+                throw new RuntimeException("转换异常:" + e);
+            }
+        }
+        return vList;
     }
 
     @Test
