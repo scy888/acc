@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -173,8 +174,9 @@ public class LoanProvider implements LoanClient {
 
     @Override
     @Transactional
+    @Async
     public Result saveAllLoanContractAndLoanTransFlow(List<? extends LoanDetailReq> list) {
-
+        log.info("saveAllLoanContractAndLoanTransFlow()方法的异步调用的线程名:{}",Thread.currentThread().getName());
         List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list.stream().distinct()
                 .map(LoanDetailReq::getDueBillNo).collect(Collectors.toList()));
         Map<String, LoanContract> map = loanContractList.stream().collect(Collectors.toMap(LoanContract::getDueBillNo, Function.identity(), (a, b) -> b));

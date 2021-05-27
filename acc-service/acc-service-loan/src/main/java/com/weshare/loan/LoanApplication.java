@@ -6,6 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @author: scyang
@@ -18,6 +19,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableEurekaClient
 @EnableDiscoveryClient
 @EnableJpaAuditing//自动加载时间的
+@EnableAsync
 @EnableFeignClients(basePackages = "com.weshare")
 public class LoanApplication {
     public static void main(String[] args) {

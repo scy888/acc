@@ -10,6 +10,7 @@ import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,9 +32,12 @@ public class AdapterProvider implements AdapterClient {
     @Autowired
     private LoanDetailRepo loanDetailRepo;
 
+
     @Transactional
     @Override
+    @Async
     public Result saveAllLoanDetail(List<? extends LoanDetailReq> list) {
+        log.info("saveAllLoanDetail()方法的异步调用的线程名:{}",Thread.currentThread().getName());
         loanDetailRepo.deleteByDueBillNoList(list.stream().map(LoanDetailReq::getDueBillNo).collect(Collectors.toList()));
         loanDetailRepo.saveAll(
                 list.stream().map(e -> {

@@ -7,6 +7,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @author: scyang
@@ -17,6 +18,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  */
 @SpringBootApplication
 //@EnableJpaAuditing//自动加载时间的
+@EnableAsync
 @EnableEurekaClient
 @EnableFeignClients
 @EnableDiscoveryClient

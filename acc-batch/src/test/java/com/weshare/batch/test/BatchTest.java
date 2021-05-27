@@ -7,6 +7,7 @@ import com.weshare.service.api.entity.LoanDetailReq;
 import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
  */
 
 @SpringBootTest
+@Slf4j
 public class BatchTest {
     @Autowired
     @Qualifier("secondJdbcTemplate")
@@ -85,9 +88,15 @@ public class BatchTest {
                 new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6228 4800 5864 3078 676", "02", batchDate),
                 new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6217 8576 0000 7092 823", "01", batchDate)
         );
+        log.info("test0515()的方法的主线程名:{}", Thread.currentThread().getName());
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
-        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存
+        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
+
+        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
+        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
+
+
         List<String> list = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         list.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
 
