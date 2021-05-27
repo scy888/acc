@@ -4,9 +4,6 @@ package com.weshare.adapter.entity;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -58,6 +55,7 @@ public class LoanDetail {
 
     @Getter
     public enum LoanStatusEnum {
+
         成功("01"),
         失败("02");
 

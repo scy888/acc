@@ -1,5 +1,6 @@
 package com.weshare.service.api.client;
 
+import com.weshare.service.api.entity.LoanDetailReq;
 import com.weshare.service.api.entity.User;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
@@ -25,4 +26,7 @@ public interface LoanClient {
 
     @PostMapping("/tesPostUrl")
     Result tesPostUrl(@RequestBody User user);
+
+    @PostMapping("/saveAllLoanContract")
+    Result saveAllLoanContractAndLoanTransFlow(@RequestBody List<? extends LoanDetailReq> list);
 }

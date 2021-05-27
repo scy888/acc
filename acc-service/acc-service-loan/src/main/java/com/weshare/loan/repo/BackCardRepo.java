@@ -1,7 +1,10 @@
 package com.weshare.loan.repo;
 
 import com.weshare.loan.entity.BackCard;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 /**
  * @author: scyang
@@ -12,4 +15,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface BackCardRepo extends JpaRepository<BackCard,String> {
     BackCard findByBackNum(String backNum);
+
+    List<BackCard> findByDueBillNo(String dueBillNo);
 }

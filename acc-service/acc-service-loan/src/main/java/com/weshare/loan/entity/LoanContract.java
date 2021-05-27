@@ -80,4 +80,5 @@ public class LoanContract {
 
     @Column(columnDefinition = "datetime null comment '修改日期' ")
     private LocalDateTime lastModifiedDate;
+
 }

@@ -1,31 +1,32 @@
 package com.weshare.loan.provider;
 
 import com.weshare.loan.dao.LoanDao;
-import com.weshare.loan.entity.BackCard;
-import com.weshare.loan.entity.CriticalDataHash;
-import com.weshare.loan.entity.LinkMan;
-import com.weshare.loan.entity.UserBase;
+import com.weshare.loan.entity.*;
 import com.weshare.loan.enums.HashPrefix;
-import com.weshare.loan.repo.BackCardRepo;
-import com.weshare.loan.repo.CriticalDataHashRepo;
-import com.weshare.loan.repo.LinkManRepo;
+import com.weshare.loan.repo.*;
 import com.weshare.service.api.client.LoanClient;
+import com.weshare.service.api.entity.LoanDetailReq;
 import com.weshare.service.api.entity.User;
 import com.weshare.service.api.entity.UserBaseReq;
+import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.Md5Utils;
 import common.SnowFlake;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,10 @@ public class LoanProvider implements LoanClient {
     private BackCardRepo backCardRepo;
     @Autowired
     private CriticalDataHashRepo criticalDataHashRepo;
+    @Autowired
+    private LoanContractRepo loanContractRepo;
+    @Autowired
+    private LoanTransFlowRepo loanTransFlowRepo;
     private String MD5 = "MD5";
 
     @Override
@@ -166,6 +171,65 @@ public class LoanProvider implements LoanClient {
         return Result.result(true, msg);
     }
 
+    @Override
+    @Transactional
+    public Result saveAllLoanContractAndLoanTransFlow(List<? extends LoanDetailReq> list) {
+
+        List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list.stream().distinct()
+                .map(LoanDetailReq::getDueBillNo).collect(Collectors.toList()));
+        Map<String, LoanContract> map = loanContractList.stream().collect(Collectors.toMap(LoanContract::getDueBillNo, Function.identity(), (a, b) -> b));
+        list = list.stream().filter(e -> e.getLoanStatus().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
+        for (LoanDetailReq req : list) {
+
+            LocalDateTime localDateTime = LocalDateTime.now().withYear(req.getBatchDate().getYear())
+                    .withMonth(req.getBatchDate().getMonthValue())
+                    .withDayOfMonth(req.getBatchDate().getDayOfMonth());
+
+            LoanContract loanContract = map.get(req.getDueBillNo());
+
+            loanContract = Optional.ofNullable(loanContract).orElseGet(
+                    () -> new LoanContract()
+                            .setId(SnowFlake.getInstance().nextId() + "")
+                            .setCreatedDate(localDateTime)
+            );
+            loanContract.setDueBillNo(req.getDueBillNo())
+                    .setUserId(criticalDataHashRepo.findByDueBillNo(req.getDueBillNo()).getUserId())
+                    .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                    .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                    .setProductName(ProjectEnum.getProductName(loanContract.getProjectNo(), loanContract.getProductNo()))
+                    .setContractAmount(req.getLoanAmount())
+                    .setInterestRate(new BigDecimal("0.02"))
+                    .setTotalTerm(req.getTerm())
+                    .setPrincipal(req.getLoanAmount())
+                    .setBatchDate(req.getBatchDate())
+                    .setRemark("放款成功")
+                    .setLastModifiedDate(localDateTime);
+            loanContractRepo.save(loanContract);
+
+            Optional.ofNullable(loanTransFlowRepo.findByBatchDateAndDueBillNo(req.getBatchDate(), req.getDueBillNo())).ifPresent(e -> {
+                loanTransFlowRepo.deleteByBatchDateAndDueBillNo(req.getBatchDate(), req.getDueBillNo());
+            });
+            BackCard backCard = backCardRepo.findByDueBillNo(req.getDueBillNo()).stream().findFirst().orElse(null);
+            loanTransFlowRepo.save(new LoanTransFlow()
+                    .setId(SnowFlake.getInstance().nextId() + "")
+                    .setFlowSn(SnowFlake.getInstance().nextId() + "")
+                    .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                    .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                    .setDueBillNo(req.getDueBillNo())
+                    .setTransAmount(req.getLoanAmount())
+                    .setBankAccountName(backCard.getBackName().name())
+                    .setBankAccountNo(backCard.getBackName().getNum())
+                    .setTransTime(localDateTime)
+                    .setRemark("放款交易流水成功")
+                    .setBatchDate(req.getBatchDate())
+                    .setCreatedDate(localDateTime)
+                    .setLastModifiedDate(localDateTime)
+            );
+        }
+
+        return Result.result(true);
+    }
+
     private List<CriticalDataHash> getCollect(List<UserBaseReq> userBaseReqList) {
         return userBaseReqList.stream().map(e -> new CriticalDataHash()
                 .setUserId(Md5Utils.algorithmEncode(e.getUserId(), MD5))
@@ -182,5 +246,17 @@ public class LoanProvider implements LoanClient {
                 .setCreateDate(LocalDate.now())
                 .setLastModifyDate(LocalDateTime.now()))
                 .collect(Collectors.toList());
+    }
+
+    @Getter
+    public enum StatusEnum {
+
+        成功("01"),
+        失败("02");
+        private String code;
+
+        StatusEnum(String code) {
+            this.code = code;
+        }
     }
 }

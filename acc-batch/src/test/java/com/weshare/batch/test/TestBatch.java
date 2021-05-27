@@ -27,7 +27,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.IntSummaryStatistics;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -219,12 +222,12 @@ public class TestBatch {
         DecimalFormat decimalFormat = new DecimalFormat("0.00%");
         String format = decimalFormat.format(new BigDecimal("0.12564"));
         System.out.println(format);
-        System.out.println(format.substring(0,format.lastIndexOf("%")));
+        System.out.println(format.substring(0, format.lastIndexOf("%")));
 
         LocalDateTime localDateTime = LocalDateTime.of(2021, 5, 24, 12, 12, 12);
         System.out.println(localDateTime);
         LocalDateTime localDateTime1 = LocalDateTime.now();
-        System.out.println(localDateTime.with(ChronoField.MILLI_OF_SECOND,0).toString().replace("T", " "));
-        System.out.println(localDateTime1.with(ChronoField.MILLI_OF_SECOND,0).toString().replace("T", " "));
+        System.out.println(localDateTime.with(ChronoField.MILLI_OF_SECOND, 0).toString().replace("T", " "));
+        System.out.println(localDateTime1.with(ChronoField.MILLI_OF_SECOND, 0).toString().replace("T", " "));
     }
 }

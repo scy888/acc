@@ -1,6 +1,11 @@
 package com.weshare.batch.test;
 
 import com.weshare.batch.controller.AsyncController;
+import com.weshare.batch.feignClient.AdapterFeignClient;
+import com.weshare.batch.feignClient.LoanFeignClient;
+import com.weshare.service.api.entity.LoanDetailReq;
+import common.ReflectUtils;
+import common.SnowFlake;
 import jodd.io.ZipUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +14,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 
+import java.io.File;
+import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author: scyang
@@ -27,9 +40,12 @@ public class BatchTest {
     @Qualifier("secondJdbcTemplate")
     //private JdbcTemplate secondJdbcTemplate;
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private AsyncController asyncController;
+    @Autowired
+    private AdapterFeignClient adapterFeignClient;
+    @Autowired
+    private LoanFeignClient loanFeignClient;
 
     @Test
     public void test0() {
@@ -57,5 +73,32 @@ public class BatchTest {
     @Test
     public void test04() throws Exception {
         asyncController.asyncControlleTest();
+    }
+
+    @Test
+    public void test0515() throws Exception {
+        LocalDate batchDate = LocalDate.parse("2020-05-15");
+        String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        List<LoanDetailReq> loanDetailReqs = List.of(
+                new LoanDetailReq("YX-101", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6217 0028 7001 5622 705", "02", batchDate),
+                new LoanDetailReq("YX-101", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6214 8312 7106 8212 236", "01", batchDate),
+                new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6228 4800 5864 3078 676", "02", batchDate),
+                new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6217 8576 0000 7092 823", "01", batchDate)
+        );
+
+        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
+        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存
+        List<String> list = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        list.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+
+        Path path = Paths.get("/yxms", dateStr, "create");
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
+        File file = new File(path.toUri());
+        for (File listFile : Objects.requireNonNull(file.listFiles())) {
+            listFile.delete();
+        }
+        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), list);
     }
 }

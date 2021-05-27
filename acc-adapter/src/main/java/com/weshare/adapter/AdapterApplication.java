@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * @describe:
  */
 @SpringBootApplication
-@EnableJpaAuditing//自动加载时间的
+//@EnableJpaAuditing//自动加载时间的
 @EnableEurekaClient
 @EnableFeignClients
 @EnableDiscoveryClient

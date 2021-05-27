@@ -2,6 +2,7 @@ package com.weshare.adapter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.entity.IncomeApply;
+import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.UserBaseReq;
 import common.JsonUtil;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ class AdapterControllerTest {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private AdapterClient adapterClient;
 
     @Test
     public void mongodbTest() throws Exception {
@@ -99,7 +102,8 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void jdbcTest() {
+    public void LoanDetailTest() {
+
 
     }
 }
