@@ -24,7 +24,7 @@ public class RepaymentPlanReq {
 
     private BigDecimal shouldCapitalMoney;//应还本金(元)
 
-    private BigDecimal shouldInterestlMoney;//应还利息(元)
+    private BigDecimal shouldInterestMoney;//应还利息(元)
 
     private LocalDate batchDate;//跑批日期
 

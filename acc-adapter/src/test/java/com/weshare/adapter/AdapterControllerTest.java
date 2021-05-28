@@ -1,8 +1,10 @@
 package com.weshare.adapter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.service.api.client.AdapterClient;
+import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.entity.UserBaseReq;
 import common.JsonUtil;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,6 +41,8 @@ class AdapterControllerTest {
     private MongoTemplate mongoTemplate;
     @Autowired
     private AdapterClient adapterClient;
+    @Autowired
+    private AdapterDao adapterDao;
 
     @Test
     public void mongodbTest() throws Exception {
@@ -102,8 +109,25 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void LoanDetailTest() {
+    public void RepaymentPlanTest() {
 
+        LocalDate batchDate = LocalDate.parse("2020-05-15");
+        List<RepaymentPlanReq> repaymentPlanReqs = List.of(
+                new RepaymentPlanReq("YX-101", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-101", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-101", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-101", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-101", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-101", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate),
 
+                new RepaymentPlanReq("YX-102", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-102", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-102", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-102", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-102", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-102", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate)
+        );
+
+        adapterClient.saveAllRepaymentPlan(repaymentPlanReqs);
     }
 }

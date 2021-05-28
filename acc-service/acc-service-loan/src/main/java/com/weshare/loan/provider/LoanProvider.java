@@ -269,23 +269,40 @@ public class LoanProvider implements LoanClient {
             Optional.ofNullable(map.get(req.getDueBillNo())).ifPresentOrElse(
                     e -> loanTransFlowRepo.deleteByBatchDateAndDueBillNo(e.getBatchDate(), e.getDueBillNo()),
                     () -> log.info("batchDate:{},借据号:{},不存在...", batchDate_, req.getDueBillNo()));
+
+            loanTransFlowRepo.save(
+                    createLoanTransFlow(req)
+            );
         }
-        loanTransFlowRepo.saveAll(
-                list.stream().map(e -> {
-                    LoanTransFlow loanTransFlow = new LoanTransFlow();
-                    BeanUtils.copyProperties(e, loanTransFlow);
-                    LocalDate batchDate__ = e.getBatchDate();
-                    LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate__.getYear()).withMonth(batchDate__.getMonthValue()).withDayOfMonth(batchDate__.getDayOfMonth());
-                    BackCard backCard = backCardRepo.findByDueBillNo(e.getDueBillNo()).get(0);
-                    return loanTransFlow.setId(SnowFlake.getInstance().nextId() + "")
-                            .setBankAccountName(backCard.getBackName().name())
-                            .setBankAccountNo(backCard.getBackName().getNum())
-                            .setCreatedDate(localDateTime)
-                            .setLastModifiedDate(localDateTime);
-                }).collect(Collectors.toList())
-        );
-        int a = 5 / 0;
+//        loanTransFlowRepo.saveAll(
+//                list.stream().map(e -> {
+//                    LoanTransFlow loanTransFlow = new LoanTransFlow();
+//                    BeanUtils.copyProperties(e, loanTransFlow);
+//                    LocalDate batchDate__ = e.getBatchDate();
+//                    LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate__.getYear()).withMonth(batchDate__.getMonthValue()).withDayOfMonth(batchDate__.getDayOfMonth());
+//                    BackCard backCard = backCardRepo.findByDueBillNo(e.getDueBillNo()).get(0);
+//                    return loanTransFlow.setId(SnowFlake.getInstance().nextId() + "")
+//                            .setBankAccountName(backCard.getBackName().name())
+//                            .setBankAccountNo(backCard.getBackName().getNum())
+//                            .setCreatedDate(localDateTime)
+//                            .setLastModifiedDate(localDateTime);
+//                }).collect(Collectors.toList())
+//        );
         return Result.result(true);
+    }
+
+    private LoanTransFlow createLoanTransFlow(LoanTransFlowReq req) {
+        LoanTransFlow loanTransFlow = new LoanTransFlow();
+        BeanUtils.copyProperties(req, loanTransFlow);
+        LocalDate batchDate__ = req.getBatchDate();
+        LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate__.getYear()).withMonth(batchDate__.getMonthValue()).withDayOfMonth(batchDate__.getDayOfMonth());
+        BackCard backCard = backCardRepo.findByDueBillNo(req.getDueBillNo()).get(0);
+        loanTransFlow.setId(SnowFlake.getInstance().nextId() + "")
+                .setBankAccountName(backCard.getBackName().name())
+                .setBankAccountNo(backCard.getBackName().getNum())
+                .setCreatedDate(localDateTime)
+                .setLastModifiedDate(localDateTime);
+        return loanTransFlow;
     }
 
     private List<CriticalDataHash> getCollect(List<UserBaseReq> userBaseReqList) {

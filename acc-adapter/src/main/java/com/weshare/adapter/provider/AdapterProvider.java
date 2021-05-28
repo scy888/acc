@@ -1,6 +1,8 @@
 package com.weshare.adapter.provider;
 
+import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.LoanDetail;
+import com.weshare.adapter.entity.RepaymentPlan;
 import com.weshare.adapter.repo.LoanDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
@@ -16,8 +18,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +42,8 @@ public class AdapterProvider implements AdapterClient {
     private LoanDetailRepo loanDetailRepo;
     @Autowired
     private AdapterService adapterService;
+    @Autowired
+    private AdapterDao adapterDao;
 
     @Transactional
     @Override
@@ -58,8 +67,30 @@ public class AdapterProvider implements AdapterClient {
     }
 
     @Override
+    @Async
     public Result saveAllRepaymentPlan(List<? extends RepaymentPlanReq> list) {
-        return null;
+        log.info("saveAllRepaymentPlan()方法的异步调用的线程名:{}", Thread.currentThread().getName());
+        List<RepaymentPlan> repaymentPlanReqList = adapterDao.findByDueBillNoAndTerm(list);
+        Map<String, RepaymentPlan> map = repaymentPlanReqList.stream().collect(Collectors.toMap(e -> e.getDueBillNo() + "_" + e.getTerm(), Function.identity()));
+
+        for (RepaymentPlanReq planReq : list) {
+            RepaymentPlan repaymentPlan = map.get(planReq.getDueBillNo() + "_" + planReq.getTerm());
+            Optional.ofNullable(repaymentPlan).ifPresentOrElse(e -> {
+                BeanUtils.copyProperties(planReq, e);
+                LocalDate batchDate = e.getBatchDate();
+                LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate.getYear()).withMonth(batchDate.getMonthValue()).withDayOfMonth(batchDate.getDayOfMonth());
+                adapterDao.updateRepaymentPlan(e.setLastModifiedDate(localDateTime));
+            }, () -> {
+                RepaymentPlan plan = new RepaymentPlan();
+                BeanUtils.copyProperties(planReq, plan);
+                LocalDate batchDate = plan.getBatchDate();
+                LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate.getYear()).withMonth(batchDate.getMonthValue()).withDayOfMonth(batchDate.getDayOfMonth());
+                adapterDao.insertRepaymentPlan(plan.setId(SnowFlake.getInstance().nextId() + "")
+                        .setCreatedDate(localDateTime)
+                        .setLastModifiedDate(localDateTime));
+            });
+        }
+        return Result.result(true);
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
         @Index(name = "repayment_plan_due_bill_no_and_term", unique = true, columnList = "dueBillNo,term")
 })
 @org.hibernate.annotations.Table(appliesTo = "repayment_plan",comment = "还款计划表")
-public class RepaymentPlan {
+public class RepaymentPlan  {
 
     @Id
     private String id;
@@ -39,7 +40,7 @@ public class RepaymentPlan {
     private BigDecimal shouldCapitalMoney;
 
     @Column(columnDefinition = "decimal(12,2) not null comment '应还利息(元)'")
-    private BigDecimal shouldInterestlMoney;
+    private BigDecimal shouldInterestMoney;
 
     @Column(columnDefinition = "date null comment '跑批日期'")
     private LocalDate batchDate;

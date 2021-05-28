@@ -1,6 +1,7 @@
 package com.weshare.batch.test;
 
 import com.weshare.batch.entity.Person;
+import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.enums.TermStatusEnum;
 import common.ChangeEnumUtils;
 import common.ReflectUtils;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -233,5 +235,36 @@ public class TestBatch {
             return list;
         });
         System.out.println(orElseGet);
+    }
+
+    @Test
+    public void test003(){
+
+        LocalDate batchDate = LocalDate.parse("2020-05-15");
+        List<RepaymentPlanReq> repaymentPlanReqs = List.of(
+                new RepaymentPlanReq("YX-101", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-101", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-101", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-101", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-101", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-101", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate),
+
+                new RepaymentPlanReq("YX-102", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-102", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-102", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-102", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-102", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-102", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate)
+        );
+        Map<String, RepaymentPlanReq> collect = repaymentPlanReqs.stream().collect(Collectors.toMap(e -> e.getDueBillNo()+"_"+e.getTerm(), Function.identity(),(a,b)->b));
+        for (Map.Entry<String, RepaymentPlanReq> entry : collect.entrySet()) {
+            System.out.println(entry.getKey()+":"+entry.getValue());
+        }
+        System.out.println("=========================================================================");
+        Map<String, List<RepaymentPlanReq>> map = repaymentPlanReqs.stream().collect(Collectors.groupingBy(e -> e.getDueBillNo()+"_"+e.getTerm()));
+        for (Map.Entry<String, List<RepaymentPlanReq>> entry : map.entrySet()) {
+            System.out.println(entry.getKey()+":"+entry.getValue());
+
+        }
     }
 }

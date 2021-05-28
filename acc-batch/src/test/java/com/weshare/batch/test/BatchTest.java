@@ -107,6 +107,7 @@ public class BatchTest {
                 new RepaymentPlanReq("YX-102", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate)
         );
         log.info("test0515()的方法的主线程名:{}", Thread.currentThread().getName());
+
         List<String> loanList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         loanList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
 
@@ -125,7 +126,8 @@ public class BatchTest {
         Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
-        //loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
-        adapterFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs, batchDate.toString());
+        adapterFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水
+
+        adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
     }
 }

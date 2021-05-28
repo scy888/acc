@@ -1,17 +1,16 @@
 package com.weshare.adapter.service;
 
 import com.weshare.adapter.feignCilent.LoanFeignClient;
-import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.LoanContractReq;
 import com.weshare.service.api.entity.LoanDetailReq;
 import com.weshare.service.api.entity.LoanTransFlowReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.SnowFlake;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,7 +37,7 @@ public class AdapterService {
 
         //保存acc_loan.loan_contract
         loanFeignClient.saveAllLoanContract(
-                list.stream().map(req -> {
+                list.stream().filter(e -> ((LoanDetailReq) e).getLoanStatus().equals(StatusEnum.成功.getCode())).map(req -> {
                     LoanContractReq loanContractReq = new LoanContractReq();
                     return loanContractReq
                             .setDueBillNo(req.getDueBillNo())
@@ -56,7 +55,7 @@ public class AdapterService {
 
         //保存acc_loan.loan_trans_flow
         loanFeignClient.saveAllLoanTransFlow(
-                list.stream().filter(e -> e.getLoanStatus().equals("01")).map(req -> {
+                list.stream().filter(e -> e.getLoanStatus().equals(StatusEnum.成功.getCode())).map(req -> {
                     LoanTransFlowReq loanTransFlowReq = new LoanTransFlowReq();
                     LocalDate localDate = req.getBatchDate();
                     LocalDateTime localDateTime = LocalDateTime.now().withYear(localDate.getYear()).withMonth(localDate.getMonthValue()).withDayOfMonth(localDate.getDayOfMonth());
@@ -74,5 +73,18 @@ public class AdapterService {
         );
 
         return Result.result(true);
+    }
+
+    @Getter
+    public enum StatusEnum {
+
+        成功("01"),
+        失败("02");
+
+        private String code;
+
+        StatusEnum(String code) {
+            this.code = code;
+        }
     }
 }
