@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author: scyang
@@ -18,10 +19,12 @@ import java.time.LocalDate;
  */
 public interface LoanTransFlowRepo extends JpaRepository<LoanTransFlow, String> {
 
-    LoanTransFlow findByBatchDateAndDueBillNo(LocalDate batchDate,String dueBillNo);
+    LoanTransFlow findByBatchDateAndDueBillNo(LocalDate batchDate, String dueBillNo);
 
     @Transactional
     @Modifying
     @Query("delete #{#entityName} a where a.batchDate=:batchDate and a.dueBillNo=:dueBillNo")
-    void deleteByBatchDateAndDueBillNo(@Param("batchDate") LocalDate batchDate, @Param("dueBillNo")String dueBillNo);
+    void deleteByBatchDateAndDueBillNo(@Param("batchDate") LocalDate batchDate, @Param("dueBillNo") String dueBillNo);
+
+    List<LoanTransFlow> findByBatchDateAndDueBillNoIn(LocalDate batchDate, List<String> dueBillNoList);
 }

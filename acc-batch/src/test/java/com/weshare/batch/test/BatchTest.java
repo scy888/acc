@@ -4,6 +4,8 @@ import com.weshare.batch.controller.AsyncController;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.service.api.entity.LoanDetailReq;
+import com.weshare.service.api.entity.RepayPlanReq;
+import com.weshare.service.api.entity.RepaymentPlanReq;
 import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
@@ -23,6 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -88,17 +91,27 @@ public class BatchTest {
                 new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6228 4800 5864 3078 676", "02", batchDate),
                 new LoanDetailReq("YX-102", batchDate, new BigDecimal(1200), SnowFlake.getInstance().nextId() + "", 6, "6217 8576 0000 7092 823", "01", batchDate)
         );
+        List<RepaymentPlanReq> repaymentPlanReqs = List.of(
+                new RepaymentPlanReq("YX-101", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-101", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-101", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-101", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-101", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-101", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate),
+
+                new RepaymentPlanReq("YX-102", 1, batchDate.plusMonths(1), new BigDecimal(300), new BigDecimal(170), new BigDecimal(130), batchDate),
+                new RepaymentPlanReq("YX-102", 2, batchDate.plusMonths(2), new BigDecimal(300), new BigDecimal(180), new BigDecimal(120), batchDate),
+                new RepaymentPlanReq("YX-102", 3, batchDate.plusMonths(3), new BigDecimal(300), new BigDecimal(190), new BigDecimal(110), batchDate),
+                new RepaymentPlanReq("YX-102", 4, batchDate.plusMonths(4), new BigDecimal(300), new BigDecimal(200), new BigDecimal(100), batchDate),
+                new RepaymentPlanReq("YX-102", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
+                new RepaymentPlanReq("YX-102", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate)
+        );
         log.info("test0515()的方法的主线程名:{}", Thread.currentThread().getName());
+        List<String> loanList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
-        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
-
-        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
-        loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
-
-
-        List<String> list = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        list.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> repaymentList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
         Path path = Paths.get("/yxms", dateStr, "create");
         if (Files.notExists(path)) {
@@ -108,6 +121,11 @@ public class BatchTest {
         for (File listFile : Objects.requireNonNull(file.listFiles())) {
             listFile.delete();
         }
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), list);
+        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanList);
+        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentList);
+
+        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
+        //loanFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs);//保存loan库的放款明细和放款流水
+        adapterFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs, batchDate.toString());
     }
 }

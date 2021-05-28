@@ -27,10 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -229,5 +226,12 @@ public class TestBatch {
         LocalDateTime localDateTime1 = LocalDateTime.now();
         System.out.println(localDateTime.with(ChronoField.MILLI_OF_SECOND, 0).toString().replace("T", " "));
         System.out.println(localDateTime1.with(ChronoField.MILLI_OF_SECOND, 0).toString().replace("T", " "));
+
+        List orElseGet = (List) Optional.ofNullable(null).orElseGet(() -> {
+            ArrayList<String> list = new ArrayList<>();
+            list.add("a");
+            return list;
+        });
+        System.out.println(orElseGet);
     }
 }

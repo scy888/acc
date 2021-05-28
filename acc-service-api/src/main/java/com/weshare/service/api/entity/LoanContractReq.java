@@ -1,6 +1,7 @@
 package com.weshare.service.api.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
  * @date 2020-07-14 14:17
  **/
 @Data
+@Accessors(chain = true)
 public class LoanContractReq {
 
 

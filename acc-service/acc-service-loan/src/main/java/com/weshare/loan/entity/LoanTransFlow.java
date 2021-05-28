@@ -19,8 +19,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @Entity
 @javax.persistence.Table(indexes = {
-        @Index(name = "idx_loan_trans_flow_due_bill_no", columnList = "dueBillNo"),
-        @Index(name = "idx_loan_trans_flow_batch_date", columnList = "batchDate")
+        @Index(name = "idx_loan_trans_flow_due_bill_no_batch_date", unique = true, columnList = "dueBillNo,batchDate"),
 })
 @Table(appliesTo = "loan_trans_flow", comment = "放款流水记录")
 public class LoanTransFlow {

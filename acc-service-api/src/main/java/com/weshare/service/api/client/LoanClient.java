@@ -1,8 +1,6 @@
 package com.weshare.service.api.client;
 
-import com.weshare.service.api.entity.LoanDetailReq;
-import com.weshare.service.api.entity.User;
-import com.weshare.service.api.entity.UserBaseReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.result.Result;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +25,12 @@ public interface LoanClient {
     @PostMapping("/tesPostUrl")
     Result tesPostUrl(@RequestBody User user);
 
-    @PostMapping("/saveAllLoanContract")
+    @PostMapping("/saveAllLoanContractAndLoanTransFlow")
     Result saveAllLoanContractAndLoanTransFlow(@RequestBody List<? extends LoanDetailReq> list);
+
+    @PostMapping("/saveAllLoanContract")
+    Result saveAllLoanContract(@RequestBody List<LoanContractReq> list);
+
+    @PostMapping("/saveAllLoanTransFlow")
+    Result saveAllLoanTransFlow(@RequestBody List<LoanTransFlowReq> list, @RequestParam("batchDate") String batchDate);
 }

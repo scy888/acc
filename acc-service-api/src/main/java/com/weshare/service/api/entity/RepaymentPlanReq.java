@@ -1,6 +1,8 @@
 package com.weshare.service.api.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
@@ -8,6 +10,8 @@ import java.time.LocalDate;
 
 @Data
 @Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class RepaymentPlanReq {
 
     private String dueBillNo;//借据号

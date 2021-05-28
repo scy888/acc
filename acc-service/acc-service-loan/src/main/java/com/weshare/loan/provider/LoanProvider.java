@@ -5,9 +5,7 @@ import com.weshare.loan.entity.*;
 import com.weshare.loan.enums.HashPrefix;
 import com.weshare.loan.repo.*;
 import com.weshare.service.api.client.LoanClient;
-import com.weshare.service.api.entity.LoanDetailReq;
-import com.weshare.service.api.entity.User;
-import com.weshare.service.api.entity.UserBaseReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.Md5Utils;
@@ -21,6 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.ValidationProviderResolver;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -175,8 +174,9 @@ public class LoanProvider implements LoanClient {
     @Override
     @Transactional
     @Async
+    @Deprecated(forRemoval = true)
     public Result saveAllLoanContractAndLoanTransFlow(List<? extends LoanDetailReq> list) {
-        log.info("saveAllLoanContractAndLoanTransFlow()方法的异步调用的线程名:{}",Thread.currentThread().getName());
+        log.info("saveAllLoanContractAndLoanTransFlow()方法的异步调用的线程名:{}", Thread.currentThread().getName());
         List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list.stream().distinct()
                 .map(LoanDetailReq::getDueBillNo).collect(Collectors.toList()));
         Map<String, LoanContract> map = loanContractList.stream().collect(Collectors.toMap(LoanContract::getDueBillNo, Function.identity(), (a, b) -> b));
@@ -229,6 +229,62 @@ public class LoanProvider implements LoanClient {
             );
         }
 
+        return Result.result(true);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public Result saveAllLoanContract(List<LoanContractReq> list) {
+        log.info("saveAllLoanContract()方法的异步调用的线程名:{}", Thread.currentThread().getName());
+        List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list.stream().distinct()
+                .map(LoanContractReq::getDueBillNo).collect(Collectors.toList()));
+        Map<String, LoanContract> map = loanContractList.stream().collect(Collectors.toMap(LoanContract::getDueBillNo, Function.identity(), (a, b) -> b));
+        for (LoanContractReq req : list) {
+            LocalDate batchDate = req.getBatchDate();
+            LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate.getYear()).withMonth(batchDate.getMonthValue()).withDayOfMonth(batchDate.getDayOfMonth());
+            LoanContract loanContract = Optional.ofNullable(map.get(req.getDueBillNo())).orElseGet(
+                    () -> new LoanContract().setId(SnowFlake.getInstance().nextId() + "")
+                            .setCreatedDate(localDateTime)
+            );
+            BeanUtils.copyProperties(req, loanContract);
+            loanContractRepo.save(loanContract
+                    .setLastModifiedDate(localDateTime)
+                    .setUserId(criticalDataHashRepo.findByDueBillNo(req.getDueBillNo()).getUserId()));
+        }
+        return Result.result(true);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public Result saveAllLoanTransFlow(List<LoanTransFlowReq> list, String batchDate) {
+        log.info("saveAllLoanTransFlow()方法的异步调用的线程名:{}", Thread.currentThread().getName());
+
+        List<String> dueBillNoList = list.stream().map(LoanTransFlowReq::getDueBillNo).collect(Collectors.toList());
+        LocalDate batchDate_ = LocalDate.parse(batchDate);
+        List<LoanTransFlow> loanTransFlows = loanTransFlowRepo.findByBatchDateAndDueBillNoIn(batchDate_, dueBillNoList);
+        Map<String, LoanTransFlow> map = loanTransFlows.stream().collect(Collectors.toMap(LoanTransFlow::getDueBillNo, Function.identity()));
+        for (LoanTransFlowReq req : list) {
+            Optional.ofNullable(map.get(req.getDueBillNo())).ifPresentOrElse(
+                    e -> loanTransFlowRepo.deleteByBatchDateAndDueBillNo(e.getBatchDate(), e.getDueBillNo()),
+                    () -> log.info("batchDate:{},借据号:{},不存在...", batchDate_, req.getDueBillNo()));
+        }
+        loanTransFlowRepo.saveAll(
+                list.stream().map(e -> {
+                    LoanTransFlow loanTransFlow = new LoanTransFlow();
+                    BeanUtils.copyProperties(e, loanTransFlow);
+                    LocalDate batchDate__ = e.getBatchDate();
+                    LocalDateTime localDateTime = LocalDateTime.now().withYear(batchDate__.getYear()).withMonth(batchDate__.getMonthValue()).withDayOfMonth(batchDate__.getDayOfMonth());
+                    BackCard backCard = backCardRepo.findByDueBillNo(e.getDueBillNo()).get(0);
+                    return loanTransFlow.setId(SnowFlake.getInstance().nextId() + "")
+                            .setBankAccountName(backCard.getBackName().name())
+                            .setBankAccountNo(backCard.getBackName().getNum())
+                            .setCreatedDate(localDateTime)
+                            .setLastModifiedDate(localDateTime);
+                }).collect(Collectors.toList())
+        );
+        int a = 5 / 0;
         return Result.result(true);
     }
 
