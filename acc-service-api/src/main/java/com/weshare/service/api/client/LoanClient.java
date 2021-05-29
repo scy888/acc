@@ -33,4 +33,7 @@ public interface LoanClient {
 
     @PostMapping("/saveAllLoanTransFlow")
     Result saveAllLoanTransFlow(@RequestBody List<LoanTransFlowReq> list, @RequestParam("batchDate") String batchDate);
+
+    @PostMapping("/findLoanContractByDueBillNoIn")
+    Result<List<LoanContractReq>> findLoanContractByDueBillNoIn(@RequestBody List<String> list);
 }

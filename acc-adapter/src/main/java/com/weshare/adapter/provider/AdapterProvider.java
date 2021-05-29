@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,7 +93,7 @@ public class AdapterProvider implements AdapterClient {
     }
 
     @Override
-    public void saveAllLoanContractAndLoanTransFlow(List<? extends LoanDetailReq> list, String batchDate) {
-        adapterService.saveAllLoanContractAndLoanTransFlow(list, batchDate);
+    public void saveAllLoanContractAndLoanTransFlowAndRepaySummary(List<? extends LoanDetailReq> list, String batchDate) {
+        adapterService.saveAllLoanContractAndLoanTransFlowAndRepaySummary(list, batchDate);
     }
 }

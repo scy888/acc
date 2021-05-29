@@ -1,8 +1,11 @@
 package com.weshare.service.api.client;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.weshare.service.api.entity.RepayPlanReq;
+import com.weshare.service.api.entity.RepaySummaryReq;
+import com.weshare.service.api.result.Result;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author: scyang
@@ -18,4 +21,13 @@ public interface RepayClient {
     @GetMapping("/getRepayClient/{repayClient}/{isInvoking}")
     String getRepayClient(@PathVariable("repayClient") String repayClient,
                           @PathVariable("isInvoking") Boolean isInvoking);
+
+    @PostMapping("/saveRepayPlan")
+    Result saveRepayPlan(@RequestBody List<RepayPlanReq> list);
+
+    @PostMapping("/saveRepaySummary")
+    Result saveRepaySummary(@RequestBody List<RepaySummaryReq> list);
+
+    @PostMapping("/findRepaySummaryByDueBillNoIn")
+    Result<List<RepaySummaryReq>> findRepaySummaryByDueBillNoIn(@RequestBody List<String> list);
 }

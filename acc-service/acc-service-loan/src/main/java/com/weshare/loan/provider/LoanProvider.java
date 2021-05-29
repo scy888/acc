@@ -9,6 +9,7 @@ import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.Md5Utils;
+import common.ReflectUtils;
 import common.SnowFlake;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -260,7 +261,6 @@ public class LoanProvider implements LoanClient {
     @Transactional
     public Result saveAllLoanTransFlow(List<LoanTransFlowReq> list, String batchDate) {
         log.info("saveAllLoanTransFlow()方法的异步调用的线程名:{}", Thread.currentThread().getName());
-
         List<String> dueBillNoList = list.stream().map(LoanTransFlowReq::getDueBillNo).collect(Collectors.toList());
         LocalDate batchDate_ = LocalDate.parse(batchDate);
         List<LoanTransFlow> loanTransFlows = loanTransFlowRepo.findByBatchDateAndDueBillNoIn(batchDate_, dueBillNoList);
@@ -289,6 +289,15 @@ public class LoanProvider implements LoanClient {
 //                }).collect(Collectors.toList())
 //        );
         return Result.result(true);
+    }
+
+    @Override
+    public Result<List<LoanContractReq>> findLoanContractByDueBillNoIn(List<String> list) {
+        List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list);
+        List<LoanContractReq> loanContractReqList = ReflectUtils.getBeanUtils(loanContractList, LoanContractReq.class);
+        Result result = Result.result(true, loanContractReqList);
+        return result;
+
     }
 
     private LoanTransFlow createLoanTransFlow(LoanTransFlowReq req) {

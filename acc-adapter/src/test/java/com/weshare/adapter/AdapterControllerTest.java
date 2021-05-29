@@ -3,6 +3,7 @@ package com.weshare.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
+import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.entity.UserBaseReq;
@@ -41,6 +42,8 @@ class AdapterControllerTest {
     private MongoTemplate mongoTemplate;
     @Autowired
     private AdapterClient adapterClient;
+    @Autowired
+    private AdapterService adapterService;
     @Autowired
     private AdapterDao adapterDao;
 
@@ -129,5 +132,6 @@ class AdapterControllerTest {
         );
 
         adapterClient.saveAllRepaymentPlan(repaymentPlanReqs);
+        adapterService.saveAllRepayPlan(repaymentPlanReqs);
     }
 }

@@ -27,6 +27,6 @@ public interface AdapterClient {
     @PostMapping("/saveAllRepaymentPlan")
     Result saveAllRepaymentPlan(@RequestBody List<? extends RepaymentPlanReq> list);
 
-    @PostMapping("/saveAllLoanContractAndLoanTransFlow/batch")
-    void saveAllLoanContractAndLoanTransFlow(@RequestBody List<? extends LoanDetailReq> list, @RequestParam("batchDate") String batchDate);
+    @PostMapping("/saveAllLoanContractAndLoanTransFlowAndRepaySummary/batch")
+    void saveAllLoanContractAndLoanTransFlowAndRepaySummary(@RequestBody List<? extends LoanDetailReq> list, @RequestParam("batchDate") String batchDate);
 }

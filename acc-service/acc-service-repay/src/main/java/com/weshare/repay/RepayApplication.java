@@ -2,8 +2,11 @@ package com.weshare.repay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @author: scyang
@@ -15,8 +18,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableJpaAuditing//自动加载时间的
-//@EnableDiscoveryClient
-//@EnableFeignClients(basePackages = "com.weshare")
+@EnableDiscoveryClient
+@EnableFeignClients
+//@EnableAsync
 public class RepayApplication {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();

@@ -4,18 +4,15 @@ import com.weshare.batch.controller.AsyncController;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.service.api.entity.LoanDetailReq;
-import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import common.ReflectUtils;
 import common.SnowFlake;
-import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -25,10 +22,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -126,7 +121,7 @@ public class BatchTest {
         Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
-        adapterFeignClient.saveAllLoanContractAndLoanTransFlow(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水
+        adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
 
         adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
     }

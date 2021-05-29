@@ -14,8 +14,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -124,5 +126,11 @@ public class DomeTest {
         UserBaseReq.ManReq manReq = new UserBaseReq.ManReq();
         BeanUtils.copyProperties(linkManReq,manReq);
         System.out.println(manReq);
+    }
+    @Test
+    public void test03(){
+        ArrayList<String> 数组越界了 = Optional.ofNullable(new ArrayList<String>()).orElseThrow(() -> new RuntimeException("数组越界了"));
+
+        System.out.println(数组越界了);
     }
 }

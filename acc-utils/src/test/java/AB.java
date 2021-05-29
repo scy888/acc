@@ -1,9 +1,11 @@
-package com.weshare.service.api.result;
-
+import common.ReflectUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+
+import java.util.ArrayList;
 
 /**
  * @author: scyang
@@ -31,5 +33,10 @@ public class AB {
         private String name;
         private String age;
         private String address;
+    }
+
+    @Test
+    public void test() {
+        System.out.println(ReflectUtils.getBeanUtils(new ArrayList<A>(), B.class));
     }
 }
