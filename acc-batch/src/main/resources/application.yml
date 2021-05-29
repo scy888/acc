@@ -8,7 +8,9 @@ spring:
 service:
   acc-adapter-service: ${spring.profiles.active}-acc-adapter
   acc-loan-service: ${spring.profiles.active}-acc-loan
+  acc-repay-service: ${spring.profiles.active}-acc-repay
 host:
   acc-adapter-host: 127.0.0.1:9001/adapter
   acc-loan-host: 127.0.0.1:9003/loan
+  acc-repay-host: 127.0.0.1:9004/repay
 

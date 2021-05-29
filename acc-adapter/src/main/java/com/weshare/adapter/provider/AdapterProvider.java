@@ -96,4 +96,9 @@ public class AdapterProvider implements AdapterClient {
     public void saveAllLoanContractAndLoanTransFlowAndRepaySummary(List<? extends LoanDetailReq> list, String batchDate) {
         adapterService.saveAllLoanContractAndLoanTransFlowAndRepaySummary(list, batchDate);
     }
+
+    @Override
+    public void saveAllRepayPlanUpdateLoanContractAndRepaySummary(List<? extends RepaymentPlanReq> list) {
+        adapterService.saveAllRepayPlanUpdateLoanContractAndRepaySummary(list);
+    }
 }

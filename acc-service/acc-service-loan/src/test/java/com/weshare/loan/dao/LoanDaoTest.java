@@ -52,4 +52,9 @@ class LoanDaoTest {
         Result result = loanClient.saveListUserBase(baseReqList);
         System.out.println(JsonUtil.toJson(result, true));
     }
+
+    @Test
+    public void currentTerm(){
+        loanClient.UpdateRepaySummaryCurrentTerm("WS121212","2020-05-15");
+    }
 }

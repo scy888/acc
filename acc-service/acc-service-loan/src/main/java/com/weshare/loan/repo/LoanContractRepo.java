@@ -14,4 +14,6 @@ import java.util.List;
  */
 public interface LoanContractRepo extends JpaRepository<LoanContract,String> {
     List<LoanContract> findByDueBillNoIn(List<String> dueBillNoList);
+
+    List<LoanContract> findByProjectNo(String projectNo);
 }

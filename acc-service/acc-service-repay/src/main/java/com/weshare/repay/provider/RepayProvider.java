@@ -8,20 +8,21 @@ import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.result.Result;
+import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import common.ReflectUtils;
 import common.SnowFlake;
+import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.diff.myers.Snake;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class RepayProvider implements RepayClient {
     private RepayPlanRepo repayPlanRepo;
     @Autowired
     private RepaySummaryRepo repaySummaryRepo;
+    private Integer pageSize = 1;
 
     @Override
     public String getRepayClient(String repayClient, Boolean isInvoking) {
@@ -98,5 +100,57 @@ public class RepayProvider implements RepayClient {
         List<RepaySummaryReq> summaryReqList = ReflectUtils.getBeanUtils(repaySummaryList, RepaySummaryReq.class);
         Result result = Result.result(true, summaryReqList);
         return result;
+    }
+
+    @Override
+    @Deprecated(forRemoval = true)
+    public Result RefreshRepaySummaryCurrentTerm(String projectNo, String batchDate) {
+
+        int countTotal = repaySummaryRepo.countByProjectNo(projectNo);
+        int pageTotal = (int) Math.ceil(countTotal * 1.0 / pageSize);
+
+        for (int pageNum = 1; pageNum <= pageTotal; pageNum++) {
+            Page<String> page = repaySummaryRepo.findByProjectNo(projectNo, PageRequest.of(pageNum - 1, pageSize));
+            List<String> dueBillNoList = page.getContent();
+            List<DueBillNoAndTermDueDate> list = repayPlanRepo.findByDueBillNoIn(dueBillNoList);
+            Map<String, List<DueBillNoAndTermDueDate>> map = list.stream().collect(Collectors.groupingBy(DueBillNoAndTermDueDate::getDueBillNo));
+            for (Map.Entry<String, List<DueBillNoAndTermDueDate>> entry : map.entrySet()) {
+                String dueBillNo = entry.getKey();
+                List<DueBillNoAndTermDueDate> dateList = entry.getValue();
+                LocalDate firstDate = dateList.stream().map(DueBillNoAndTermDueDate::getTermDueDate).min(LocalDate::compareTo).orElse(null);
+                LocalDate endDate = dateList.stream().map(DueBillNoAndTermDueDate::getTermDueDate).max(LocalDate::compareTo).orElse(null);
+                RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo(dueBillNo);
+                repaySummary.setCurrentTerm(StringUtils.getCurrentTerm(firstDate, endDate, LocalDate.parse(batchDate), dateList.size()));
+                Integer currentTerm = repaySummary.getCurrentTerm();
+                for (DueBillNoAndTermDueDate dueBillNoAndTermDueDate : dateList) {
+                    if (dueBillNoAndTermDueDate.getTerm().equals(currentTerm)) {
+                        repaySummary.setCurrentTermDueDate(dueBillNoAndTermDueDate.getTermDueDate());
+                        break;
+                    }
+                }
+                LocalDate localDate = LocalDate.parse(batchDate);
+                LocalDateTime localDateTime = LocalDateTime.now().withYear(localDate.getYear()).withMonth(localDate.getMonthValue()).withDayOfMonth(localDate.getDayOfMonth());
+                repaySummary.setLastModifiedDate(localDateTime);
+                repaySummaryRepo.save(repaySummary);
+            }
+        }
+
+        return Result.result(true);
+    }
+
+    @Override
+    public Result UpdateRepaySunnaryCurrentTerm(UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm) {
+        String batchDate = updateRepaySummaryCurrentTerm.getBatchDate();
+        Integer currentTerm = updateRepaySummaryCurrentTerm.getCurrentTerm();
+        String dueBillNo = updateRepaySummaryCurrentTerm.getDueBillNo();
+        LocalDate localDate = LocalDate.parse(batchDate);
+        LocalDateTime localDateTime = LocalDateTime.now().withYear(localDate.getYear()).withMonth(localDate.getMonthValue()).withDayOfMonth(localDate.getDayOfMonth());
+        RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo(dueBillNo);
+        repaySummary.setCurrentTerm(currentTerm);
+        repaySummary.setLastModifiedDate(localDateTime);
+        LocalDate termDueDate = repayPlanRepo.findByDueBillNoAndTerm(dueBillNo, currentTerm).getTermDueDate();
+        repaySummary.setCurrentTermDueDate(termDueDate);
+        repaySummaryRepo.save(repaySummary);
+        return Result.result(true);
     }
 }

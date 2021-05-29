@@ -3,24 +3,25 @@ package com.weshare.loan.provider;
 import com.weshare.loan.dao.LoanDao;
 import com.weshare.loan.entity.*;
 import com.weshare.loan.enums.HashPrefix;
+import com.weshare.loan.feignClient.RepayFeignClient;
 import com.weshare.loan.repo.*;
 import com.weshare.service.api.client.LoanClient;
+import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.Md5Utils;
 import common.ReflectUtils;
 import common.SnowFlake;
+import common.StringUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.ValidationProviderResolver;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +55,8 @@ public class LoanProvider implements LoanClient {
     private LoanContractRepo loanContractRepo;
     @Autowired
     private LoanTransFlowRepo loanTransFlowRepo;
+    @Autowired
+    private RepayFeignClient repayFeignClient;
     private String MD5 = "MD5";
 
     @Override
@@ -298,6 +301,21 @@ public class LoanProvider implements LoanClient {
         Result result = Result.result(true, loanContractReqList);
         return result;
 
+    }
+
+    @Override
+    public Result UpdateRepaySummaryCurrentTerm(String projectNo, String batchDate) {
+        List<LoanContract> loanContractList = loanContractRepo.findByProjectNo(projectNo);
+        for (LoanContract loanContract : loanContractList) {
+            String dueBillNo = loanContract.getDueBillNo();
+            LocalDate firstTermDueDate = loanContract.getFirstTermDueDate();
+            LocalDate lastTermDueDate = loanContract.getLastTermDueDate();
+            Integer totalTerm = loanContract.getTotalTerm();
+            repayFeignClient.UpdateRepaySunnaryCurrentTerm(new RepayClient.UpdateRepaySummaryCurrentTerm()
+            .setCurrentTerm(StringUtils.getCurrentTerm(firstTermDueDate,lastTermDueDate,LocalDate.parse(batchDate),totalTerm))
+            .setBatchDate(batchDate).setDueBillNo(dueBillNo));
+        }
+        return Result.result(true);
     }
 
     private LoanTransFlow createLoanTransFlow(LoanTransFlowReq req) {

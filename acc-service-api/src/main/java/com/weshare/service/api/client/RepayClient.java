@@ -3,6 +3,8 @@ package com.weshare.service.api.client;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.result.Result;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,4 +32,22 @@ public interface RepayClient {
 
     @PostMapping("/findRepaySummaryByDueBillNoIn")
     Result<List<RepaySummaryReq>> findRepaySummaryByDueBillNoIn(@RequestBody List<String> list);
+
+    @GetMapping("/RefreshRepaySummaryCurrentTerm/{projectNo}/{batchDate}")
+    Result RefreshRepaySummaryCurrentTerm(@PathVariable("projectNo") String projectNo,
+                                          @PathVariable("batchDate") String batchDate);
+
+    @PostMapping("/UpdateRepaySummaryCurrentTerm")
+    Result UpdateRepaySunnaryCurrentTerm(@RequestBody UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm);
+
+    @Data
+    @Accessors(chain = true)
+    class UpdateRepaySummaryCurrentTerm {
+
+        private String batchDate;
+        private String dueBillNo;
+        private Integer currentTerm;
+    }
+
+
 }

@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -132,6 +131,6 @@ class AdapterControllerTest {
         );
 
         adapterClient.saveAllRepaymentPlan(repaymentPlanReqs);
-        adapterService.saveAllRepayPlan(repaymentPlanReqs);
+        adapterService.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);
     }
 }

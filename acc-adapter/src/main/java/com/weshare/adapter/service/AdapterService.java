@@ -97,7 +97,7 @@ public class AdapterService {
         return Result.result(true);
     }
 
-    public Result saveAllRepayPlan(@RequestBody List<? extends RepaymentPlanReq> list) {
+    public Result saveAllRepayPlanUpdateLoanContractAndRepaySummary(@RequestBody List<? extends RepaymentPlanReq> list) {
 
         List<RepayPlanReq> planReqList = list.stream().map(e -> {
             RepayPlanReq planReq = new RepayPlanReq();

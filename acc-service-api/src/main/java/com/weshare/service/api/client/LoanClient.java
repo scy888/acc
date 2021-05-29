@@ -36,4 +36,8 @@ public interface LoanClient {
 
     @PostMapping("/findLoanContractByDueBillNoIn")
     Result<List<LoanContractReq>> findLoanContractByDueBillNoIn(@RequestBody List<String> list);
+
+    @GetMapping("/UpdateRepaySummaryCurrentTerm/{projectNo}/{batchDate}")
+    Result UpdateRepaySummaryCurrentTerm(@PathVariable("projectNo")String projectNo,
+                                         @PathVariable("batchDate")String batchDate);
 }

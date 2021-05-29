@@ -5,6 +5,7 @@ import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.service.api.entity.LoanDetailReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
+import com.weshare.service.api.enums.ProjectEnum;
 import common.ReflectUtils;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
@@ -124,5 +125,7 @@ public class BatchTest {
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
 
         adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
+        adapterFeignClient.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);//更新loan库的放款明细,repay库的用户主信息
+        loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(),batchDate.toString());//最后刷新repay_summary当前期数
     }
 }
