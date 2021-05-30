@@ -3,14 +3,12 @@ package com.weshare.adapter.service;
 import com.weshare.adapter.feignCilent.LoanFeignClient;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
 import com.weshare.service.api.entity.*;
-import com.weshare.service.api.enums.AssetStatusEnum;
-import com.weshare.service.api.enums.ProjectEnum;
-import com.weshare.service.api.enums.TermStatusEnum;
+import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
 import common.SnowFlake;
-import common.StringUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -146,6 +143,89 @@ public class AdapterService {
         loanFeignClient.saveAllLoanContract(contractReqList);
         repayFeignClient.saveRepaySummary(summaryReqList);
         return Result.result(true);
+    }
+
+    public Result saveRefundDownRepayTransFlowAndReceiptDetail(List<? extends RefundTicketReq> list, String batchDate) {
+        list = list.stream().filter(e -> e.getRefundStatus().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
+        for (RefundTicketReq refundTicketReq : list) {
+            //退票要根据还款计划拆分,只虚拟还本金,不还利息
+            List<RepayPlanReq> repayPlanReqList = repayFeignClient.findRepayPlanListByDueBillNo(refundTicketReq.getDueBillNo()).getData();
+            List<RepayTransFlowReq> repayTransFlowReqList = new ArrayList<>();
+            List<ReceiptDetailReq> receiptDetailReqList = new ArrayList<>();
+            for (RepayPlanReq repayPlanReq : repayPlanReqList) {
+                //生成虚拟还还款流水
+                RepayTransFlowReq repayTransFlow = getRepayTransFlow(refundTicketReq, repayPlanReq);
+                repayTransFlowReqList.add(repayTransFlow);
+                //生成虚拟实还记录
+                ReceiptDetailReq receiptDetailReq = getReceiptDetail(repayTransFlow, repayPlanReq.getTerm(), repayPlanReqList.size());
+                receiptDetailReqList.add(receiptDetailReq);
+            }
+            repayFeignClient.saveAllRepayTransFlow(repayTransFlowReqList, refundTicketReq.getBatchDate().toString());
+            repayFeignClient.saveAllReceiptDetail(receiptDetailReqList, refundTicketReq.getBatchDate().toString());
+            //更新还款计划
+            repayFeignClient.saveRepayPlan(repayPlanReqList.stream().map(e -> {
+                RepayPlanReq repayPlanReq = new RepayPlanReq();
+                BeanUtils.copyProperties(e, repayPlanReq);
+                return e.setTermRepayPrin(e.getTermPrin())
+                        .setRepayDate(refundTicketReq.getRefundDate().toLocalDate())
+                        .setTermStatus(TermStatusEnum.REPAID)
+                        .setRemark("退票只还本期本金")
+                        .setTermPaidOutType(TermPaidOutTypeEnum.REFUND_PAIDOUT)
+                        .setBatchDate(refundTicketReq.getBatchDate());
+            }).collect(Collectors.toList()));
+        }
+        //更新repay_summary
+        List<RepaySummaryReq> repaySummaryReqList = repayFeignClient.findRepaySummaryByDueBillNoIn(list.stream().map(RefundTicketReq::getDueBillNo)
+                .collect(Collectors.toList())).getData();
+        repayFeignClient.saveRepaySummary(
+                repaySummaryReqList.stream().map(e -> {
+                    RepaySummaryReq repaySummaryReq = new RepaySummaryReq();
+                    BeanUtils.copyProperties(e, repaySummaryReq);
+                    return repaySummaryReq
+                            .setAssetStatus(AssetStatusEnum.SETTLED)
+                            .setCurrentPaidOutDate(LocalDate.parse(batchDate))
+                            .setSettleDate(LocalDate.parse(batchDate))
+                            .setReturnTerm(e.getTotalTerm())
+                            .setRemainPrincipal(BigDecimal.ZERO)
+                            .setRemainInterest(BigDecimal.ZERO)
+                            .setSettleType(SettleTypeEnum.RETURN_SETTLE)
+                            .setRemark("退票结清")
+                            .setBatchDate(LocalDate.parse(batchDate));
+                }).collect(Collectors.toList())
+        );
+
+        return Result.result(true);
+    }
+
+    private ReceiptDetailReq getReceiptDetail(RepayTransFlowReq repayTransFlow, int term, int totalTerm) {
+
+        return new ReceiptDetailReq()
+                .setProductNo(repayTransFlow.getProductNo())
+                .setProjectNo(repayTransFlow.getProjectNo())
+                .setDueBillNo(repayTransFlow.getDueBillNo())
+                .setTotalTerm(totalTerm)
+                .setTerm(term)
+                .setAmount(repayTransFlow.getTransAmount())
+                .setFeeType(FeeTypeEnum.PRICINPAL)
+                .setReceiptType(ReceiptTypeEnum.REFUND)
+                .setFlowSn(repayTransFlow.getFlowSn())
+                .setRepayDate(repayTransFlow.getTransTime().toLocalDate())
+                .setRemark("退票结清")
+                .setBatchDate(repayTransFlow.getBatchDate());
+    }
+
+    private RepayTransFlowReq getRepayTransFlow(RefundTicketReq refundTicketReq, RepayPlanReq repayPlanReq) {
+        return new RepayTransFlowReq()
+                .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                .setFlowSn(SnowFlake.getInstance().nextId() + "")
+                .setDueBillNo(refundTicketReq.getDueBillNo())
+                .setTransFlowType(TransFlowTypeEnum.退票.name())
+                .setTransAmount(repayPlanReq.getTermPrin())
+                .setTransTime(refundTicketReq.getRefundDate())
+                .setTransStatus("成功")
+                .setRemark("退票")
+                .setBatchDate(refundTicketReq.getBatchDate());
     }
 
     @Getter

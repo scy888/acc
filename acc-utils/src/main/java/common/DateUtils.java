@@ -17,36 +17,42 @@ import java.time.format.DateTimeFormatter;
  */
 @Data
 public class DateUtils {
-    private final String PATTERN_ONE="yyyy-MM-dd";
-    private final String PATTERN_TWO="yyyy年MM月dd日";
-    private final String PATTERN_THREE="yyyyMMdd";
-    private final String PATTERN_FOUR="yyyyMMddHHmmss";
-    private final String PATTERN_FIVE="yyyy-MM-dd HH:mm:ss";
-    private final String PATTERN_SIX="yyyy年MM月dd日 HH时mm分ss秒";
+    private final String PATTERN_ONE = "yyyy-MM-dd";
+    private final String PATTERN_TWO = "yyyy年MM月dd日";
+    private final String PATTERN_THREE = "yyyyMMdd";
+    private final String PATTERN_FOUR = "yyyyMMddHHmmss";
+    private final String PATTERN_FIVE = "yyyy-MM-dd HH:mm:ss";
+    private final String PATTERN_SIX = "yyyy年MM月dd日 HH时mm分ss秒";
 
-    public String getDateStr(int year,int month,int day,String pattern){
+    public String getDateStr(int year, int month, int day, String pattern) {
         String dateStr = LocalDate.of(year, month, day).format(DateTimeFormatter.ofPattern(pattern));
         return dateStr;
     }
 
-    public String getDateStr(int year,int month,int day,int hour,int minute,int second, String pattern){
-        String dateStr = LocalDateTime.of(year, month,day ,hour , minute,second ).format(DateTimeFormatter.ofPattern(pattern));
+    public String getDateStr(int year, int month, int day, int hour, int minute, int second, String pattern) {
+        String dateStr = LocalDateTime.of(year, month, day, hour, minute, second).format(DateTimeFormatter.ofPattern(pattern));
 
         return dateStr;
     }
 
-    public LocalDate getLocalDate(String dateStr,String pattern){
+    public LocalDate getLocalDate(String dateStr, String pattern) {
         LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
         return localDate;
     }
 
-    public LocalDateTime getLocalDateTime(String dateStr,String pattern){
+    public LocalDateTime getLocalDateTime(String dateStr, String pattern) {
         LocalDateTime localDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
         return localDateTime;
     }
 
+    public static LocalDateTime getLocalDateTime(LocalDate localDate) {
+        return LocalDateTime.now().withYear(localDate.getYear())
+                .withMonth(localDate.getMonthValue())
+                .withDayOfMonth(localDate.getDayOfMonth());
+    }
+
     @Test
-    public void test01(){
+    public void test01() {
         DateUtils dateUtils = new DateUtils();
         System.out.println(dateUtils.getDateStr(2020, 7, 5, dateUtils.PATTERN_ONE));
         System.out.println(dateUtils.getDateStr(2020, 7, 5, dateUtils.PATTERN_TWO));
@@ -63,5 +69,10 @@ public class DateUtils {
         System.out.println(dateUtils.getLocalDateTime("2020年07月05日 15时35分36秒", dateUtils.PATTERN_SIX));
         System.out.println(dateUtils.getLocalDateTime("20200705153536", dateUtils.PATTERN_FOUR));
 
+    }
+
+    @Test
+    public void test02(){
+        System.out.println(getLocalDateTime(LocalDate.parse("1991-01-16")));
     }
 }

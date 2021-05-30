@@ -1,6 +1,7 @@
 package com.weshare.service.api.client;
 
 import com.weshare.service.api.entity.LoanDetailReq;
+import com.weshare.service.api.entity.RefundTicketReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.result.Result;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,6 @@ public interface AdapterClient {
     @PostMapping("/saveAllLoanDetail")
     Result saveAllLoanDetail(@RequestBody List<? extends LoanDetailReq> list);
 
-
     @PostMapping("/saveAllRepaymentPlan")
     Result saveAllRepaymentPlan(@RequestBody List<? extends RepaymentPlanReq> list);
 
@@ -32,4 +32,7 @@ public interface AdapterClient {
 
     @PostMapping("/saveAllRepayPlanUpdateLoanContractAndRepaySummary")
     void saveAllRepayPlanUpdateLoanContractAndRepaySummary(@RequestBody List<? extends RepaymentPlanReq> list);
+
+    @PostMapping("/saveAllRefundTicket")
+    Result saveAllRefundTicket(@RequestBody List<? extends RefundTicketReq> list);
 }

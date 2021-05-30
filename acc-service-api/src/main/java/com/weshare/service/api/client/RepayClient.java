@@ -1,7 +1,9 @@
 package com.weshare.service.api.client;
 
+import com.weshare.service.api.entity.ReceiptDetailReq;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
+import com.weshare.service.api.entity.RepayTransFlowReq;
 import com.weshare.service.api.result.Result;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -38,7 +40,16 @@ public interface RepayClient {
                                           @PathVariable("batchDate") String batchDate);
 
     @PostMapping("/UpdateRepaySummaryCurrentTerm")
-    Result UpdateRepaySunnaryCurrentTerm(@RequestBody UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm);
+    Result UpdateRepaySummaryCurrentTerm(@RequestBody UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm);
+
+    @PostMapping("/saveAllRepayTransFlow")
+    Result saveAllRepayTransFlow(@RequestBody List<RepayTransFlowReq> list,@RequestParam("batchDate")String batchDate);
+
+    @PostMapping("/saveAllReceiptDetail")
+    Result saveAllReceiptDetail(@RequestBody List<ReceiptDetailReq> list,@RequestParam("batchDate")String batchDate);
+
+    @GetMapping("/findRepayPlanListByDueBillNo/{dueBillNo}")
+    Result<List<RepayPlanReq>> findRepayPlanListByDueBillNo(@PathVariable("dueBillNo")String dueBillNo);
 
     @Data
     @Accessors(chain = true)

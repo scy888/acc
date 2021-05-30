@@ -1,7 +1,10 @@
 package com.weshare.adapter.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -16,6 +19,9 @@ import java.time.LocalDateTime;
  * @describe:
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Accessors(chain = true)
 @Entity
 @Table(indexes = {@Index(name = "refund_ticket_du_bill_no_refund_status", unique = true, columnList = "dueBillNo,refundStatus")})
 @org.hibernate.annotations.Table(appliesTo = "refund_ticket", comment = "退票文件")

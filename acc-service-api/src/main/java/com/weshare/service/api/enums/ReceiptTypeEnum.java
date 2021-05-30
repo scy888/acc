@@ -16,7 +16,8 @@ public enum ReceiptTypeEnum {
     NORMAL("正常还款"),
     PRE("提前结清"),
     OVERDUE("逾期还款"),
-    REDUCE("减免");
+    REDUCE("减免"),
+    REFUND("退票");
 
     private String desc;
 

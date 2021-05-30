@@ -20,4 +20,6 @@ public interface RepayPlanRepo extends JpaRepository<RepayPlan, String> {
 
     @Query("select new com.weshare.service.api.vo.DueBillNoAndTermDueDate(t.dueBillNo,t.term,t.termDueDate) from #{#entityName} t where t.dueBillNo in :dueBillNoList")
     List<DueBillNoAndTermDueDate> findByDueBillNoIn(@Param("dueBillNoList") List<String> dueBillNoList);
+
+    List<RepayPlan> findByDueBillNo(String dueBillNo);
 }

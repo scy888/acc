@@ -5,8 +5,10 @@ import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
+import com.weshare.service.api.entity.RefundTicketReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.entity.UserBaseReq;
+import common.DateUtils;
 import common.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -132,5 +134,16 @@ class AdapterControllerTest {
 
         adapterClient.saveAllRepaymentPlan(repaymentPlanReqs);
         adapterService.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);
+    }
+
+    @Test
+    public void saveAllRefundTicketTest() {
+        LocalDate batchDate = LocalDate.parse("2020-05-30");
+        List<RefundTicketReq> refundTicketReqs = List.of(
+                new RefundTicketReq("YX-101", new BigDecimal(1200), LocalDate.parse("2020-05-15"), "02", "6217 0028 7001 5622 705", DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RefundTicketReq("YX-101", new BigDecimal(1200), LocalDate.parse("2020-05-15"), "01", "6217 0028 7001 5622 705", DateUtils.getLocalDateTime(batchDate), batchDate)
+        );
+        adapterClient.saveAllRefundTicket(refundTicketReqs);
+        adapterService.saveRefundDownRepayTransFlowAndReceiptDetail(refundTicketReqs, batchDate.toString());
     }
 }

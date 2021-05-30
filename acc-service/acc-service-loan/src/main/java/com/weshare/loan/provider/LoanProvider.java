@@ -311,7 +311,7 @@ public class LoanProvider implements LoanClient {
             LocalDate firstTermDueDate = loanContract.getFirstTermDueDate();
             LocalDate lastTermDueDate = loanContract.getLastTermDueDate();
             Integer totalTerm = loanContract.getTotalTerm();
-            repayFeignClient.UpdateRepaySunnaryCurrentTerm(new RepayClient.UpdateRepaySummaryCurrentTerm()
+            repayFeignClient.UpdateRepaySummaryCurrentTerm(new RepayClient.UpdateRepaySummaryCurrentTerm()
             .setCurrentTerm(StringUtils.getCurrentTerm(firstTermDueDate,lastTermDueDate,LocalDate.parse(batchDate),totalTerm))
             .setBatchDate(batchDate).setDueBillNo(dueBillNo));
         }

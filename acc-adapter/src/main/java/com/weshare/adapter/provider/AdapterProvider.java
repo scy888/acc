@@ -2,14 +2,19 @@ package com.weshare.adapter.provider;
 
 import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.LoanDetail;
+import com.weshare.adapter.entity.RefundTicket;
 import com.weshare.adapter.entity.RepaymentPlan;
 import com.weshare.adapter.repo.LoanDetailRepo;
+import com.weshare.adapter.repo.RefundTicketRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.LoanDetailReq;
+import com.weshare.service.api.entity.RefundTicketReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
+import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.ChangeEnumUtils;
+import common.DateUtils;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -39,6 +44,8 @@ public class AdapterProvider implements AdapterClient {
 
     @Autowired
     private LoanDetailRepo loanDetailRepo;
+    @Autowired
+    private RefundTicketRepo refundTicketRepo;
     @Autowired
     private AdapterService adapterService;
     @Autowired
@@ -100,5 +107,23 @@ public class AdapterProvider implements AdapterClient {
     @Override
     public void saveAllRepayPlanUpdateLoanContractAndRepaySummary(List<? extends RepaymentPlanReq> list) {
         adapterService.saveAllRepayPlanUpdateLoanContractAndRepaySummary(list);
+    }
+
+    @Override
+    public Result saveAllRefundTicket(List<? extends RefundTicketReq> list) {
+        for (RefundTicketReq refundTicketReq : list) {
+            String dueBillNo = refundTicketReq.getDueBillNo();
+            RefundTicket.RefundStatusEnum refundStatus = ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(),
+                    "refundStatus", refundTicketReq.getRefundStatus(), RefundTicket.RefundStatusEnum.class);
+            RefundTicket refundTicket = refundTicketRepo.findByDueBillNoAndRefundStatus(dueBillNo, refundStatus);
+            refundTicket = Optional.ofNullable(refundTicket).orElseGet(() ->
+                    new RefundTicket().setId(SnowFlake.getInstance().nextId() + "")
+                            .setCreateDate(DateUtils.getLocalDateTime(refundTicketReq.getBatchDate()))
+                            .setRefundStatus(refundStatus));
+            BeanUtils.copyProperties(refundTicketReq, refundTicket, "refundStatus");
+            refundTicketRepo.save(refundTicket
+                    .setLastModifiedDate(DateUtils.getLocalDateTime(refundTicketReq.getBatchDate())));
+        }
+        return Result.result(true);
     }
 }

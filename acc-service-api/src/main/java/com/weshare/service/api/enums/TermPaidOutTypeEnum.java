@@ -14,7 +14,8 @@ public enum TermPaidOutTypeEnum {
 
     PRE_PAIDOUT("提前还清本期"),
     NORMAL_PAIDOUT("正常还清本期"),
-    OVERDUE_PAIDOUT("逾期还清本期");
+    OVERDUE_PAIDOUT("逾期还清本期"),
+    REFUND_PAIDOUT("退票还清本期");
 
     private String desc;
 

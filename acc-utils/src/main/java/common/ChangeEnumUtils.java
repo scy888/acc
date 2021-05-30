@@ -32,7 +32,17 @@ public enum ChangeEnumUtils {
             new TransferEnum("debitType", "02", "提前结清扣款"),
 
             new TransferEnum("refundStatus", "01", "退票成功"),
-            new TransferEnum("refundStatus", "02", "退票失败")
+            new TransferEnum("refundStatus", "02", "退票失败"),
+
+            new TransferEnum("transFlowType", "主动还款", "主动还款"),
+            new TransferEnum("transFlowType", "退票", "退票"),
+            new TransferEnum("transFlowType", "逾期还款", "逾期还款"),
+            new TransferEnum("transFlowType", "减免", "减免"),
+
+            new TransferEnum("transStatus", "成功", "成功"),
+            new TransferEnum("transStatus", "失败", "失败"),
+            new TransferEnum("transStatus", "已退票", "已退票")
+
 
     ));
 

@@ -1,23 +1,31 @@
 package com.weshare.repay.provider;
 
+import com.weshare.repay.entity.ReceiptDetail;
 import com.weshare.repay.entity.RepayPlan;
 import com.weshare.repay.entity.RepaySummary;
+import com.weshare.repay.entity.RepayTransFlow;
+import com.weshare.repay.repo.ReceiptDetailRepo;
 import com.weshare.repay.repo.RepayPlanRepo;
 import com.weshare.repay.repo.RepaySummaryRepo;
+import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
+import com.weshare.service.api.entity.ReceiptDetailReq;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
+import com.weshare.service.api.entity.RepayTransFlowReq;
+import com.weshare.service.api.enums.ProjectEnum;
+import com.weshare.service.api.enums.TransFlowTypeEnum;
+import com.weshare.service.api.enums.TransStatusEnum;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
-import common.ReflectUtils;
-import common.SnowFlake;
-import common.StringUtils;
+import common.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -40,6 +48,10 @@ public class RepayProvider implements RepayClient {
     private RepayPlanRepo repayPlanRepo;
     @Autowired
     private RepaySummaryRepo repaySummaryRepo;
+    @Autowired
+    private RepayTransFlowRepo repayTransFlowRepo;
+    @Autowired
+    private ReceiptDetailRepo receiptDetailRepo;
     private Integer pageSize = 1;
 
     @Override
@@ -139,7 +151,7 @@ public class RepayProvider implements RepayClient {
     }
 
     @Override
-    public Result UpdateRepaySunnaryCurrentTerm(UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm) {
+    public Result UpdateRepaySummaryCurrentTerm(UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm) {
         String batchDate = updateRepaySummaryCurrentTerm.getBatchDate();
         Integer currentTerm = updateRepaySummaryCurrentTerm.getCurrentTerm();
         String dueBillNo = updateRepaySummaryCurrentTerm.getDueBillNo();
@@ -152,5 +164,51 @@ public class RepayProvider implements RepayClient {
         repaySummary.setCurrentTermDueDate(termDueDate);
         repaySummaryRepo.save(repaySummary);
         return Result.result(true);
+    }
+
+    @Override
+    @Transactional
+    public Result saveAllRepayTransFlow(List<RepayTransFlowReq> list, String batchDate) {
+        repayTransFlowRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse(batchDate), list.stream().map(RepayTransFlowReq::getDueBillNo)
+                .collect(Collectors.toList()));
+        repayTransFlowRepo.saveAll(
+                list.stream().map(e -> {
+                            RepayTransFlow repayTransFlow = new RepayTransFlow();
+                            BeanUtils.copyProperties(e, repayTransFlow);
+                            return repayTransFlow.setId(SnowFlake.getInstance().nextId() + "")
+                                    .setTransFlowType(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(), "transFlowType", e.getTransFlowType(), TransFlowTypeEnum.class))
+                                    .setTransStatus(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(), "transStatus", e.getTransStatus(), TransStatusEnum.class))
+                                    .setCreatedDate(DateUtils.getLocalDateTime(e.getBatchDate()))
+                                    .setLastModifiedDate(DateUtils.getLocalDateTime(e.getBatchDate()));
+                        }
+                ).collect(Collectors.toList())
+        );
+        return Result.result(true);
+    }
+
+    @Override
+    public Result saveAllReceiptDetail(List<ReceiptDetailReq> list, String batchDate) {
+        receiptDetailRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse(batchDate), list.stream().map(ReceiptDetailReq::getDueBillNo)
+                .collect(Collectors.toList()));
+
+        receiptDetailRepo.saveAll(
+                list.stream().map(e -> {
+                    ReceiptDetail receiptDetail = new ReceiptDetail();
+                    BeanUtils.copyProperties(e, receiptDetail);
+                    return receiptDetail
+                            .setId(SnowFlake.getInstance().nextId() + "")
+                            .setCreatedDate(DateUtils.getLocalDateTime(e.getBatchDate()))
+                            .setLastModifiedDate(DateUtils.getLocalDateTime(e.getBatchDate()));
+                }).collect(Collectors.toList())
+        );
+        return Result.result(true);
+    }
+
+    @Override
+    public Result<List<RepayPlanReq>> findRepayPlanListByDueBillNo(String dueBillNo) {
+        List<RepayPlan> repayPlanList = repayPlanRepo.findByDueBillNo(dueBillNo);
+        List<RepayPlanReq> repayPlanReqList = ReflectUtils.getBeanUtils(repayPlanList, RepayPlanReq.class);
+        Result result = Result.result(true, repayPlanReqList);
+        return result;
     }
 }
