@@ -24,6 +24,8 @@ public enum ChangeEnumUtils {
             new TransferEnum("loanStatus", "01", "成功"),
             new TransferEnum("loanStatus", "02", "失败"),
 
+            new TransferEnum("loanStatusEnum", "01", "SUCCESS"),
+
             new TransferEnum("transactionResult", "01", "成功"),
             new TransferEnum("transactionResult", "02", "失败"),
             new TransferEnum("transactionResult", "03", "处理中"),

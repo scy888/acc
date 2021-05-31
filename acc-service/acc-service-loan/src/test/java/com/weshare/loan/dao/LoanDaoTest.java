@@ -54,7 +54,16 @@ class LoanDaoTest {
     }
 
     @Test
-    public void currentTerm(){
-        loanClient.UpdateRepaySummaryCurrentTerm("WS121212","2020-05-15");
+    public void currentTerm() {
+        loanClient.UpdateRepaySummaryCurrentTerm("WS121212", "2020-05-15");
+    }
+
+    @Test
+    public void testUpdateStatus() {
+        loanClient.UpdateLoanContractStatus(
+                List.of(new LoanClient.UpdateLoanContractStatus()
+                        .setBatchDate("2021-05-30")
+                        .setDueBillNo("YX-101"))
+        );
     }
 }

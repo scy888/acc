@@ -8,12 +8,10 @@ import com.weshare.loan.repo.*;
 import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.*;
+import com.weshare.service.api.enums.LoanStatusEnum;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
-import common.Md5Utils;
-import common.ReflectUtils;
-import common.SnowFlake;
-import common.StringUtils;
+import common.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -267,9 +265,9 @@ public class LoanProvider implements LoanClient {
         List<String> dueBillNoList = list.stream().map(LoanTransFlowReq::getDueBillNo).collect(Collectors.toList());
         LocalDate batchDate_ = LocalDate.parse(batchDate);
         List<LoanTransFlow> loanTransFlows = loanTransFlowRepo.findByBatchDateAndDueBillNoIn(batchDate_, dueBillNoList);
-        Map<String, LoanTransFlow> map = loanTransFlows.stream().collect(Collectors.toMap(LoanTransFlow::getDueBillNo, Function.identity()));
+        Map<String, LoanTransFlow> map = loanTransFlows.stream().collect(Collectors.toMap(e->e.getDueBillNo()+"_"+e.getBatchDate(), Function.identity()));
         for (LoanTransFlowReq req : list) {
-            Optional.ofNullable(map.get(req.getDueBillNo())).ifPresentOrElse(
+            Optional.ofNullable(map.get(req.getDueBillNo()+"_"+req.getBatchDate())).ifPresentOrElse(
                     e -> loanTransFlowRepo.deleteByBatchDateAndDueBillNo(e.getBatchDate(), e.getDueBillNo()),
                     () -> log.info("batchDate:{},借据号:{},不存在...", batchDate_, req.getDueBillNo()));
 
@@ -312,8 +310,29 @@ public class LoanProvider implements LoanClient {
             LocalDate lastTermDueDate = loanContract.getLastTermDueDate();
             Integer totalTerm = loanContract.getTotalTerm();
             repayFeignClient.UpdateRepaySummaryCurrentTerm(new RepayClient.UpdateRepaySummaryCurrentTerm()
-            .setCurrentTerm(StringUtils.getCurrentTerm(firstTermDueDate,lastTermDueDate,LocalDate.parse(batchDate),totalTerm))
-            .setBatchDate(batchDate).setDueBillNo(dueBillNo));
+                    .setCurrentTerm(StringUtils.getCurrentTerm(firstTermDueDate, lastTermDueDate, LocalDate.parse(batchDate), totalTerm))
+                    .setBatchDate(batchDate).setDueBillNo(dueBillNo));
+        }
+        return Result.result(true);
+    }
+
+    @Override
+    public Result UpdateLoanContractStatus(List<UpdateLoanContractStatus> list) {
+
+        List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list.stream().map(UpdateLoanContractStatus::getDueBillNo)
+                .collect(Collectors.toList()));
+        for (UpdateLoanContractStatus status : list) {
+            for (LoanContract contract : loanContractList) {
+                if (status.getDueBillNo().equals(contract.getDueBillNo())) {
+                    loanContractRepo.save(contract
+                            .setBatchDate(LocalDate.parse(status.getBatchDate()))
+                            .setLoanStatusEnum(LoanStatusEnum.REFUND)
+                            .setLastModifiedDate(DateUtils.getLocalDateTime(LocalDate.parse(status.getBatchDate())))
+                            .setRemark("已退票")
+                    );
+                    break;
+                }
+            }
         }
         return Result.result(true);
     }

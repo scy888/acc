@@ -2,6 +2,9 @@ package com.weshare.service.api.client;
 
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.result.Result;
+import lombok.Data;
+import lombok.Value;
+import lombok.experimental.Accessors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +41,16 @@ public interface LoanClient {
     Result<List<LoanContractReq>> findLoanContractByDueBillNoIn(@RequestBody List<String> list);
 
     @GetMapping("/UpdateRepaySummaryCurrentTerm/{projectNo}/{batchDate}")
-    Result UpdateRepaySummaryCurrentTerm(@PathVariable("projectNo")String projectNo,
-                                         @PathVariable("batchDate")String batchDate);
+    Result UpdateRepaySummaryCurrentTerm(@PathVariable("projectNo") String projectNo,
+                                         @PathVariable("batchDate") String batchDate);
+
+    @PostMapping("/UpdateLoanContractStatus")
+    Result UpdateLoanContractStatus(@RequestBody List<UpdateLoanContractStatus> list);
+
+    @Data
+    @Accessors(chain = true)
+    class UpdateLoanContractStatus {
+        private String dueBillNo;
+        private String batchDate;
+    }
 }

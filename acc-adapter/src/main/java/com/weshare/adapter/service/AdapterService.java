@@ -2,9 +2,12 @@ package com.weshare.adapter.service;
 
 import com.weshare.adapter.feignCilent.LoanFeignClient;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
+import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
+import common.ChangeEnumUtils;
+import common.DateUtils;
 import common.SnowFlake;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,7 @@ public class AdapterService {
                             .setProjectNo(ProjectEnum.YXMS.getProjectNo())
                             .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
                             .setProductName(ProjectEnum.getProductName(loanContractReq.getProjectNo(), loanContractReq.getProductNo()))
+                            .setLoanStatusEnum(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(), "loanStatusEnum", req.getLoanStatus(), LoanStatusEnum.class))
                             .setContractAmount(req.getLoanAmount())
                             .setInterestRate(new BigDecimal("0.02"))
                             .setTotalTerm(req.getTerm())
@@ -193,7 +197,25 @@ public class AdapterService {
                             .setBatchDate(LocalDate.parse(batchDate));
                 }).collect(Collectors.toList())
         );
-
+        //修改loan_contract表的放款状态
+        loanFeignClient.UpdateLoanContractStatus(
+                list.stream().map(e -> new LoanClient.UpdateLoanContractStatus()
+                        .setBatchDate(e.getBatchDate().toString())
+                        .setDueBillNo(e.getDueBillNo())
+                ).collect(Collectors.toList())
+        );
+        //新增一条放款流水
+        loanFeignClient.saveAllLoanTransFlow(
+                list.stream().map(e -> new LoanTransFlowReq()
+                        .setBatchDate(e.getBatchDate())
+                        .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                        .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                        .setDueBillNo(e.getDueBillNo())
+                        .setFlowSn(SnowFlake.getInstance().nextId() + "")
+                        .setTransAmount(e.getLoanAmount())
+                        .setRemark("退票还款流水")
+                        .setTransTime(DateUtils.getLocalDateTime(e.getBatchDate()))
+                ).collect(Collectors.toList()), batchDate);
         return Result.result(true);
     }
 

@@ -1,5 +1,6 @@
 package com.weshare.service.api.entity;
 
+import com.weshare.service.api.enums.LoanStatusEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -34,6 +35,8 @@ public class LoanContractReq {
     private Integer totalTerm;//贷款总期数
 
     private Integer repayDay;//每月还款日
+
+    private LoanStatusEnum loanStatusEnum;
 
     private LocalDate firstTermDueDate;//第一期应还日期
 

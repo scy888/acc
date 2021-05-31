@@ -1,13 +1,11 @@
 package com.weshare.loan.entity;
 
+import com.weshare.service.api.enums.LoanStatusEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.Table;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,6 +54,10 @@ public class LoanContract {
 
     @Column(columnDefinition = "int(4) null comment '每月还款日'")
     private Integer repayDay;
+
+    @Column(columnDefinition = "varchar(10) null comment '贷款状态'")
+    @Enumerated(EnumType.STRING)
+    private LoanStatusEnum loanStatusEnum;
 
     @Column(columnDefinition = "date null comment '第一期应还日期' ")
     private LocalDate firstTermDueDate;

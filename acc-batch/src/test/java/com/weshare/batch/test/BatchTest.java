@@ -115,7 +115,8 @@ public class BatchTest {
         List<String> repaymentList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundList = new ArrayList<RefundTicketReq>().stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        ArrayList<RefundTicketReq> refundTicketReqs = new ArrayList<>();
+        List<String> refundList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         refundList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
 
         List<String> repayTransFlowList = new ArrayList<RepayTransFlowReq>().stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
@@ -144,6 +145,10 @@ public class BatchTest {
 
         adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
         adapterFeignClient.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);//更新loan库的放款明细,repay库的用户主信息
+
+        adapterFeignClient.saveAllRefundTicket(refundTicketReqs);//报存adapter库的退票文件
+        adapterFeignClient.saveRefundDownRepayTransFlowAndReceiptDetail(refundTicketReqs, batchDate.toString());//保存实还更新还款计划(用户还款主信息,放款主信息,新增放款流水)
+
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
     }
 
@@ -197,7 +202,8 @@ public class BatchTest {
         adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
         adapterFeignClient.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);//更新loan库的放款明细,repay库的用户主信息
 
-
+        adapterFeignClient.saveAllRefundTicket(refundTicketReqs);//报存adapter库的退票文件
+        adapterFeignClient.saveRefundDownRepayTransFlowAndReceiptDetail(refundTicketReqs, batchDate.toString());//保存实还更新还款计划(用户还款主信息,放款主信息,新增放款流水)
 
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
     }

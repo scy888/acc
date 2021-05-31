@@ -5,6 +5,7 @@ import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
+import com.weshare.service.api.entity.RebackDetailReq;
 import com.weshare.service.api.entity.RefundTicketReq;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.entity.UserBaseReq;
@@ -145,5 +146,16 @@ class AdapterControllerTest {
         );
         adapterClient.saveAllRefundTicket(refundTicketReqs);
         adapterService.saveRefundDownRepayTransFlowAndReceiptDetail(refundTicketReqs, batchDate.toString());
+    }
+
+    @Test
+    public void saveAllRebackDetailAndRepaymentDetail0615Test() {
+        LocalDate batchDate = LocalDate.parse("2020-06-15");
+        List<RebackDetailReq> rebackDetailReqs = List.of(
+                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.身份证号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.银行卡号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "01", RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate)
+        );
     }
 }

@@ -35,4 +35,8 @@ public interface AdapterClient {
 
     @PostMapping("/saveAllRefundTicket")
     Result saveAllRefundTicket(@RequestBody List<? extends RefundTicketReq> list);
+
+    @PostMapping("/saveRefundDownRepayTransFlowAndReceiptDetail/batch")
+    void saveRefundDownRepayTransFlowAndReceiptDetail(@RequestBody List<? extends RefundTicketReq> list, @RequestParam("batchDate") String batchDate);
+
 }
