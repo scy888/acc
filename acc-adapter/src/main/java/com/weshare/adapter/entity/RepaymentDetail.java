@@ -27,7 +27,7 @@ public class RepaymentDetail {
     @Column(columnDefinition = "varchar(32) not null comment '借据号'")
     private String dueBillNo;
 
-    @Column(columnDefinition = "varchar(2) not null comment '扣款类型 01-正常扣款,02-提前结清扣款'")
+    @Column(columnDefinition = "varchar(10) not null comment '扣款类型 01-正常扣款,02-提前结清扣款'")
     @Enumerated(EnumType.STRING)
     private DebitTypeEnum debitType;
 
@@ -46,6 +46,9 @@ public class RepaymentDetail {
     @Column(columnDefinition = "decimal(12,2) default 0.00 comment '利息(元)'")
     private BigDecimal interest;
 
+    @Column(columnDefinition = "decimal(12,2) default 0.00 comment '减免利息(元)'")
+    private BigDecimal reduceInterest;
+
     @Column(columnDefinition = "decimal(12,2) default 0.00 comment '罚息(元)'")
     private BigDecimal Penalty;
 
@@ -61,7 +64,11 @@ public class RepaymentDetail {
     @Getter
     public enum DebitTypeEnum {
        正常扣款("01"),
-       提前结清扣款("02");
+       提前结清扣款("02"),
+       逾期扣款("03"),
+       减免扣款("04"),
+       退票扣款("05");
+
 
        private String code;
 

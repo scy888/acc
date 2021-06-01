@@ -1,8 +1,6 @@
 package com.weshare.service.api.client;
 
-import com.weshare.service.api.entity.LoanDetailReq;
-import com.weshare.service.api.entity.RefundTicketReq;
-import com.weshare.service.api.entity.RepaymentPlanReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.result.Result;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,5 +36,11 @@ public interface AdapterClient {
 
     @PostMapping("/saveRefundDownRepayTransFlowAndReceiptDetail/batch")
     void saveRefundDownRepayTransFlowAndReceiptDetail(@RequestBody List<? extends RefundTicketReq> list, @RequestParam("batchDate") String batchDate);
+
+    @PostMapping("/saveAllRebackDetal")
+    Result saveAllRebackDetal(@RequestBody List<? extends RebackDetailReq> list);
+
+    @PostMapping("/saveAllRepaymentDetail")
+    Result saveAllRepaymentDetail(@RequestBody List<? extends RepaymentDetailReq> list);
 
 }

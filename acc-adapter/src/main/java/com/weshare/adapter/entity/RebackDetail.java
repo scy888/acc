@@ -1,6 +1,7 @@
 package com.weshare.adapter.entity;
 
 import com.weshare.service.api.entity.RebackDetailReq;
+import com.weshare.service.api.enums.TransFlowTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -49,11 +50,18 @@ public class RebackDetail {
     private BigDecimal interest;
 
     @Column(columnDefinition = "decimal(12,2) default 0.00 comment '减免利息(元)'")
-    private BigDecimal Reduceinterest;
+    private BigDecimal reduceInterest;
+
+    @Column(columnDefinition = "decimal(12,2) default 0.00 comment '罚息(元)'")
+    private BigDecimal Penalty;
 
     @Column(columnDefinition = "varchar(2) not null comment '交易结果 01-成功,02-失败,03处理中'")
     @Enumerated(EnumType.STRING)
-    private ResultEnum transactionResult;
+    private RebackDetailReq.TransactionResult transactionResult;
+
+    @Column(columnDefinition = "varchar(25) not null comment '交易类型'")
+    @Enumerated(EnumType.STRING)
+    private TransFlowTypeEnum transFlowType;
 
     @Column(columnDefinition = "varchar(100) null comment '失败原因'")
     @Enumerated(EnumType.STRING)
@@ -71,17 +79,4 @@ public class RebackDetail {
     @Column(columnDefinition = "datetime null comment '修改时间'")
     private LocalDateTime lastModifiedDate;
 
-
-    @Getter
-    public enum ResultEnum {
-        成功("01"),
-        失败("02"),
-        处理中("03");
-
-        private String code;
-
-        ResultEnum(String code) {
-            this.code = code;
-        }
-    }
 }

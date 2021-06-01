@@ -7,5 +7,4 @@ public enum TransStatusEnum {
 
     成功,
     失败,
-    已退票;
 }

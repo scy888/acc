@@ -15,5 +15,20 @@
         <module name="acc-utils" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="11" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="acc" options="-parameters" />
+      <module name="acc-adapter" options="-parameters" />
+      <module name="acc-batch" options="-parameters" />
+      <module name="acc-eureka" options="-parameters" />
+      <module name="acc-service" options="-parameters" />
+      <module name="acc-service-api" options="-parameters" />
+      <module name="acc-service-loan" options="-parameters" />
+      <module name="acc-service-repay" options="-parameters" />
+      <module name="acc-utils" options="-parameters" />
+      <module name="acceureka" options="" />
+    </option>
   </component>
 </project>

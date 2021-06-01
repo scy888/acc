@@ -15,7 +15,7 @@ public enum FeeTypeEnum {
     PRICINPAL("本金"),
     INTEREST("利息"),
     PENALTY("罚息"),
-    REDUCE_PENALTY("减免罚息");
+    REDUCE_PENALTY("减免利息");
 
     private String desc;
 

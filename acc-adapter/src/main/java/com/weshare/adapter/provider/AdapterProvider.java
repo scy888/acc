@@ -1,16 +1,14 @@
 package com.weshare.adapter.provider;
 
 import com.weshare.adapter.dao.AdapterDao;
-import com.weshare.adapter.entity.LoanDetail;
-import com.weshare.adapter.entity.RefundTicket;
-import com.weshare.adapter.entity.RepaymentPlan;
+import com.weshare.adapter.entity.*;
 import com.weshare.adapter.repo.LoanDetailRepo;
+import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.repo.RefundTicketRepo;
+import com.weshare.adapter.repo.RepaymentDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
-import com.weshare.service.api.entity.LoanDetailReq;
-import com.weshare.service.api.entity.RefundTicketReq;
-import com.weshare.service.api.entity.RepaymentPlanReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.result.Result;
 import common.ChangeEnumUtils;
@@ -46,6 +44,10 @@ public class AdapterProvider implements AdapterClient {
     private LoanDetailRepo loanDetailRepo;
     @Autowired
     private RefundTicketRepo refundTicketRepo;
+    @Autowired
+    private RebackDetailRepo rebackDetailRepo;
+    @Autowired
+    private RepaymentDetailRepo repaymentDetailRepo;
     @Autowired
     private AdapterService adapterService;
     @Autowired
@@ -130,5 +132,47 @@ public class AdapterProvider implements AdapterClient {
     @Override
     public void saveRefundDownRepayTransFlowAndReceiptDetail(List<? extends RefundTicketReq> list, String batchDate) {
         adapterService.saveRefundDownRepayTransFlowAndReceiptDetail(list, batchDate);
+
+    }
+
+    @Override
+    @Transactional
+    public Result saveAllRebackDetal(List<? extends RebackDetailReq> list) {
+        List<String> dueBillNoList = list.stream().map(RebackDetailReq::getDueBillNo).collect(Collectors.toList());
+        LocalDate batchDate = list.stream().map(RebackDetailReq::getBatchDate).findFirst().orElse(null);
+        rebackDetailRepo.deleteByBatchDateAndDueBillNoIn(batchDate,dueBillNoList);
+        rebackDetailRepo.saveAll(
+                list.stream().map(e->{
+                    RebackDetail rebackDetail = new RebackDetail();
+                    rebackDetail.setId(SnowFlake.getInstance().nextId()+"")
+                            .setTransactionResult(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(),"transactionResult",((RebackDetailReq) e).getTransactionResult(), RebackDetailReq.TransactionResult.class))
+                            .setCreatedDate(DateUtils.getLocalDateTime(e.getBatchDate()))
+                            .setLastModifiedDate(DateUtils.getLocalDateTime(e.getBatchDate()));
+                    BeanUtils.copyProperties(e,rebackDetail);
+                    return rebackDetail;
+                        }
+                ).collect(Collectors.toList())
+        );
+        return Result.result(true);
+    }
+
+    @Override
+    public Result saveAllRepaymentDetail(List<? extends RepaymentDetailReq> list) {
+        LocalDate batchDate = list.stream().map(RepaymentDetailReq::getBatchDate).findFirst().orElse(null);
+        List<String> dueBillNoList = list.stream().map(RepaymentDetailReq::getDueBillNo).collect(Collectors.toList());
+        repaymentDetailRepo.deleteByBatchDateAndDueBillNoIn(batchDate,dueBillNoList);
+        repaymentDetailRepo.saveAll(
+                list.stream().map(e->{
+                    RepaymentDetail repaymentDetail = new RepaymentDetail();
+                    BeanUtils.copyProperties(e,repaymentDetail);
+                    repaymentDetail
+                            .setId(SnowFlake.getInstance().nextId()+"")
+                            .setDebitType(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(),"debitType", e.getDebitType(), RepaymentDetail.DebitTypeEnum.class))
+                            .setCreatedDate(DateUtils.getLocalDateTime(e.getBatchDate()))
+                            .setLastModifiedDate(DateUtils.getLocalDateTime(e.getBatchDate()));
+                    return repaymentDetail;
+                }).collect(Collectors.toList())
+        );
+        return Result.result(true);
     }
 }

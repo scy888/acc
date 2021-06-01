@@ -3,14 +3,14 @@ package com.weshare.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
+import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
-import com.weshare.service.api.entity.RebackDetailReq;
-import com.weshare.service.api.entity.RefundTicketReq;
-import com.weshare.service.api.entity.RepaymentPlanReq;
-import com.weshare.service.api.entity.UserBaseReq;
+import com.weshare.service.api.entity.*;
+import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
 import common.JsonUtil;
+import common.ReflectUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,18 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: scyang
@@ -48,6 +52,8 @@ class AdapterControllerTest {
     private AdapterService adapterService;
     @Autowired
     private AdapterDao adapterDao;
+    @Autowired
+    private RebackDetailRepo rebackDetailRepo;
 
     @Test
     public void mongodbTest() throws Exception {
@@ -149,13 +155,67 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void saveAllRebackDetailAndRepaymentDetail0615Test() {
+    public void saveAllRebackDetailAndRepaymentDetail0615Test() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-06-15");
-        List<RebackDetailReq> rebackDetailReqs = List.of(
-                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
-                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.身份证号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
-                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "02", RebackDetailReq.FailReasonEnum.银行卡号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
-                new RebackDetailReq("YX-102", 1, new BigDecimal(170), new BigDecimal(170), BigDecimal.ZERO, BigDecimal.ZERO, "01", RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate)
+        List<RebackDetailReq> rebackDetailReqs_01 = List.of(
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(80), new BigDecimal(70), BigDecimal.ZERO, BigDecimal.ZERO,"02", TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(80), new BigDecimal(70), BigDecimal.ZERO,BigDecimal.ZERO, "02",TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.身份证号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(80), new BigDecimal(70), BigDecimal.ZERO,BigDecimal.ZERO, "02",TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.银行卡号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(80), new BigDecimal(70), BigDecimal.ZERO,BigDecimal.ZERO, "01",TransFlowTypeEnum.正常还款, null, DateUtils.getLocalDateTime(batchDate), batchDate)
         );
+        List<RebackDetailReq> rebackDetailReqs_02 = List.of(
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(90), new BigDecimal(60), BigDecimal.ZERO,BigDecimal.ZERO, "02",TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.手机号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(90), new BigDecimal(60), BigDecimal.ZERO,BigDecimal.ZERO, "02",TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.身份证号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(90), new BigDecimal(60), BigDecimal.ZERO,BigDecimal.ZERO, "02",TransFlowTypeEnum.正常还款, RebackDetailReq.FailReasonEnum.银行卡号错误, DateUtils.getLocalDateTime(batchDate), batchDate),
+                new RebackDetailReq("YX-102", 1, new BigDecimal(150), new BigDecimal(90), new BigDecimal(60), BigDecimal.ZERO,BigDecimal.ZERO, "01",TransFlowTypeEnum.正常还款, null, DateUtils.getLocalDateTime(batchDate), batchDate)
+        );
+        ArrayList<RebackDetailReq> rebackDetailReqs = new ArrayList<>();
+        rebackDetailReqs.addAll(rebackDetailReqs_01);
+        rebackDetailReqs.addAll(rebackDetailReqs_02);
+        rebackDetailReqs=new ArrayList<>(rebackDetailReqs);
+        rebackDetailReqs.clear();
+
+        List<RepaymentDetailReq> repaymentDetailReqs = List.of(
+                new RepaymentDetailReq("YX-102", "01", DateUtils.getLocalDateTime(batchDate), 1, new BigDecimal(150), new BigDecimal(80), new BigDecimal(70), BigDecimal.ZERO, BigDecimal.ZERO, batchDate),
+                new RepaymentDetailReq("YX-102", "01", DateUtils.getLocalDateTime(batchDate), 1, new BigDecimal(150), new BigDecimal(90), new BigDecimal(60), BigDecimal.ZERO, BigDecimal.ZERO, batchDate)
+        );
+        repaymentDetailReqs=new ArrayList<>(repaymentDetailReqs);
+        repaymentDetailReqs.clear();
+
+        adapterClient.saveAllRebackDetal(rebackDetailReqs);//保存adapter库的reback_detail表（扣款明细表）
+        adapterService.saveAllRepayTransFlow(rebackDetailReqs,batchDate.toString());//保存repay库的repay_trans_flow表（还款流水表）
+
+        adapterClient.saveAllRepaymentDetail(repaymentDetailReqs);//保存adapter库的repayment_detail表（还款明细表）
+
+
+        Path path = Paths.get("/reback");
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
+        for (File file : new File(path.toUri()).listFiles()) {
+            file.delete();
+        }
+        String fieldNames1 = ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate");
+        List<String> list1 = rebackDetailReqs_01.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        list1.add(0,fieldNames1);
+        Files.write(Paths.get(String.valueOf(path),"rebackDetailReqs_01.csv"),list1);
+
+        String fieldNames2 = ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate");
+        List<String> list2 = rebackDetailReqs_02.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        list2.add(0,fieldNames2);
+        Files.write(Paths.get(String.valueOf(path),"rebackDetailReqs_02.csv"),list2);
+
+        List<String> list3 = Files.readAllLines(Paths.get(String.valueOf(path), "rebackDetailReqs_01.csv"));
+        List<String> list4 = Files.readAllLines(Paths.get(String.valueOf(path), "rebackDetailReqs_02.csv"));
+        Stream<String> stream1 = list3.stream().skip(1);
+        Stream<String> stream2 = list4.stream().skip(1);
+        List<String> listConcat = Stream.concat(stream1, stream2).collect(Collectors.toList());
+        listConcat.add(0,ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        Files.write(Paths.get(String.valueOf(path),"rebackDetailReqs.csv"),listConcat);
+
+    }
+    @Test
+    public void testDelete(){
+        rebackDetailRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse("2020-05-15"),List.of("123"));
     }
 }

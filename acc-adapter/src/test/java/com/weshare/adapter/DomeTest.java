@@ -119,18 +119,32 @@ public class DomeTest {
 
     @Test
     public void test02() {
-        String s="{\"user_id\":\"55\",\"due_bill_no\":\"111\"}";
+        String s = "{\"user_id\":\"55\",\"due_bill_no\":\"111\"}";
         UserBaseReq.LinkManReq linkManReq = JsonUtil.fromJson(s, UserBaseReq.LinkManReq.class);
         System.out.println(linkManReq);
 
         UserBaseReq.ManReq manReq = new UserBaseReq.ManReq();
-        BeanUtils.copyProperties(linkManReq,manReq);
+        BeanUtils.copyProperties(linkManReq, manReq);
         System.out.println(manReq);
     }
-    @Test
-    public void test03(){
-        ArrayList<String> 数组越界了 = Optional.ofNullable(new ArrayList<String>()).orElseThrow(() -> new RuntimeException("数组越界了"));
 
-        System.out.println(数组越界了);
+    @Test
+    public void test03() {
+        List<String> list1 = List.of("1-壹", "2-贰", "3-叁", "4-肆", "5-伍");
+        list1 = new ArrayList<>(list1);
+
+        List<String> list2 = List.of("1", "2", "3", "4");
+        list2 = new ArrayList<>(list2);
+
+//        for (String s2 : list2) {
+//            String s = list1.stream().filter(s1 -> s1.split("-")[0].equals(s2)).findFirst().orElse(null);
+//            list1.remove(s);
+//        }
+
+        for (String s2 : list2) {
+            list1.removeIf(e -> e.split("-")[0].equals(s2));
+        }
+
+        System.out.println(list1);
     }
 }

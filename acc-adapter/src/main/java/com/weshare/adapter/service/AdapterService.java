@@ -219,6 +219,29 @@ public class AdapterService {
         return Result.result(true);
     }
 
+   public Result saveAllRepayTransFlow(List<? extends RebackDetailReq> list,String batchDate){
+         list=list.stream().filter(e-> e.getTransactionResult().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
+        repayFeignClient.saveAllRepayTransFlow(
+                list.stream().map(e->{
+                    RepayTransFlowReq repayTransFlowReq = new RepayTransFlowReq();
+                    repayTransFlowReq
+                            .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                            .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                            .setFlowSn(SnowFlake.getInstance().nextId()+"")
+                            .setDueBillNo(e.getDueBillNo())
+                            .setTransFlowType(e.getTransFlowType().name())
+                            .setTransAmount(e.getDebitAmount())
+                            .setTransTime(e.getDebitDate())
+                            .setTransStatus(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(),"transactionResult", e.getTransactionResult(), RebackDetailReq.TransactionResult.class).name())
+                            .setRemark(e.getTransFlowType().name())
+                            .setBatchDate(e.getBatchDate())
+                    ;
+                   return repayTransFlowReq;
+                }).collect(Collectors.toList()),batchDate
+        );
+        return Result.result(true);
+    }
+
     private ReceiptDetailReq getReceiptDetail(RepayTransFlowReq repayTransFlow, int term, int totalTerm) {
 
         return new ReceiptDetailReq()
@@ -245,7 +268,7 @@ public class AdapterService {
                 .setTransFlowType(TransFlowTypeEnum.退票.name())
                 .setTransAmount(repayPlanReq.getTermPrin())
                 .setTransTime(refundTicketReq.getRefundDate())
-                .setTransStatus("成功")
+                .setTransStatus(TransStatusEnum.成功.name())
                 .setRemark("退票")
                 .setBatchDate(refundTicketReq.getBatchDate());
     }
