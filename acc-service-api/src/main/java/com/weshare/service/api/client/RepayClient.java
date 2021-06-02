@@ -5,10 +5,12 @@ import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.entity.RepayTransFlowReq;
 import com.weshare.service.api.result.Result;
+import com.weshare.service.api.vo.Tuple3;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -43,13 +45,16 @@ public interface RepayClient {
     Result UpdateRepaySummaryCurrentTerm(@RequestBody UpdateRepaySummaryCurrentTerm updateRepaySummaryCurrentTerm);
 
     @PostMapping("/saveAllRepayTransFlow")
-    Result saveAllRepayTransFlow(@RequestBody List<RepayTransFlowReq> list,@RequestParam("batchDate")String batchDate);
+    Result saveAllRepayTransFlow(@RequestBody List<RepayTransFlowReq> list, @RequestParam("batchDate") String batchDate);
 
     @PostMapping("/saveAllReceiptDetail")
-    Result saveAllReceiptDetail(@RequestBody List<ReceiptDetailReq> list,@RequestParam("batchDate")String batchDate);
+    Result saveAllReceiptDetail(@RequestBody List<ReceiptDetailReq> list, @RequestParam("batchDate") String batchDate);
 
     @GetMapping("/findRepayPlanListByDueBillNo/{dueBillNo}")
-    Result<List<RepayPlanReq>> findRepayPlanListByDueBillNo(@PathVariable("dueBillNo")String dueBillNo);
+    Result<List<RepayPlanReq>> findRepayPlanListByDueBillNo(@PathVariable("dueBillNo") String dueBillNo);
+
+    @GetMapping("/getFlowSn/{dueBillNo}/{batchDate}")
+    Result<List<Tuple3<String,String, BigDecimal>>> getFlowSn(@PathVariable("dueBillNo") String dueBillNo, @PathVariable("batchDate") String batchDate);
 
     @Data
     @Accessors(chain = true)
@@ -59,6 +64,5 @@ public interface RepayClient {
         private String dueBillNo;
         private Integer currentTerm;
     }
-
 
 }

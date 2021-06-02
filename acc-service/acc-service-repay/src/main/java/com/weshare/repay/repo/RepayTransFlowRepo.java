@@ -24,4 +24,5 @@ public interface RepayTransFlowRepo extends JpaRepository<RepayTransFlow, String
     @Query(value = "delete from #{#entityName} e where e.batchDate=:batchDate and e.dueBillNo in :dueBillNoList")
     void deleteByBatchDateAndDueBillNoIn(@Param("batchDate") LocalDate batchDate, @Param("dueBillNoList") List<String> dueBillNoList);
 
+    List<RepayTransFlow> findByDueBillNoAndBatchDate(String dueBillNo, LocalDate batchDate);
 }

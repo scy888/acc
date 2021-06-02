@@ -18,6 +18,7 @@ import com.weshare.service.api.enums.TransFlowTypeEnum;
 import com.weshare.service.api.enums.TransStatusEnum;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
+import com.weshare.service.api.vo.Tuple3;
 import common.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +29,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -210,5 +212,12 @@ public class RepayProvider implements RepayClient {
         List<RepayPlanReq> repayPlanReqList = ReflectUtils.getBeanUtils(repayPlanList, RepayPlanReq.class);
         Result result = Result.result(true, repayPlanReqList);
         return result;
+    }
+
+    @Override
+    public Result<List<Tuple3<String, String, BigDecimal>>> getFlowSn(String dueBillNo, String batchDate) {
+        List<RepayTransFlow> list = repayTransFlowRepo.findByDueBillNoAndBatchDate(dueBillNo, LocalDate.parse(batchDate));
+        List<Tuple3<String, String, BigDecimal>> tuple3s = list.stream().map(e -> Tuple3.of(e.getDueBillNo(), e.getFlowSn(), e.getTransAmount())).collect(Collectors.toList());
+        return Result.result(true, tuple3s);
     }
 }

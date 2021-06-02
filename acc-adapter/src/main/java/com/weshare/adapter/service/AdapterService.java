@@ -6,8 +6,10 @@ import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
+import com.weshare.service.api.vo.Tuple3;
 import common.ChangeEnumUtils;
 import common.DateUtils;
+import common.JsonUtil;
 import common.SnowFlake;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -219,27 +221,114 @@ public class AdapterService {
         return Result.result(true);
     }
 
-   public Result saveAllRepayTransFlow(List<? extends RebackDetailReq> list,String batchDate){
-         list=list.stream().filter(e-> e.getTransactionResult().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
+    public Result createRepayTransFlow(List<? extends RebackDetailReq> list, String batchDate) {
+        list = list.stream().filter(e -> e.getTransactionResult().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
         repayFeignClient.saveAllRepayTransFlow(
-                list.stream().map(e->{
+                list.stream().map(e -> {
                     RepayTransFlowReq repayTransFlowReq = new RepayTransFlowReq();
                     repayTransFlowReq
                             .setProjectNo(ProjectEnum.YXMS.getProjectNo())
                             .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
-                            .setFlowSn(SnowFlake.getInstance().nextId()+"")
+                            .setFlowSn(SnowFlake.getInstance().nextId() + "")
                             .setDueBillNo(e.getDueBillNo())
                             .setTransFlowType(e.getTransFlowType().name())
                             .setTransAmount(e.getDebitAmount())
                             .setTransTime(e.getDebitDate())
-                            .setTransStatus(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(),"transactionResult", e.getTransactionResult(), RebackDetailReq.TransactionResult.class).name())
+                            .setTransStatus(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(), "transactionResult", e.getTransactionResult(), RebackDetailReq.TransactionResult.class).name())
                             .setRemark(e.getTransFlowType().name())
-                            .setBatchDate(e.getBatchDate())
-                    ;
-                   return repayTransFlowReq;
-                }).collect(Collectors.toList()),batchDate
+                            .setBatchDate(e.getBatchDate());
+                    return repayTransFlowReq;
+                }).collect(Collectors.toList()), batchDate
         );
         return Result.result(true);
+    }
+
+    public Result createAllReceiptDetail(List<? extends RepaymentDetailReq> list, String batchDate) {
+            Map<String, ? extends List<? extends RepaymentDetailReq>> map = list.stream().collect(Collectors.groupingBy(RepaymentDetailReq::getDueBillNo));
+            for (Map.Entry<String, ? extends List<? extends RepaymentDetailReq>> entry : map.entrySet()) {
+                List<ReceiptDetailReq> receiptDetailReqList = new ArrayList<>();
+                String dueBillNo = entry.getKey();
+                List<? extends RepaymentDetailReq> repaymentDetailReqs = entry.getValue();
+                List<Tuple3<String, String, BigDecimal>> tuple3s = repayFeignClient.getFlowSn(dueBillNo, batchDate).getData();
+                for (RepaymentDetailReq repaymentDetailReq : repaymentDetailReqs) {
+                    Tuple3<String, String, BigDecimal> tuple3 = tuple3s.stream().
+                            filter(e -> e.getFirst().equals(repaymentDetailReq.getDueBillNo())
+                                    && e.getThird().compareTo(repaymentDetailReq.getRepaymentAmount()) == 0)
+                            .findFirst().orElse(null);
+                    String flowSn = tuple3.getSecond();
+                    tuple3s.remove(tuple3);
+                    receiptDetailReqList.addAll(
+                            createReceiptReqList(repaymentDetailReq, flowSn));
+                }
+                repayFeignClient.saveAllReceiptDetail(receiptDetailReqList, batchDate);
+        }
+        return Result.result(true);
+    }
+
+    private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req, String flown) {
+        List<ReceiptDetailReq> list = new ArrayList<>();
+        if (req.getPrincipal().compareTo(BigDecimal.ZERO) > 0) {
+            list.add(
+                    createReceiptReq(req, flown)
+                            .setAmount(req.getPrincipal())
+                            .setFeeType(FeeTypeEnum.PRINCIPAL)
+            );
+        }
+        if (req.getInterest().compareTo(BigDecimal.ZERO) > 0) {
+            list.add(
+                    createReceiptReq(req, flown)
+                            .setAmount(req.getInterest())
+                            .setFeeType(FeeTypeEnum.INTEREST)
+            );
+        }
+        if (req.getPenalty().compareTo(BigDecimal.ZERO) > 0) {
+            list.add(
+                    createReceiptReq(req, flown)
+                            .setAmount(req.getPenalty())
+                            .setFeeType(FeeTypeEnum.PENALTY)
+            );
+        }
+        if (req.getReduceInterest().compareTo(BigDecimal.ZERO) > 0) {
+            list.add(
+                    createReceiptReq(req, flown)
+                            .setAmount(req.getReduceInterest())
+                            .setFeeType(FeeTypeEnum.REDUCE_INTEREST)
+            );
+        }
+        return list;
+    }
+
+    private ReceiptDetailReq createReceiptReq(RepaymentDetailReq req, String flown) {
+        ReceiptDetailReq receiptDetailReq = new ReceiptDetailReq();
+        receiptDetailReq
+                .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                .setBatchDate(req.getBatchDate())
+                .setDueBillNo(req.getDueBillNo())
+                .setTotalTerm(6)
+                .setTerm(req.getTerm())
+                .setRepayDate(req.getTradeDate().toLocalDate())
+                .setFlowSn(flown)
+                .setReceiptType(getReceiptType(req.getDebitType()))
+                .setRemark(receiptDetailReq.getReceiptType().getDesc());
+        return receiptDetailReq;
+    }
+
+    private ReceiptTypeEnum getReceiptType(String debitType) {
+        switch (debitType) {
+            case "01":
+                return ReceiptTypeEnum.NORMAL;
+            case "02":
+                return ReceiptTypeEnum.PRE;
+            case "03":
+                return ReceiptTypeEnum.OVERDUE;
+            case "04":
+                return ReceiptTypeEnum.REDUCE;
+            case "05":
+                return ReceiptTypeEnum.REFUND;
+            default:
+                return null;
+        }
     }
 
     private ReceiptDetailReq getReceiptDetail(RepayTransFlowReq repayTransFlow, int term, int totalTerm) {
@@ -251,7 +340,7 @@ public class AdapterService {
                 .setTotalTerm(totalTerm)
                 .setTerm(term)
                 .setAmount(repayTransFlow.getTransAmount())
-                .setFeeType(FeeTypeEnum.PRICINPAL)
+                .setFeeType(FeeTypeEnum.PRINCIPAL)
                 .setReceiptType(ReceiptTypeEnum.REFUND)
                 .setFlowSn(repayTransFlow.getFlowSn())
                 .setRepayDate(repayTransFlow.getTransTime().toLocalDate())
