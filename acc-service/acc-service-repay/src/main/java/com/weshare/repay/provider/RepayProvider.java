@@ -220,4 +220,11 @@ public class RepayProvider implements RepayClient {
         List<Tuple3<String, String, BigDecimal>> tuple3s = list.stream().map(e -> Tuple3.of(e.getDueBillNo(), e.getFlowSn(), e.getTransAmount())).collect(Collectors.toList());
         return Result.result(true, tuple3s);
     }
+
+    @Override
+    public Result<Integer> getTotalTerm(String dueBillNo, String projectNo) {
+      Integer totalTerm= repaySummaryRepo.findByDueBillNoAndProjectNo(dueBillNo,projectNo);
+      log.info("totalTerm:{}",totalTerm);
+        return Result.result(true,totalTerm);
+    }
 }

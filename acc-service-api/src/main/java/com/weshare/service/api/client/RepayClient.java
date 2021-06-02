@@ -56,6 +56,9 @@ public interface RepayClient {
     @GetMapping("/getFlowSn/{dueBillNo}/{batchDate}")
     Result<List<Tuple3<String,String, BigDecimal>>> getFlowSn(@PathVariable("dueBillNo") String dueBillNo, @PathVariable("batchDate") String batchDate);
 
+    @GetMapping("/getTotalTerm")
+    Result<Integer> getTotalTerm(@RequestParam("dueBillNo")String dueBillNo,@RequestParam("projectNo")String projectNo);
+
     @Data
     @Accessors(chain = true)
     class UpdateRepaySummaryCurrentTerm {

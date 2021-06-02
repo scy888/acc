@@ -29,4 +29,7 @@ public interface RepaySummaryRepo extends JpaRepository<RepaySummary, String> {
     String findByDueBillNo_(@Param("dueBillNo") String dueBillNo);
 
     RepaySummary findByDueBillNo(String dueBillNo);
+
+    @Query("select e.totalTerm from #{#entityName} e where e.dueBillNo=:dueBillNo and e.projectNo=:projectNo")
+    Integer findByDueBillNoAndProjectNo(String dueBillNo, String projectNo);
 }

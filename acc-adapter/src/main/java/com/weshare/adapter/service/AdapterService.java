@@ -244,53 +244,57 @@ public class AdapterService {
     }
 
     public Result createAllReceiptDetail(List<? extends RepaymentDetailReq> list, String batchDate) {
-            Map<String, ? extends List<? extends RepaymentDetailReq>> map = list.stream().collect(Collectors.groupingBy(RepaymentDetailReq::getDueBillNo));
-            for (Map.Entry<String, ? extends List<? extends RepaymentDetailReq>> entry : map.entrySet()) {
-                List<ReceiptDetailReq> receiptDetailReqList = new ArrayList<>();
-                String dueBillNo = entry.getKey();
-                List<? extends RepaymentDetailReq> repaymentDetailReqs = entry.getValue();
-                List<Tuple3<String, String, BigDecimal>> tuple3s = repayFeignClient.getFlowSn(dueBillNo, batchDate).getData();
-                for (RepaymentDetailReq repaymentDetailReq : repaymentDetailReqs) {
-                    Tuple3<String, String, BigDecimal> tuple3 = tuple3s.stream().
-                            filter(e -> e.getFirst().equals(repaymentDetailReq.getDueBillNo())
-                                    && e.getThird().compareTo(repaymentDetailReq.getRepaymentAmount()) == 0)
-                            .findFirst().orElse(null);
-                    String flowSn = tuple3.getSecond();
-                    tuple3s.remove(tuple3);
-                    receiptDetailReqList.addAll(
-                            createReceiptReqList(repaymentDetailReq, flowSn));
-                }
-                repayFeignClient.saveAllReceiptDetail(receiptDetailReqList, batchDate);
+        Map<String, ? extends List<? extends RepaymentDetailReq>> map = list.stream().collect(Collectors.groupingBy(RepaymentDetailReq::getDueBillNo));
+        for (Map.Entry<String, ? extends List<? extends RepaymentDetailReq>> entry : map.entrySet()) {
+            List<ReceiptDetailReq> receiptDetailReqList = new ArrayList<>();
+            String dueBillNo = entry.getKey();
+            List<? extends RepaymentDetailReq> repaymentDetailReqs = entry.getValue();
+            List<Tuple3<String, String, BigDecimal>> tuple3s = repayFeignClient.getFlowSn(dueBillNo, batchDate).getData();
+            Integer totalTerm = repayFeignClient.getTotalTerm(dueBillNo, ProjectEnum.YXMS.getProjectNo()).getData();
+            for (RepaymentDetailReq repaymentDetailReq : repaymentDetailReqs) {
+                Tuple3<String, String, BigDecimal> tuple3 = tuple3s.stream().
+                        filter(e -> e.getFirst().equals(repaymentDetailReq.getDueBillNo())
+                                && e.getThird().compareTo(repaymentDetailReq.getRepaymentAmount()) == 0)
+                        .findFirst().orElse(null);
+                String flowSn = tuple3.getSecond();
+                tuple3s.remove(tuple3);
+                receiptDetailReqList.addAll(
+                        createReceiptReqList(repaymentDetailReq).stream().peek(e ->
+                                e.setTotalTerm(totalTerm).setFlowSn(flowSn)).collect(Collectors.toList())
+                );
+            }
+            repayFeignClient.saveAllReceiptDetail(receiptDetailReqList, batchDate);
         }
         return Result.result(true);
     }
 
-    private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req, String flown) {
+    private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req) {
+
         List<ReceiptDetailReq> list = new ArrayList<>();
         if (req.getPrincipal().compareTo(BigDecimal.ZERO) > 0) {
             list.add(
-                    createReceiptReq(req, flown)
+                    createReceiptReq(req)
                             .setAmount(req.getPrincipal())
                             .setFeeType(FeeTypeEnum.PRINCIPAL)
             );
         }
         if (req.getInterest().compareTo(BigDecimal.ZERO) > 0) {
             list.add(
-                    createReceiptReq(req, flown)
+                    createReceiptReq(req)
                             .setAmount(req.getInterest())
                             .setFeeType(FeeTypeEnum.INTEREST)
             );
         }
         if (req.getPenalty().compareTo(BigDecimal.ZERO) > 0) {
             list.add(
-                    createReceiptReq(req, flown)
+                    createReceiptReq(req)
                             .setAmount(req.getPenalty())
                             .setFeeType(FeeTypeEnum.PENALTY)
             );
         }
         if (req.getReduceInterest().compareTo(BigDecimal.ZERO) > 0) {
             list.add(
-                    createReceiptReq(req, flown)
+                    createReceiptReq(req)
                             .setAmount(req.getReduceInterest())
                             .setFeeType(FeeTypeEnum.REDUCE_INTEREST)
             );
@@ -298,17 +302,15 @@ public class AdapterService {
         return list;
     }
 
-    private ReceiptDetailReq createReceiptReq(RepaymentDetailReq req, String flown) {
+    private ReceiptDetailReq createReceiptReq(RepaymentDetailReq req) {
         ReceiptDetailReq receiptDetailReq = new ReceiptDetailReq();
         receiptDetailReq
                 .setProjectNo(ProjectEnum.YXMS.getProjectNo())
                 .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
                 .setBatchDate(req.getBatchDate())
                 .setDueBillNo(req.getDueBillNo())
-                .setTotalTerm(6)
                 .setTerm(req.getTerm())
                 .setRepayDate(req.getTradeDate().toLocalDate())
-                .setFlowSn(flown)
                 .setReceiptType(getReceiptType(req.getDebitType()))
                 .setRemark(receiptDetailReq.getReceiptType().getDesc());
         return receiptDetailReq;
