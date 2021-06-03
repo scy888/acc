@@ -13,12 +13,15 @@ import com.weshare.service.api.entity.ReceiptDetailReq;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.entity.RepayTransFlowReq;
+import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import com.weshare.service.api.enums.TransStatusEnum;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
+import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
+import com.weshare.service.api.vo.Tuple4;
 import common.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -215,6 +218,14 @@ public class RepayProvider implements RepayClient {
     }
 
     @Override
+    public Result<List<Tuple2<BigDecimal, FeeTypeEnum>>> getReceiptDetailTwo(String dueBillNo, Integer term) {
+        List<ReceiptDetail> receiptDetails = receiptDetailRepo.findByDueBillNoAndTerm(dueBillNo, term);
+        List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = receiptDetails.stream().map(e -> Tuple2.of(e.getAmount(), e.getFeeType()))
+                .collect(Collectors.toList());
+        return Result.result(true, tuple2s);
+    }
+
+    @Override
     public Result<List<Tuple3<String, String, BigDecimal>>> getFlowSn(String dueBillNo, String batchDate) {
         List<RepayTransFlow> list = repayTransFlowRepo.findByDueBillNoAndBatchDate(dueBillNo, LocalDate.parse(batchDate));
         List<Tuple3<String, String, BigDecimal>> tuple3s = list.stream().map(e -> Tuple3.of(e.getDueBillNo(), e.getFlowSn(), e.getTransAmount())).collect(Collectors.toList());
@@ -223,8 +234,34 @@ public class RepayProvider implements RepayClient {
 
     @Override
     public Result<Integer> getTotalTerm(String dueBillNo, String projectNo) {
-      Integer totalTerm= repaySummaryRepo.findByDueBillNoAndProjectNo(dueBillNo,projectNo);
-      log.info("totalTerm:{}",totalTerm);
-        return Result.result(true,totalTerm);
+        Integer totalTerm = repaySummaryRepo.findByDueBillNoAndProjectNo(dueBillNo, projectNo);
+        log.info("totalTerm:{}", totalTerm);
+        return Result.result(true, totalTerm);
+    }
+
+    @Override
+    public Result<List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>>> getRepayPlanFourth(String dueBillNo) {
+        List<RepayPlan> planList = repayPlanRepo.findByDueBillNo(dueBillNo);
+        List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = planList.stream().map(repayPlan ->
+                Tuple4.of(repayPlan.getTermBillAmount(), repayPlan.getTermPrin(), repayPlan.getTermDueDate(), repayPlan.getTerm())).collect(Collectors.toList());
+        return Result.result(true, tuple4s);
+    }
+
+    @Override
+    public Result updateRepayPlan(RepayPlanReq repayPlanReq) {
+        RepayPlan repayPlan = repayPlanRepo.findByDueBillNoAndTerm(repayPlanReq.getDueBillNo(), repayPlanReq.getTerm());
+        String[] args = {"projectNo", "productNo", "termStartDate", "termDueDate", "termPrin", "termInt"};
+        BeanUtils.copyProperties(repayPlanReq, repayPlan, args);
+        repayPlanRepo.save(repayPlan.setLastModifiedDate(DateUtils.getLocalDateTime(repayPlanReq.getBatchDate())));
+        return Result.result(true);
+    }
+
+    @Override
+    public Result updateRepaySummary(RepaySummaryReq repaySummaryReq) {
+        RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo(repaySummaryReq.getDueBillNo());
+        String[] args = {"projectNo", "productNo", "userId", "contractAmount", "loanDate", "repayDay","totalTerm"};
+        BeanUtils.copyProperties(repaySummaryReq, repaySummary, args);
+        repaySummaryRepo.save(repaySummary.setLastModifiedDate(DateUtils.getLocalDateTime(repaySummaryReq.getBatchDate())));
+        return null;
     }
 }

@@ -23,4 +23,6 @@ public interface ReceiptDetailRepo extends JpaRepository<ReceiptDetail, String> 
     @Modifying
     @Query("delete from #{#entityName} where batchDate=:batchDate and dueBillNo in :dueBillNoList")
     void deleteByBatchDateAndDueBillNoIn(@Param("batchDate") LocalDate batchDate,@Param("dueBillNoList") List<String> dueBillNoList);
+
+    List<ReceiptDetail> findByDueBillNoAndTerm(String dueBillNo, Integer term);
 }

@@ -6,11 +6,10 @@ import com.weshare.service.api.client.LoanClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
+import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
-import common.ChangeEnumUtils;
-import common.DateUtils;
-import common.JsonUtil;
-import common.SnowFlake;
+import com.weshare.service.api.vo.Tuple4;
+import common.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -249,9 +248,11 @@ public class AdapterService {
             List<ReceiptDetailReq> receiptDetailReqList = new ArrayList<>();
             String dueBillNo = entry.getKey();
             List<? extends RepaymentDetailReq> repaymentDetailReqs = entry.getValue();
+            //根据借据号和时间查出当天所有的还款流水（返回借据号,还款金额,流水号）
             List<Tuple3<String, String, BigDecimal>> tuple3s = repayFeignClient.getFlowSn(dueBillNo, batchDate).getData();
             Integer totalTerm = repayFeignClient.getTotalTerm(dueBillNo, ProjectEnum.YXMS.getProjectNo()).getData();
             for (RepaymentDetailReq repaymentDetailReq : repaymentDetailReqs) {
+                //根据借据号和扣款金额匹配上的取出流水号,并从该集合中移除掉
                 Tuple3<String, String, BigDecimal> tuple3 = tuple3s.stream().
                         filter(e -> e.getFirst().equals(repaymentDetailReq.getDueBillNo())
                                 && e.getThird().compareTo(repaymentDetailReq.getRepaymentAmount()) == 0)
@@ -264,8 +265,129 @@ public class AdapterService {
                 );
             }
             repayFeignClient.saveAllReceiptDetail(receiptDetailReqList, batchDate);
+            //更新还款计划，一次根据借据号查出所有的期次还款计划
+            List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayFeignClient.getRepayPlanFourth(dueBillNo).getData();
+            for (Map.Entry<Integer, List<ReceiptDetailReq>> entity : receiptDetailReqList.
+                    stream().collect(Collectors.groupingBy(ReceiptDetailReq::getTerm)).entrySet()) {
+                Integer term = entity.getKey();
+                //List<ReceiptDetailReq> receiptDetailReqs = entity.getValue();
+                Tuple4<BigDecimal, BigDecimal, LocalDate, Integer> tuple4 = tuple4s.stream()
+                        .filter(e -> e.getFourth().equals(term)).findFirst().orElse(null);
+                BigDecimal termBillAmount = tuple4.getFirst();//本期账单应还金额
+                BigDecimal termPrin = tuple4.getSecond();//本期账单的应还本金
+                LocalDate termDueDate = tuple4.getThird();//本期账单应还日
+                //一次根据借据号和期次查出实还表中费用类型的金额(幂等性)
+                List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = repayFeignClient.getReceiptDetailTwo(dueBillNo, term).getData();
+                RepayPlanReq repayPlanReq = new RepayPlanReq();
+                repayPlanReq.setDueBillNo(dueBillNo);
+                repayPlanReq.setTerm(term);
+                repayPlanReq.setBatchDate(LocalDate.parse(batchDate));
+                repayPlanReq.setTermRepayPrin(getAmount(tuple2s, FeeTypeEnum.PRINCIPAL));//已还本金
+                repayPlanReq.setTermRepayInt(getAmount(tuple2s, FeeTypeEnum.INTEREST));//已还利息
+                repayPlanReq.setTermRepayPenalty(getAmount(tuple2s, FeeTypeEnum.PENALTY));//已还罚息
+                repayPlanReq.setTermReduceInt(getAmount(tuple2s, FeeTypeEnum.REDUCE_INTEREST));//减免利息
+                repayPlanReq.setTermPenalty(getAmount(tuple2s, FeeTypeEnum.PENALTY));//应还罚息
+                repayPlanReq.setTermBillAmount(termBillAmount.add(repayPlanReq.getTermPenalty()));//应还金额
+                repayPlanReq.setTermStatus(getTermStatus(repayPlanReq.getTermBillAmount(), tuple2s.stream().map(Tuple2::getFirst).reduce(BigDecimal.ZERO, BigDecimal::add), termDueDate, batchDate));//期次状态
+                repayPlanReq.setRepayDate(repayPlanReq.getTermStatus() == TermStatusEnum.REPAID ? LocalDate.parse(batchDate) : null);//已还日
+                repayPlanReq.setTermPaidOutType(getTermPaidOutType(repayPlanReq.getTermStatus(), repayPlanReq.getRepayDate(), termDueDate));//还清类型
+                repayPlanReq.setRemark(repayPlanReq.getTermPaidOutType() == null ? "本期次未结清" : repayPlanReq.getTermPaidOutType().getDesc());//备注
+                repayFeignClient.updateRepayPlan(repayPlanReq);
+            }
+            //更新summary表
+            List<RepayPlanReq> planReqList = repayFeignClient.findRepayPlanListByDueBillNo(dueBillNo).getData();
+            LocalDate firstDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).min(LocalDate::compareTo).orElse(null);
+            LocalDate lastDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).max(LocalDate::compareTo).orElse(null);
+            RepaySummaryReq repaySummaryReq = new RepaySummaryReq();
+            repaySummaryReq.setDueBillNo(dueBillNo);//借据号
+            repaySummaryReq.setBatchDate(LocalDate.parse(batchDate));
+            repaySummaryReq.setAssetStatus(getAssetStatus(planReqList.stream()
+                    .map(RepayPlanReq::getTermStatus).collect(Collectors.toList())));//资产状态
+            repaySummaryReq.setReturnTerm((int) planReqList.stream()
+                    .filter(e -> e.getTermStatus() == TermStatusEnum.REPAID).count());//已还期次
+            repaySummaryReq.setRemainPrincipal(planReqList.stream().map(e -> e.getTermPrin()
+                    .subtract(e.getTermRepayPrin())).reduce(BigDecimal.ZERO, BigDecimal::add));//剩余本金
+            repaySummaryReq.setRemainInterest(planReqList.stream().map(e -> e.getTermInt()
+                    .subtract(e.getTermRepayInt())).reduce(BigDecimal.ZERO, BigDecimal::add));//剩余利息
+            repaySummaryReq.setCurrentTerm(StringUtils.getCurrentTerm(firstDate, lastDate, LocalDate.parse(batchDate), totalTerm));//当前期次
+            repaySummaryReq.setCurrentTermDueDate(planReqList.stream().filter(e -> e.getTerm().equals(repaySummaryReq.getCurrentTerm()))
+                    .map(RepayPlanReq::getTermDueDate).findFirst().orElse(null));//当前期次的应还日
+            repaySummaryReq.setCurrentPaidOutDate(planReqList.stream().filter(e -> e.getRepayDate() != null &&
+                    e.getTerm().equals(repaySummaryReq.getCurrentTerm())).map(RepayPlanReq::getRepayDate).findFirst().orElse(null));//当前期次结清日
+            repaySummaryReq.setSettleDate(planReqList.stream().allMatch(e -> e.getRepayDate() != null) ?
+                    planReqList.stream().map(RepayPlanReq::getRepayDate).max(LocalDate::compareTo).orElse(null) : null);//结清日期
+            repaySummaryReq.setSettleType(getSettleType(planReqList, repaySummaryReq.getAssetStatus()));//结清类型
+            repaySummaryReq.setRemark(repaySummaryReq.getAssetStatus().getDesc());
+            repayFeignClient.updateRepaySummary(repaySummaryReq);
         }
+
         return Result.result(true);
+    }
+
+    @Deprecated
+    private SettleTypeEnum getSettleType(List<RepayPlanReq> planReqList, AssetStatusEnum assetStatus) {
+        switch (assetStatus) {
+            case SETTLED:
+                List<LocalDate> termDueDateList = planReqList.stream().map(RepayPlanReq::getTermDueDate).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                List<LocalDate> repayDateList = planReqList.stream().map(RepayPlanReq::getRepayDate).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                if (repayDateList.get(0).compareTo(termDueDateList.get(1)) <= 0) {
+                }
+        }
+        return null;
+    }
+
+    private AssetStatusEnum getAssetStatus(List<TermStatusEnum> termStatusEnums) {
+
+        if (termStatusEnums.stream().anyMatch(e -> e == TermStatusEnum.UNDUE)
+                && termStatusEnums.stream().noneMatch(e -> e == TermStatusEnum.OVERDUE)) {
+            //期次状态有正常或已还的并且没有一个逾期的,资产状态就是正常
+            return AssetStatusEnum.NORMAL;
+        }
+        if (termStatusEnums.stream().anyMatch(e -> e == TermStatusEnum.OVERDUE)) {
+            //期次状态有一个逾期,资产状态就逾期
+            return AssetStatusEnum.OVERDUE;
+        }
+        if (termStatusEnums.stream().allMatch(e -> e == TermStatusEnum.REPAID)) {
+            return AssetStatusEnum.SETTLED;
+        }
+        return null;
+    }
+
+
+    private TermPaidOutTypeEnum getTermPaidOutType(TermStatusEnum termStatus, LocalDate repayDate, LocalDate termDueDate) {
+        if (termStatus == TermStatusEnum.REPAID) {
+            if (repayDate.isBefore(termDueDate)) {
+                return TermPaidOutTypeEnum.PRE_PAIDOUT;
+            }
+            if (repayDate.isEqual(termDueDate)) {
+                return TermPaidOutTypeEnum.NORMAL_PAIDOUT;
+            }
+            if (repayDate.isAfter(termDueDate)) {
+                return TermPaidOutTypeEnum.OVERDUE_PAIDOUT;
+            }
+        }
+        return null;
+    }
+
+    private TermStatusEnum getTermStatus(BigDecimal termBillAmount, BigDecimal receiptAmount, LocalDate termDueDate, String batchDate) {
+        LocalDate localDate = LocalDate.parse(batchDate);
+        if (localDate.isAfter(termDueDate)) {//实际还款日期大于等于应还日期
+            if (receiptAmount.compareTo(termBillAmount) >= 0) {//实际已还金额大于等于应还金额
+                return TermStatusEnum.REPAID;
+            } else {
+                return TermStatusEnum.OVERDUE;
+            }
+        } else {//实际还款日期小于应还日期
+            if (receiptAmount.compareTo(termBillAmount) >= 0) {//实际已还金额大于等于应还金额
+                return TermStatusEnum.REPAID;
+            } else {
+                return TermStatusEnum.UNDUE;
+            }
+        }
+    }
+
+    private BigDecimal getAmount(List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s, FeeTypeEnum feeTypeEnum) {
+        return tuple2s.stream().filter(e -> e.getSecond() == feeTypeEnum).map(Tuple2::getFirst).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req) {

@@ -7,7 +7,11 @@ import com.weshare.repay.repo.RepayPlanRepo;
 import com.weshare.repay.repo.RepaySummaryRepo;
 import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
+import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
+import com.weshare.service.api.vo.Tuple2;
+import com.weshare.service.api.vo.Tuple4;
+import common.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -52,5 +57,16 @@ class RepayProviderTest {
     public void testDelete() {
         repayTransFlowRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse("2021-05-30"), List.of("Yx-101"));
         receiptDetailRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse("2021-05-30"), List.of("Yx-101"));
+    }
+
+    @Test
+    public void testFourth() {
+        List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayClient.getRepayPlanFourth("YX-102").getData();
+        System.out.println("tuple4s:\n"+ JsonUtil.toJson(tuple4s,true));
+    }
+    @Test
+    public void testTwo(){
+        List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = repayClient.getReceiptDetailTwo("YX-102", 1).getData();
+        System.out.println("tuple2s:\n"+ JsonUtil.toJson(tuple2s,true));
     }
 }

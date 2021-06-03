@@ -10,9 +10,11 @@ import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import com.weshare.service.api.vo.Tuple3;
+import com.weshare.service.api.vo.Tuple4;
 import common.DateUtils;
 import common.JsonUtil;
 import common.ReflectUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,7 @@ import java.util.stream.Stream;
  */
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@Slf4j
 class AdapterControllerTest {
 
     @Autowired
@@ -225,5 +228,12 @@ class AdapterControllerTest {
         rebackDetailRepo.deleteByBatchDateAndDueBillNoIn(LocalDate.parse("2020-05-15"), List.of("123"));
         List<Tuple3<String, String, BigDecimal>> tuple3s = repayFeignClient.getFlowSn("YX-102", "2020-06-15").getData();
         System.out.println(tuple3s);
+    }
+
+    @Test
+    public void testFourth() {
+        List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayFeignClient.getRepayPlanFourth("YX-102").getData();
+        Tuple4<BigDecimal, BigDecimal, LocalDate, Integer> tuple4 = tuple4s.stream().filter(e -> e.getFourth() == 6).findFirst().orElse(null);
+        log.info("tuple4:{}",JsonUtil.toJson(tuple4,true));
     }
 }
