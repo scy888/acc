@@ -21,7 +21,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -68,5 +73,25 @@ class RepayProviderTest {
     public void testTwo(){
         List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = repayClient.getReceiptDetailTwo("YX-102", 1).getData();
         System.out.println("tuple2s:\n"+ JsonUtil.toJson(tuple2s,true));
+    }
+    @Test
+    public void testSorted(){
+        List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayClient.getRepayPlanFourth("YX-102").getData();
+        List<LocalDate> dateList = tuple4s.stream().sorted(Comparator.comparing(Tuple4::getThird,Comparator.reverseOrder()))
+                .map(Tuple4::getThird).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        System.out.println(dateList);
+
+        LocalDate min = tuple4s.stream().max(Comparator.comparing(Tuple4::getThird,Comparator.reverseOrder())).map(Tuple4::getThird).orElse(null);
+        System.out.println(min);
+        Optional<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> or = tuple4s.stream().max(Comparator.comparing(Tuple4::getThird)).or(() -> Optional.of(Tuple4.of(BigDecimal.ZERO, BigDecimal.ZERO, LocalDate.now(), 12)));
+        LocalDate min_ = tuple4s.stream().map(Tuple4::getThird).max(Comparator.comparing(localDate -> localDate, Comparator.reverseOrder())).orElse(null);
+        System.out.println(min_);
+        System.out.println(tuple4s.stream().map(Tuple4::getThird).map(LocalDate::toString).collect(Collectors.toList()));
+
+        List<String> list = List.of("2020-06-15", "2020-06-15", "2020-06-15");
+        System.out.println(list.stream().map(LocalDate::parse).collect(Collectors.toList()));
+
+        List<String> list1 = List.of("2020/06/15 12:12:25", "2020/06/15 12:12:25", "2020/06/15 12:12:25");
+        System.out.println(list1.stream().map(e -> LocalDateTime.parse(e, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))).collect(Collectors.toList()));
     }
 }

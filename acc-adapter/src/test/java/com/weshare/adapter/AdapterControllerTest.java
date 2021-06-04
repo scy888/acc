@@ -190,7 +190,7 @@ class AdapterControllerTest {
         //repaymentDetailReqs.clear();
 
         adapterClient.saveAllRebackDetal(rebackDetailReqs);//保存adapter库的reback_detail表（扣款明细表）
-        adapterService.createRepayTransFlow(rebackDetailReqs, batchDate.toString());//保存repay库的repay_trans_flow表（还款流水表）
+        adapterService.createAllRepayTransFlow(rebackDetailReqs, batchDate.toString());//保存repay库的repay_trans_flow表（还款流水表）
 
         adapterClient.saveAllRepaymentDetail(repaymentDetailReqs);//保存adapter库的repayment_detail表（还款明细表）
         adapterService.createAllReceiptDetail(repaymentDetailReqs, batchDate.toString());//保存repay的库receipt_detail表(实还记录)

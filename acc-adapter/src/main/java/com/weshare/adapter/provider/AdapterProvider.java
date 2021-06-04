@@ -175,4 +175,14 @@ public class AdapterProvider implements AdapterClient {
         );
         return Result.result(true);
     }
+
+    @Override
+    public void createAllRepayTransFlow(List<? extends RebackDetailReq> list, String batchDate) {
+        adapterService.createAllRepayTransFlow(list,batchDate);
+    }
+
+    @Override
+    public void createAllReceiptDetail(List<? extends RepaymentDetailReq> list, String batchDate) {
+        adapterService.createAllReceiptDetail(list,batchDate);
+    }
 }

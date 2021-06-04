@@ -43,4 +43,9 @@ public interface AdapterClient {
     @PostMapping("/saveAllRepaymentDetail")
     Result saveAllRepaymentDetail(@RequestBody List<? extends RepaymentDetailReq> list);
 
+    @PostMapping("/createAllRepayTransFlow/batch")
+    void createAllRepayTransFlow(@RequestBody List<? extends RebackDetailReq> list,@RequestParam("batchDate")String batchDate);
+
+    @PostMapping("/createAllReceiptDetail/batch")
+    void createAllReceiptDetail(@RequestBody List<? extends RepaymentDetailReq> list,@RequestParam("batchDate") String batchDate);
 }

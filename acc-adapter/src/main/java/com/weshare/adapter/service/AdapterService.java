@@ -220,7 +220,7 @@ public class AdapterService {
         return Result.result(true);
     }
 
-    public Result createRepayTransFlow(List<? extends RebackDetailReq> list, String batchDate) {
+    public Result createAllRepayTransFlow(List<? extends RebackDetailReq> list, String batchDate) {
         list = list.stream().filter(e -> e.getTransactionResult().equals(StatusEnum.成功.getCode())).collect(Collectors.toList());
         repayFeignClient.saveAllRepayTransFlow(
                 list.stream().map(e -> {
@@ -320,7 +320,6 @@ public class AdapterService {
             repaySummaryReq.setRemark(repaySummaryReq.getAssetStatus().getDesc());
             repayFeignClient.updateRepaySummary(repaySummaryReq);
         }
-
         return Result.result(true);
     }
 
@@ -330,7 +329,18 @@ public class AdapterService {
             case SETTLED:
                 List<LocalDate> termDueDateList = planReqList.stream().map(RepayPlanReq::getTermDueDate).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
                 List<LocalDate> repayDateList = planReqList.stream().map(RepayPlanReq::getRepayDate).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-                if (repayDateList.get(0).compareTo(termDueDateList.get(1)) <= 0) {
+                if (repayDateList.get(0).compareTo(termDueDateList.get(1)) < 0) {
+                    //实还日期的最后一期<应还日期的倒数第二期
+                    return SettleTypeEnum.PRE_SETTLE;
+                }
+                if (repayDateList.get(0).compareTo(termDueDateList.get(1)) >= 0
+                        && repayDateList.get(0).compareTo(termDueDateList.get(0)) <= 0) {
+                    // 应还日期的倒数第二期 =<实还日期的最后一期<=应还日期的倒数第一期
+                    return SettleTypeEnum.NORMAL_SETTLE;
+                }
+                if (repayDateList.get(0).compareTo(termDueDateList.get(0)) >= 0) {
+                    //实还日期的最后一期>应还日期的倒数第一期
+                    return SettleTypeEnum.OVERDUE_SETTLE;
                 }
         }
         return null;
