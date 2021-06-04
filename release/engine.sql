@@ -6,3 +6,5 @@ alter table acc_batch.tb_person add column create_date datetime comment '创建�
 alter table acc_batch.tb_person drop column create_date;
 alter table acc_loan.loan_contract add loan_status_enum varchar(10) null comment '放款状态' after repay_day;
 alter table acc_loan.loan_contract modify loan_status_enum varchar(10) not null comment '放款状态';
+
+-- netstat -nao findstr 9002

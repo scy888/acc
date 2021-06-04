@@ -243,7 +243,7 @@ public class RepayProvider implements RepayClient {
     public Result<List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>>> getRepayPlanFourth(String dueBillNo) {
         List<RepayPlan> planList = repayPlanRepo.findByDueBillNo(dueBillNo);
         List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = planList.stream().map(repayPlan ->
-                Tuple4.of(repayPlan.getTermBillAmount(), repayPlan.getTermPrin(), repayPlan.getTermDueDate(), repayPlan.getTerm())).collect(Collectors.toList());
+                Tuple4.of(repayPlan.getTermPrin().add(repayPlan.getTermInt()), repayPlan.getTermPrin(), repayPlan.getTermDueDate(), repayPlan.getTerm())).collect(Collectors.toList());
         return Result.result(true, tuple4s);
     }
 

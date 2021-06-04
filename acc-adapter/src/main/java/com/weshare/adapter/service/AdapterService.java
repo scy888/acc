@@ -308,7 +308,7 @@ public class AdapterService {
             repaySummaryReq.setRemainPrincipal(planReqList.stream().map(e -> e.getTermPrin()
                     .subtract(e.getTermRepayPrin())).reduce(BigDecimal.ZERO, BigDecimal::add));//剩余本金
             repaySummaryReq.setRemainInterest(planReqList.stream().map(e -> e.getTermInt()
-                    .subtract(e.getTermRepayInt())).reduce(BigDecimal.ZERO, BigDecimal::add));//剩余利息
+                    .subtract(e.getTermRepayInt()).subtract(e.getTermReduceInt())).reduce(BigDecimal.ZERO, BigDecimal::add));//剩余利息
             repaySummaryReq.setCurrentTerm(StringUtils.getCurrentTerm(firstDate, lastDate, LocalDate.parse(batchDate), totalTerm));//当前期次
             repaySummaryReq.setCurrentTermDueDate(planReqList.stream().filter(e -> e.getTerm().equals(repaySummaryReq.getCurrentTerm()))
                     .map(RepayPlanReq::getTermDueDate).findFirst().orElse(null));//当前期次的应还日
