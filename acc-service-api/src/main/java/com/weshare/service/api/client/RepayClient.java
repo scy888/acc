@@ -5,6 +5,7 @@ import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.entity.RepayTransFlowReq;
 import com.weshare.service.api.enums.FeeTypeEnum;
+import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
@@ -75,6 +76,12 @@ public interface RepayClient {
 
     @PostMapping("/updateRepaySummary}")
     Result updateRepaySummary(@RequestBody RepaySummaryReq repaySummaryReq);
+
+    @GetMapping("/getRepayPlanTwo/{dueBillNo}/{term}")
+    Result<List<Tuple2<BigDecimal, Integer>>> getRepayPlanTwo(@PathVariable("dueBillNo") String dueBillNo, @PathVariable("term") Integer term);
+
+    @GetMapping("/getRepayPlan/{dueBillNo}/{termStatus}")
+    Result<List<RepayPlanReq>> getRepayPlan(@PathVariable("dueBillNo") String dueBillNo, @PathVariable("termStatus") TermStatusEnum termStatus);
 
     @Data
     @Accessors(chain = true)

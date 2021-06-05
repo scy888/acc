@@ -1,6 +1,7 @@
 package com.weshare.repay.repo;
 
 import com.weshare.repay.entity.RepayPlan;
+import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,8 @@ public interface RepayPlanRepo extends JpaRepository<RepayPlan, String> {
     List<DueBillNoAndTermDueDate> findByDueBillNoIn(@Param("dueBillNoList") List<String> dueBillNoList);
 
     List<RepayPlan> findByDueBillNo(String dueBillNo);
+
+    List<RepayPlan> findByDueBillNoAndTermGreaterThanEqual(String dueBillNo, Integer term);
+
+    List<RepayPlan> findByDueBillNoAndTermStatusNot(String dueBillNo, TermStatusEnum termStatus);
 }

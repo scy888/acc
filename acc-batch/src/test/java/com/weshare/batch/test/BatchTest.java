@@ -429,7 +429,6 @@ public class BatchTest {
 
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
     }
-
     @Test
     public void test0820Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-08-20");
@@ -450,6 +449,85 @@ public class BatchTest {
         List<RepaymentDetailReq> repaymentDetailReqs = List.of(
                 new RepaymentDetailReq("YX-102", "04", DateUtils.getLocalDateTime(batchDate), 3, new BigDecimal(215), new BigDecimal(150), new BigDecimal(30), new BigDecimal(20), new BigDecimal(15), batchDate),
                 new RepaymentDetailReq("YX-102", "04", DateUtils.getLocalDateTime(batchDate), 3, new BigDecimal(105), new BigDecimal(40), new BigDecimal(50), new BigDecimal(10), new BigDecimal(5), batchDate)
+        );
+
+        loanDetailReqs = new ArrayList<>(loanDetailReqs);
+        //loanDetailReqs.clear();
+        repaymentPlanReqs = new ArrayList<>(repaymentPlanReqs);
+        //repaymentPlanReqs.clear();
+        refundTicketReqs = new ArrayList<>(refundTicketReqs);
+        //refundTicketReqs.clear();
+        rebackDetailReqs = new ArrayList<>(rebackDetailReqs);
+        //rebackDetailReqs.clear();
+        repaymentDetailReqs = new ArrayList<>(repaymentDetailReqs);
+        //repaymentDetailReqs.clear();
+
+
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+
+        Path path = Paths.get("/yxms", dateStr, "create");
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
+        File file = new File(path.toUri());
+        for (File listFile : Objects.requireNonNull(file.listFiles())) {
+            listFile.delete();
+        }
+
+        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
+        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
+        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
+        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
+        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
+
+        adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
+        adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
+
+        adapterFeignClient.saveAllRepaymentPlan(repaymentPlanReqs);//保存adapter库的还款计划
+        adapterFeignClient.saveAllRepayPlanUpdateLoanContractAndRepaySummary(repaymentPlanReqs);//更新loan库的放款明细,repay库的用户主信息
+
+        adapterFeignClient.saveAllRefundTicket(refundTicketReqs);//报存adapter库的退票文件
+        adapterFeignClient.saveRefundDownRepayTransFlowAndReceiptDetail(refundTicketReqs, batchDate.toString());//保存实还更新还款计划(用户还款主信息,放款主信息,新增放款流水)
+
+        adapterFeignClient.saveAllRebackDetal(rebackDetailReqs);//保存adapter库的reback_detail表（扣款明细表）
+        adapterFeignClient.createAllRepayTransFlow(rebackDetailReqs, batchDate.toString());//保存repay库的repay_trans_flow表（还款流水表）
+
+        adapterFeignClient.saveAllRepaymentDetail(repaymentDetailReqs);//保存adapter库的repayment_detail表（还款明细表）
+        adapterFeignClient.createAllReceiptDetail(repaymentDetailReqs, batchDate.toString());//保存repay的库receipt_detail表(实还记录，更新还款计划和用户还款主信息表)
+
+        loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
+    }
+    @Test
+    public void test1015Repayment() throws Exception {
+        LocalDate batchDate = LocalDate.parse("2020-10-15");
+        String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        //原始放款明细
+        List<LoanDetailReq> loanDetailReqs = new ArrayList<>();
+        //原始还款计划
+        List<RepaymentPlanReq> repaymentPlanReqs = new ArrayList<>();
+        //原始退票
+        List<RefundTicketReq> refundTicketReqs = new ArrayList<>();
+        //原始扣款明细
+        List<RebackDetailReq> rebackDetailReqs = List.of(
+                new RebackDetailReq("YX-102", 4, new BigDecimal(880), new BigDecimal(660), new BigDecimal(150), new BigDecimal(40), new BigDecimal(30), "01", TransFlowTypeEnum.提前还款, null, DateUtils.getLocalDateTime(batchDate), batchDate)
+        );
+        //原始实还明细
+        List<RepaymentDetailReq> repaymentDetailReqs = List.of(
+                new RepaymentDetailReq("YX-102", "02", DateUtils.getLocalDateTime(batchDate), 4, new BigDecimal(880), new BigDecimal(660), new BigDecimal(150), new BigDecimal(40), new BigDecimal(30), batchDate)
         );
 
         loanDetailReqs = new ArrayList<>(loanDetailReqs);

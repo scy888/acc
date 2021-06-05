@@ -13,10 +13,7 @@ import com.weshare.service.api.entity.ReceiptDetailReq;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.entity.RepaySummaryReq;
 import com.weshare.service.api.entity.RepayTransFlowReq;
-import com.weshare.service.api.enums.FeeTypeEnum;
-import com.weshare.service.api.enums.ProjectEnum;
-import com.weshare.service.api.enums.TransFlowTypeEnum;
-import com.weshare.service.api.enums.TransStatusEnum;
+import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import com.weshare.service.api.vo.Tuple2;
@@ -243,14 +240,14 @@ public class RepayProvider implements RepayClient {
     public Result<List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>>> getRepayPlanFourth(String dueBillNo) {
         List<RepayPlan> planList = repayPlanRepo.findByDueBillNo(dueBillNo);
         List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = planList.stream().map(repayPlan ->
-                Tuple4.of(repayPlan.getTermPrin().add(repayPlan.getTermInt()), repayPlan.getTermPrin(), repayPlan.getTermDueDate(), repayPlan.getTerm())).collect(Collectors.toList());
+                Tuple4.of(repayPlan.getTermPrin().add(repayPlan.getTermInt()), repayPlan.getTermInt(), repayPlan.getTermDueDate(), repayPlan.getTerm())).collect(Collectors.toList());
         return Result.result(true, tuple4s);
     }
 
     @Override
     public Result updateRepayPlan(RepayPlanReq repayPlanReq) {
         RepayPlan repayPlan = repayPlanRepo.findByDueBillNoAndTerm(repayPlanReq.getDueBillNo(), repayPlanReq.getTerm());
-        String[] args = {"projectNo", "productNo", "termStartDate", "termDueDate", "termPrin", "termInt"};
+        String[] args = {"projectNo", "productNo", "termStartDate", "termDueDate", "termPrin"};
         BeanUtils.copyProperties(repayPlanReq, repayPlan, args);
         repayPlanRepo.save(repayPlan.setLastModifiedDate(DateUtils.getLocalDateTime(repayPlanReq.getBatchDate())));
         return Result.result(true);
@@ -259,9 +256,22 @@ public class RepayProvider implements RepayClient {
     @Override
     public Result updateRepaySummary(RepaySummaryReq repaySummaryReq) {
         RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo(repaySummaryReq.getDueBillNo());
-        String[] args = {"projectNo", "productNo", "userId", "contractAmount", "loanDate", "repayDay","totalTerm"};
+        String[] args = {"projectNo", "productNo", "userId", "contractAmount", "loanDate", "repayDay", "totalTerm"};
         BeanUtils.copyProperties(repaySummaryReq, repaySummary, args);
         repaySummaryRepo.save(repaySummary.setLastModifiedDate(DateUtils.getLocalDateTime(repaySummaryReq.getBatchDate())));
         return null;
+    }
+
+    @Override
+    public Result<List<Tuple2<BigDecimal, Integer>>> getRepayPlanTwo(String dueBillNo, Integer term) {
+        List<RepayPlan> planList = repayPlanRepo.findByDueBillNoAndTermGreaterThanEqual(dueBillNo, term);
+        List<Tuple2<BigDecimal, Integer>> tuple2s = planList.stream().map(e -> Tuple2.of(e.getTermPrin(), e.getTerm())).collect(Collectors.toList());
+        return Result.result(true, tuple2s);
+    }
+
+    @Override
+    public Result<List<RepayPlanReq>> getRepayPlan(String dueBillNo, TermStatusEnum termStatus) {
+        List<RepayPlan> planList = repayPlanRepo.findByDueBillNoAndTermStatusNot(dueBillNo,termStatus);
+        return Result.result(true,planList);
     }
 }

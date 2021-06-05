@@ -1,5 +1,6 @@
 package com.weshare.adapter.service;
 
+import com.weshare.adapter.entity.RepaymentDetail;
 import com.weshare.adapter.feignCilent.LoanFeignClient;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
 import com.weshare.service.api.client.LoanClient;
@@ -225,8 +226,7 @@ public class AdapterService {
         repayFeignClient.saveAllRepayTransFlow(
                 list.stream().map(e -> {
                     RepayTransFlowReq repayTransFlowReq = new RepayTransFlowReq();
-                    repayTransFlowReq
-                            .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                    repayTransFlowReq.setProjectNo(ProjectEnum.YXMS.getProjectNo())
                             .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
                             .setFlowSn(SnowFlake.getInstance().nextId() + "")
                             .setDueBillNo(e.getDueBillNo())
@@ -241,6 +241,7 @@ public class AdapterService {
         );
         return Result.result(true);
     }
+
 
     public Result createAllReceiptDetail(List<? extends RepaymentDetailReq> list, String batchDate) {
         Map<String, ? extends List<? extends RepaymentDetailReq>> map = list.stream().collect(Collectors.groupingBy(RepaymentDetailReq::getDueBillNo));
@@ -260,7 +261,7 @@ public class AdapterService {
                 String flowSn = tuple3.getSecond();
                 tuple3s.remove(tuple3);
                 receiptDetailReqList.addAll(
-                        createReceiptReqList(repaymentDetailReq).stream().peek(e ->
+                        createReceiptReqList(repaymentDetailReq,repaymentDetailReqs.size()).stream().peek(e ->
                                 e.setTotalTerm(totalTerm).setFlowSn(flowSn)).collect(Collectors.toList())
                 );
             }
@@ -270,11 +271,11 @@ public class AdapterService {
             for (Map.Entry<Integer, List<ReceiptDetailReq>> entity : receiptDetailReqList.
                     stream().collect(Collectors.groupingBy(ReceiptDetailReq::getTerm)).entrySet()) {
                 Integer term = entity.getKey();
-                //List<ReceiptDetailReq> receiptDetailReqs = entity.getValue();
+                List<ReceiptDetailReq> receiptDetailReqs = entity.getValue();
                 Tuple4<BigDecimal, BigDecimal, LocalDate, Integer> tuple4 = tuple4s.stream()
                         .filter(e -> e.getFourth().equals(term)).findFirst().orElse(null);
                 BigDecimal termBillAmount = tuple4.getFirst();//本期账单应还金额
-                BigDecimal termPrin = tuple4.getSecond();//本期账单的应还本金
+                BigDecimal termInt = tuple4.getSecond();//本期账单的应还利息
                 LocalDate termDueDate = tuple4.getThird();//本期账单应还日
                 //一次根据借据号和期次查出实还表中费用类型的金额(幂等性)
                 List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = repayFeignClient.getReceiptDetailTwo(dueBillNo, term).getData();
@@ -287,12 +288,24 @@ public class AdapterService {
                 repayPlanReq.setTermRepayPenalty(getAmount(tuple2s, FeeTypeEnum.PENALTY));//已还罚息
                 repayPlanReq.setTermReduceInt(getAmount(tuple2s, FeeTypeEnum.REDUCE_INTEREST));//减免利息
                 repayPlanReq.setTermPenalty(getAmount(tuple2s, FeeTypeEnum.PENALTY));//应还罚息
-                repayPlanReq.setTermBillAmount(termBillAmount.add(repayPlanReq.getTermPenalty()));//应还金额
-                repayPlanReq.setTermStatus(getTermStatus(repayPlanReq.getTermBillAmount(), tuple2s.stream().map(Tuple2::getFirst).reduce(BigDecimal.ZERO, BigDecimal::add), termDueDate, batchDate));//期次状态
-                repayPlanReq.setRepayDate(repayPlanReq.getTermStatus() == TermStatusEnum.REPAID ? LocalDate.parse(batchDate) : null);//已还日
-                repayPlanReq.setTermPaidOutType(getTermPaidOutType(repayPlanReq.getTermStatus(), repayPlanReq.getRepayDate(), termDueDate));//还清类型
-                repayPlanReq.setRemark(repayPlanReq.getTermPaidOutType() == null ? "本期次未结清" : repayPlanReq.getTermPaidOutType().getDesc());//备注
-                repayFeignClient.updateRepayPlan(repayPlanReq);
+                if (receiptDetailReqs.stream().noneMatch(e -> e.getFeeType() == FeeTypeEnum.INTEREST)) {
+                    //提前结清是不还利息的
+                    repayPlanReq.setTermInt(BigDecimal.ZERO);//应还利息
+                    repayPlanReq.setTermBillAmount(termBillAmount.subtract(termInt));//应还金额
+                    repayPlanReq.setTermStatus(TermStatusEnum.REPAID);//期次状态
+                    repayPlanReq.setTermPaidOutType(TermPaidOutTypeEnum.PRE_PAIDOUT);//还清类型
+                    repayPlanReq.setRepayDate(LocalDate.parse(batchDate));
+                    repayPlanReq.setRemark(TermPaidOutTypeEnum.PRE_PAIDOUT.getDesc());//备注
+                    repayFeignClient.updateRepayPlan(repayPlanReq);
+                } else {
+                    repayPlanReq.setTermInt(termInt);//应还利息
+                    repayPlanReq.setTermBillAmount(termBillAmount.add(repayPlanReq.getTermPenalty()));//应还金额
+                    repayPlanReq.setTermStatus(getTermStatus(repayPlanReq.getTermBillAmount(), tuple2s.stream().map(Tuple2::getFirst).reduce(BigDecimal.ZERO, BigDecimal::add), termDueDate, batchDate));//期次状态
+                    repayPlanReq.setRepayDate(repayPlanReq.getTermStatus() == TermStatusEnum.REPAID ? LocalDate.parse(batchDate) : null);//已还日
+                    repayPlanReq.setTermPaidOutType(getTermPaidOutType(repayPlanReq.getTermStatus(), repayPlanReq.getRepayDate(), termDueDate));//还清类型
+                    repayPlanReq.setRemark(repayPlanReq.getTermPaidOutType() == null ? "本期次未结清" : repayPlanReq.getTermPaidOutType().getDesc());//备注
+                    repayFeignClient.updateRepayPlan(repayPlanReq);
+                }
             }
             //更新summary表
             List<RepayPlanReq> planReqList = repayFeignClient.findRepayPlanListByDueBillNo(dueBillNo).getData();
@@ -400,38 +413,109 @@ public class AdapterService {
         return tuple2s.stream().filter(e -> e.getSecond() == feeTypeEnum).map(Tuple2::getFirst).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req) {
-
+    private List<ReceiptDetailReq> createReceiptReqList(RepaymentDetailReq req,Integer size) {
         List<ReceiptDetailReq> list = new ArrayList<>();
-        if (req.getPrincipal().compareTo(BigDecimal.ZERO) > 0) {
-            list.add(
-                    createReceiptReq(req)
-                            .setAmount(req.getPrincipal())
-                            .setFeeType(FeeTypeEnum.PRINCIPAL)
-            );
-        }
-        if (req.getInterest().compareTo(BigDecimal.ZERO) > 0) {
-            list.add(
-                    createReceiptReq(req)
-                            .setAmount(req.getInterest())
-                            .setFeeType(FeeTypeEnum.INTEREST)
-            );
-        }
-        if (req.getPenalty().compareTo(BigDecimal.ZERO) > 0) {
-            list.add(
-                    createReceiptReq(req)
-                            .setAmount(req.getPenalty())
-                            .setFeeType(FeeTypeEnum.PENALTY)
-            );
-        }
-        if (req.getReduceInterest().compareTo(BigDecimal.ZERO) > 0) {
-            list.add(
-                    createReceiptReq(req)
-                            .setAmount(req.getReduceInterest())
-                            .setFeeType(FeeTypeEnum.REDUCE_INTEREST)
-            );
+
+        if (RepaymentDetail.DebitTypeEnum.提前结清扣款.getCode().equals(req.getDebitType())) {
+            //提前结清还款计划未结清的期数在当前时间之前的还本金+利息+罚息+减免利息,在当前时间之后的只还本金
+            //List<RepayPlanReq> planReqList = repayFeignClient.getRepayPlan(req.getDueBillNo(), TermStatusEnum.REPAID).getData();
+            List<RepayPlanReq> planReqList = repayFeignClient.findRepayPlanListByDueBillNo(req.getDueBillNo()).getData()
+                    .stream().sorted(Comparator.comparing(RepayPlanReq::getTermDueDate)).collect(Collectors.toList());
+            LocalDate firstDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).min(Comparator.comparing(localDate -> localDate)).orElse(null);
+            LocalDate endDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).max(LocalDate::compareTo).orElse(null);
+            Integer currentTerm = StringUtils.getCurrentTerm(firstDate, endDate, req.getBatchDate(), planReqList.size());
+            planReqList = planReqList.stream().filter(e -> e.getTermStatus() != TermStatusEnum.REPAID).collect(Collectors.toList());
+            List<RepayPlanReq> prinIntList = planReqList.stream().filter(e -> e.getTerm() <= currentTerm).collect(Collectors.toList());
+            planReqList.removeAll(prinIntList);
+            List<RepayPlanReq> prinList = new ArrayList<>(planReqList);
+            //有罚息和减免的利息都放在当前期次里面
+            BigDecimal repaymentAmount = req.getRepaymentAmount();//总金额
+            BigDecimal principal = req.getPrincipal();//总本金
+            BigDecimal interest = req.getInterest();//总利息
+            BigDecimal penalty = req.getPenalty();//总罚息
+            BigDecimal reduceInterest = req.getReduceInterest();//总减免利息
+            //还本金+利息
+            for (RepayPlanReq planReq : prinIntList) {
+                if (principal.compareTo(BigDecimal.ZERO) > 0) {
+                    list.add(
+                            createReceiptReq(req.getTradeDate(), planReq.getDueBillNo(), planReq.getTerm(), planReq.getTermDueDate(), planReq.getTermPrin().divide(new BigDecimal(size)), FeeTypeEnum.PRINCIPAL)
+                    );
+                    principal = principal.subtract(planReq.getTermPrin());
+                }
+                if (interest.compareTo(BigDecimal.ZERO) > 0) {
+                    list.add(
+                            createReceiptReq(req.getTradeDate(), planReq.getDueBillNo(), planReq.getTerm(), planReq.getTermDueDate(), (planReq.getTermInt().subtract(reduceInterest)).divide(new BigDecimal(size)), FeeTypeEnum.INTEREST)
+                    );
+                    interest = interest.subtract(planReq.getTermInt());
+                }
+                if (penalty.compareTo(BigDecimal.ZERO) > 0) {
+                    list.add(createReceiptReq(req.getTradeDate(), planReq.getDueBillNo(), planReq.getTerm(), planReq.getTermDueDate(), penalty, FeeTypeEnum.PENALTY)
+                    );
+                    penalty = BigDecimal.ZERO;
+                }
+                if (reduceInterest.compareTo(BigDecimal.ZERO) > 0) {
+                    list.add(createReceiptReq(req.getTradeDate(), planReq.getDueBillNo(), planReq.getTerm(), planReq.getTermDueDate(), reduceInterest, FeeTypeEnum.REDUCE_INTEREST)
+                    );
+                    reduceInterest = BigDecimal.ZERO;
+                }
+            }
+            //还本金
+            for (RepayPlanReq planReq : prinList) {
+                if (principal.compareTo(BigDecimal.ZERO) > 0) {
+                    list.add(
+                            createReceiptReq(req.getTradeDate(), planReq.getDueBillNo(), planReq.getTerm(), planReq.getTermDueDate(), planReq.getTermPrin(), FeeTypeEnum.PRINCIPAL)
+                                    .setReceiptType(ReceiptTypeEnum.PRE)
+                                    .setRemark(ReceiptTypeEnum.PRE.getDesc())
+                    );
+                    principal = principal.subtract(planReq.getTermPrin());
+                }
+            }
+        } else {
+            if (req.getPrincipal().compareTo(BigDecimal.ZERO) > 0) {
+                list.add(
+                        createReceiptReq(req)
+                                .setAmount(req.getPrincipal())
+                                .setFeeType(FeeTypeEnum.PRINCIPAL)
+                );
+            }
+            if (req.getInterest().compareTo(BigDecimal.ZERO) > 0) {
+                list.add(
+                        createReceiptReq(req)
+                                .setAmount(req.getInterest())
+                                .setFeeType(FeeTypeEnum.INTEREST)
+                );
+            }
+            if (req.getPenalty().compareTo(BigDecimal.ZERO) > 0) {
+                list.add(
+                        createReceiptReq(req)
+                                .setAmount(req.getPenalty())
+                                .setFeeType(FeeTypeEnum.PENALTY)
+                );
+            }
+            if (req.getReduceInterest().compareTo(BigDecimal.ZERO) > 0) {
+                list.add(
+                        createReceiptReq(req)
+                                .setAmount(req.getReduceInterest())
+                                .setFeeType(FeeTypeEnum.REDUCE_INTEREST)
+                );
+            }
         }
         return list;
+    }
+
+    private ReceiptDetailReq createReceiptReq(LocalDateTime tradeDate, String dueBillNo, Integer term, LocalDate termDueDate, BigDecimal amount, FeeTypeEnum feeTypeEnum) {
+        return new ReceiptDetailReq().setAmount(amount)
+                .setFeeType(feeTypeEnum)
+                .setTerm(term)
+                .setProjectNo(ProjectEnum.YXMS.getProjectNo())
+                .setProductNo(ProjectEnum.YXMS.getProducts().get(0).getProductNo())
+                .setBatchDate(tradeDate.toLocalDate())
+                .setDueBillNo(dueBillNo)
+                .setRepayDate(tradeDate.toLocalDate())
+                .setReceiptType(tradeDate.toLocalDate().isEqual(termDueDate)
+                        ? ReceiptTypeEnum.NORMAL : ReceiptTypeEnum.OVERDUE)
+                .setRemark(tradeDate.toLocalDate().isEqual(termDueDate)
+                        ? ReceiptTypeEnum.NORMAL.getDesc() : ReceiptTypeEnum.OVERDUE.getDesc());
     }
 
     private ReceiptDetailReq createReceiptReq(RepaymentDetailReq req) {

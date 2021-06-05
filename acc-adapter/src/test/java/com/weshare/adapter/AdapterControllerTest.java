@@ -8,12 +8,14 @@ import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
 import com.weshare.service.api.entity.*;
+import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.DateUtils;
 import common.JsonUtil;
 import common.ReflectUtils;
+import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -234,6 +234,37 @@ class AdapterControllerTest {
     public void testFourth() {
         List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayFeignClient.getRepayPlanFourth("YX-102").getData();
         Tuple4<BigDecimal, BigDecimal, LocalDate, Integer> tuple4 = tuple4s.stream().filter(e -> e.getFourth() == 6).findFirst().orElse(null);
-        log.info("tuple4:{}",JsonUtil.toJson(tuple4,true));
+        log.info("tuple4:{}", JsonUtil.toJson(tuple4, true));
+    }
+
+    @Test
+    public void testRemainPrin() {
+        System.out.println(repayFeignClient.getRepayPlanTwo("YX-102", 4).getData());
+    }
+
+    @Test
+    public void testNotRepaid(){
+        List<RepayPlanReq> data = repayFeignClient.getRepayPlan("YX-102", TermStatusEnum.REPAID).getData();
+        log.info("data:{}",JsonUtil.toJson(data,true));
+        System.out.println(data.stream().map(RepayPlanReq::getTermDueDate).max(Comparator.comparing(localDate -> localDate)).orElse(null));
+        System.out.println(data.stream().map(RepayPlanReq::getTermDueDate).max(LocalDate::compareTo).orElse(null));
+        System.out.println(data.stream().map(RepayPlanReq::getTerm).max(Comparator.comparing(term -> term)).orElse(null));
+        System.out.println(data.stream().map(RepayPlanReq::getTerm).max(Integer::compareTo).orElse(null));
+    }
+
+    @Test
+    public void testCurrentTerm(){
+        List<RepayPlanReq> planReqList = repayFeignClient.findRepayPlanListByDueBillNo("YX-102").getData()
+                .stream().sorted(Comparator.comparing(RepayPlanReq::getTermDueDate)).collect(Collectors.toList());
+        LocalDate firstDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).min(Comparator.comparing(localDate -> localDate)).orElse(null);
+        LocalDate endDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).max(LocalDate::compareTo).orElse(null);
+        Integer currentTerm = StringUtils.getCurrentTerm(firstDate, endDate, LocalDate.parse("2020-10-15"), planReqList.size());
+        planReqList = planReqList.stream().filter(e -> e.getTermStatus() != TermStatusEnum.REPAID).collect(Collectors.toList());
+        List<RepayPlanReq> prinIntList = planReqList.stream().filter(e -> e.getTerm() <= currentTerm).collect(Collectors.toList());
+        planReqList.removeAll(prinIntList);
+        List<RepayPlanReq> prinList=new ArrayList<>(planReqList);
+
+        log.info("还本金+利息:{}",JsonUtil.toJson(prinIntList,true));
+        log.info("还本金:{}",JsonUtil.toJson(prinList,true));
     }
 }
