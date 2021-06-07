@@ -7,6 +7,7 @@ import common.ChangeEnumUtils;
 import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
@@ -238,7 +243,7 @@ public class TestBatch {
     }
 
     @Test
-    public void test003(){
+    public void test003() {
 
         LocalDate batchDate = LocalDate.parse("2020-05-15");
         List<RepaymentPlanReq> repaymentPlanReqs = List.of(
@@ -256,15 +261,134 @@ public class TestBatch {
                 new RepaymentPlanReq("YX-102", 5, batchDate.plusMonths(5), new BigDecimal(300), new BigDecimal(210), new BigDecimal(90), batchDate),
                 new RepaymentPlanReq("YX-102", 6, batchDate.plusMonths(6), new BigDecimal(300), new BigDecimal(250), new BigDecimal(50), batchDate)
         );
-        Map<String, RepaymentPlanReq> collect = repaymentPlanReqs.stream().collect(Collectors.toMap(e -> e.getDueBillNo()+"_"+e.getTerm(), Function.identity(),(a,b)->b));
+        Map<String, RepaymentPlanReq> collect = repaymentPlanReqs.stream().collect(Collectors.toMap(e -> e.getDueBillNo() + "_" + e.getTerm(), Function.identity(), (a, b) -> b));
         for (Map.Entry<String, RepaymentPlanReq> entry : collect.entrySet()) {
-            System.out.println(entry.getKey()+":"+entry.getValue());
+            System.out.println(entry.getKey() + ":" + entry.getValue());
         }
         System.out.println("=========================================================================");
-        Map<String, List<RepaymentPlanReq>> map = repaymentPlanReqs.stream().collect(Collectors.groupingBy(e -> e.getDueBillNo()+"_"+e.getTerm()));
+        Map<String, List<RepaymentPlanReq>> map = repaymentPlanReqs.stream().collect(Collectors.groupingBy(e -> e.getDueBillNo() + "_" + e.getTerm()));
         for (Map.Entry<String, List<RepaymentPlanReq>> entry : map.entrySet()) {
-            System.out.println(entry.getKey()+":"+entry.getValue());
-
+            System.out.println(entry.getKey() + ":" + entry.getValue());
         }
+    }
+
+
+    private static int ticket = 100;
+
+    public static void main(String[] args) {
+        ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+
+        ReentrantLock lock = new ReentrantLock(true);
+        for (int i = 1; i < 5; i++) {
+            new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            while (true) {
+                                synchronized (TestBatch.class) {
+                                    if (ticket > 0) {
+                                        try {
+                                            Thread.sleep(50);
+                                            threadLocal.set(ticket--);
+                                            System.out.println("当前窗口:" + Thread.currentThread().getName() + " 正在卖第:" + threadLocal.get() + "张票");
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }, "窗口-" + i
+            ).start();
+        }
+    }
+
+    private String getName(String name) {
+        return "当前线程名:" + Thread.currentThread().getName() + " 输出的姓名:" + name;
+    }
+
+    private void getNames(String names) {
+        for (int i = 0; i < names.length(); i++) {
+            char c = names.charAt(i);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(c);
+        }
+        System.out.println();
+    }
+
+    @Test
+    public void testName() throws ExecutionException, InterruptedException {
+        for (int i = 0; i < 5; i++) {
+            FutureTask<String> FutureTask = new FutureTask<>(() -> getName("盛重阳"));
+            new Thread(
+                    FutureTask, "shengchongyang-" + i
+            ).start();
+            System.out.println(FutureTask.get());
+        }
+    }
+
+    @Test
+    public void testNames() {
+        for (int i = 0; i < 2; i++) {
+            new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            getNames("盛重阳");
+                            //System.out.println(Thread.currentThread().getName());
+                        }
+                    }
+            ).start();
+        }
+    }
+
+    private Integer data;
+    ThreadLocal<Integer> threadLocal=new ThreadLocal();
+    @Test
+    public void testThreadDate() throws Exception {
+        for (int i = 1; i <= 4; i++) {
+            FutureTask<Integer> task = new FutureTask<>(new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    Integer date = getDate(6);
+                    System.out.println("当前线程名:{}"+Thread.currentThread().getName()+" get的值: "+date);
+                    return date;
+                }
+            });
+            new Thread(
+                    task,"thread "+i
+         ).start();
+            //System.out.println("当前线程名:{}"+Thread.currentThread().getName()+" get的值: "+task.get());
+        }
+    }
+
+    private Integer getDate(Integer num) {
+            data=new Random().nextInt(num);
+            threadLocal.set(data);
+        System.out.println("当前线程名:{}" + Thread.currentThread().getName()+" set的值："+threadLocal.get());
+        return threadLocal.get();
+    }
+
+    @Test
+    public void testNum() {
+        System.out.println((int) Math.ceil(17 / (3 * 1.0)));
+        System.out.println(17 / 3.0);
+    }
+
+    @Test
+    public void test(){
+        Student instance1 = Student.getInstance("赵敏",20);
+        instance1.setName("赵敏2");
+        instance1.setAge(202);
+        Student instance2 = Student.getInstance("周芷若",19);
+        instance2.setName("周芷若2");
+        instance2.setAge(191);
+        System.out.println(instance1==instance2);
+        System.out.println(instance1);
+        System.out.println(instance2);
     }
 }

@@ -1,6 +1,8 @@
 package com.weshare.repay.provider;
 
 import com.weshare.repay.RepayApplication;
+import com.weshare.repay.dao.RepayDao;
+import com.weshare.repay.entity.RepayPlan;
 import com.weshare.repay.entity.RepaySummary;
 import com.weshare.repay.repo.ReceiptDetailRepo;
 import com.weshare.repay.repo.RepayPlanRepo;
@@ -8,10 +10,13 @@ import com.weshare.repay.repo.RepaySummaryRepo;
 import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.enums.FeeTypeEnum;
+import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import com.weshare.service.api.vo.Tuple2;
+import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @describe:
  */
 @SpringBootTest
+@Slf4j
 class RepayProviderTest {
     @Autowired
     private RepayClient repayClient;
@@ -49,6 +56,8 @@ class RepayProviderTest {
     private RepayTransFlowRepo repayTransFlowRepo;
     @Autowired
     private ReceiptDetailRepo receiptDetailRepo;
+    @Autowired
+    private RepayDao repayDao;
 
     @Test
     void count() {
@@ -93,5 +102,59 @@ class RepayProviderTest {
 
         List<String> list1 = List.of("2020/06/15 12:12:25", "2020/06/15 12:12:25", "2020/06/15 12:12:25");
         System.out.println(list1.stream().map(e -> LocalDateTime.parse(e, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))).collect(Collectors.toList()));
+    }
+    @Test
+    public void testOneRepayPlan(){
+        RepayPlan repayPlan = repayDao.getRepayPlan("YX-102", 1);
+        log.info("repayPlan:{}",JsonUtil.toJson(repayPlan,true));
+        System.out.println(repayPlan.getTermStatus() == TermStatusEnum.REPAID);
+    }
+    @Test
+    public void testOneMap(){
+        Map<String, Object> map = repayDao.getRepayPlan(1, "YX-102");
+        log.info("map:{}",JsonUtil.toJson(map,true));
+        System.out.println(TermStatusEnum.valueOf(map.get("term_status").toString()) == TermStatusEnum.REPAID);
+    }
+    @Test
+    public void testListRepayPlan(){
+        List<RepayPlan> repayPlanList = repayDao.getRepayPlanList("YX-102", List.of(1, 2));
+        log.info("repayPlanList:{}",JsonUtil.toJson(repayPlanList,true));
+
+    }
+    @Test
+    public void testListMap(){
+        List<Map<String, Object>> mapList = repayDao.getRepayPlanList(List.of(1, 2), "YX-102");
+        log.info("mapList:{}",JsonUtil.toJson(mapList,true));
+
+    }
+
+    @Test
+    public void testTuple3(){
+        Tuple3<LocalDate, BigDecimal, TermStatusEnum> tuple3 = repayDao.getTuple3("YX-102", 1);
+        log.info("tuple3:{}",JsonUtil.toJson(tuple3,true));
+
+    }
+    @Test
+    public void testTuple3List(){
+        List<Tuple3<LocalDate, BigDecimal, TermStatusEnum>> tuple3s = repayDao.getTuple3("YX-102", List.of(1, 2));
+        log.info("tuple3:{}",JsonUtil.toJson(tuple3s,true));
+
+    }
+    @Test
+    public void testRepayList(){
+        List<RepayDao.Repay> list = repayDao.getRepayList("YX-102", List.of(1, 2));
+        log.info("list:{}",JsonUtil.toJson(list,true));
+
+    }
+    @Test
+    public void testMapList(){
+        List<Map<String, Object>> mapList = repayDao.getMapList("YX-102", List.of(1, 2));
+        log.info("mapList:{}",JsonUtil.toJson(mapList,true));
+    }
+    @Test
+    public void testBoth(){
+        List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s = repayDao.getBoth("WS121212");
+        log.info("tuple3s:{}",JsonUtil.toJson(tuple3s,true));
+
     }
 }

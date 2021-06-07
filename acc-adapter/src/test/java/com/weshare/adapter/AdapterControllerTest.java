@@ -243,9 +243,9 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void testNotRepaid(){
+    public void testNotRepaid() {
         List<RepayPlanReq> data = repayFeignClient.getRepayPlan("YX-102", TermStatusEnum.REPAID).getData();
-        log.info("data:{}",JsonUtil.toJson(data,true));
+        log.info("data:{}", JsonUtil.toJson(data, true));
         System.out.println(data.stream().map(RepayPlanReq::getTermDueDate).max(Comparator.comparing(localDate -> localDate)).orElse(null));
         System.out.println(data.stream().map(RepayPlanReq::getTermDueDate).max(LocalDate::compareTo).orElse(null));
         System.out.println(data.stream().map(RepayPlanReq::getTerm).max(Comparator.comparing(term -> term)).orElse(null));
@@ -253,7 +253,7 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void testCurrentTerm(){
+    public void testCurrentTerm() {
         List<RepayPlanReq> planReqList = repayFeignClient.findRepayPlanListByDueBillNo("YX-102").getData()
                 .stream().sorted(Comparator.comparing(RepayPlanReq::getTermDueDate)).collect(Collectors.toList());
         LocalDate firstDate = planReqList.stream().map(RepayPlanReq::getTermDueDate).min(Comparator.comparing(localDate -> localDate)).orElse(null);
@@ -262,9 +262,9 @@ class AdapterControllerTest {
         planReqList = planReqList.stream().filter(e -> e.getTermStatus() != TermStatusEnum.REPAID).collect(Collectors.toList());
         List<RepayPlanReq> prinIntList = planReqList.stream().filter(e -> e.getTerm() <= currentTerm).collect(Collectors.toList());
         planReqList.removeAll(prinIntList);
-        List<RepayPlanReq> prinList=new ArrayList<>(planReqList);
+        List<RepayPlanReq> prinList = new ArrayList<>(planReqList);
 
-        log.info("还本金+利息:{}",JsonUtil.toJson(prinIntList,true));
-        log.info("还本金:{}",JsonUtil.toJson(prinList,true));
+        log.info("还本金+利息:{}", JsonUtil.toJson(prinIntList, true));
+        log.info("还本金:{}", JsonUtil.toJson(prinList, true));
     }
 }
