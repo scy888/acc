@@ -8,8 +8,15 @@ alter table acc_loan.loan_contract add loan_status_enum varchar(10) null comment
 alter table acc_loan.loan_contract modify loan_status_enum varchar(10) not null comment '放款状态';
 
 -- netstat -nao findstr 9002
+select datediff(a.repay_date,a.term_due_date) from acc_repay.repay_plan a where a.due_bill_no='YX-102' and a.term=2
+select year(now())-year(substr('422202199109091016',7,8)) 年龄;
+select year('2021/12/12')-year(substr('422202199109091016',7,8)) 年龄;
+select year(now())-substr('422202199109091016',7,4) 年龄;
 
-
+SELECT * FROM AA a where a.id not in (select b.id from bb b );
+SELECT * FROM AA a where a.id in (select b.id from bb b );
+select * from aa a where not EXISTS (select b.id from bb b where a.id=b.id)
+select * from aa a where EXISTS (select b.id from bb b where a.id=b.id)
 
 UPDATE acc_repay.receipt_detail a ,acc_loan.loan_contract b
  set a.total_term=b.total_term,a.last_modified_date=now()
@@ -45,3 +52,29 @@ select m.due_bill_no,m.contract_amount,n.due_bill_no,n.sum_term_prin from
 
 select * from acc_loan.loan_contract a where a.due_bill_no in (select distinct b.due_bill_no from acc_repay.repay_plan b where b.project_no='WS121212') and a.project_no='WS121212';
 select * from acc_loan.loan_contract a where exists (select distinct b.due_bill_no from acc_repay.repay_plan b where b.project_no='WS121212' and a.due_bill_no=b.due_bill_no) and a.project_no='WS121212';
+
+insert into acc_adapter.bb (
+id,
+b_name,
+b_age,
+b_address
+)
+select id,a_name,a_age,a_address from acc_adapter.aa limit 1;
+
+insert into acc_adapter.bb (
+id,
+b_name,
+b_age,
+b_address
+)
+select 4,'周芷若',18,'峨嵋3' from dual
+where not exists (select * from acc_adapter.bb where b_name='周芷若' and b_address='峨嵋3')
+
+insert into acc_adapter.bb(
+id,
+b_name,
+b_age,
+b_address
+)
+values (7,'周芷若',18,'峨嵋18')
+on duplicate key update b_address='峨嵋65';

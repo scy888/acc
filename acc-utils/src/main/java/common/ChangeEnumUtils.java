@@ -17,9 +17,9 @@ import java.util.List;
 @Getter
 public enum ChangeEnumUtils {
     YXMS("WS121212", List.of(
-            new TransferEnum("termStatus", "提前结清", "PRE"),
-            new TransferEnum("termStatus", "正常结清", "NORMAL"),
-            new TransferEnum("termStatus", "逾期结清", "OVERDUE"),
+            new TransferEnum("termStatus", "本期未还", "UNDUE"),
+            new TransferEnum("termStatus", "本期已还", "REPAID"),
+            new TransferEnum("termStatus", "逾期", "OVERDUE"),
 
             new TransferEnum("loanStatus", "01", "成功"),
             new TransferEnum("loanStatus", "02", "失败"),
@@ -74,8 +74,8 @@ public enum ChangeEnumUtils {
                         .findFirst()
                 ).map(TransferEnum::getTransferValue).orElse("");
 
-        return Enum.valueOf(clazz, transFerValue);
-
+        return T.valueOf(clazz, transFerValue);
+        //return Enum.valueOf(clazz, transFerValue);
     }
 
     @Value

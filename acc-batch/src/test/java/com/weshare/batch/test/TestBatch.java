@@ -216,9 +216,9 @@ public class TestBatch {
 
     @Test
     public void test001() {
-        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "提前结清", TermStatusEnum.class));
-        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "正常结清", TermStatusEnum.class));
-        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "逾期结清", TermStatusEnum.class));
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "本期未还", TermStatusEnum.class));
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "本期已还", TermStatusEnum.class));
+        System.out.println(ChangeEnumUtils.changeEnum("WS121212", "termStatus", "逾期", TermStatusEnum.class));
     }
 
     @Test
