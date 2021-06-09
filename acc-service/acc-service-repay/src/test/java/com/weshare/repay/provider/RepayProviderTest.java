@@ -25,14 +25,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -181,10 +180,21 @@ class RepayProviderTest {
                 .setPageNum(1)
                 .setPageSize(2)
                 .setDueBillNo("YX-102")
-                .setTerms(List.of(2,3,4))
+                .setTerms(List.of(2, 3, 4))
                 .setTermStatus(TermStatusEnum.REPAID)
                 .setStartDate(LocalDate.parse("2020-01-01"))
                 .setEndDate(LocalDate.parse("2020-12-31"))).getData();
         log.info("data:{}", JsonUtil.toJson(data, true));
+    }
+
+    @Test
+    public void test() {
+        Class<RepayPlan> clazz = RepayPlan.class;
+        System.out.println("是否是注解：" + clazz.isAnnotation());
+        System.out.println(clazz.isAnnotationPresent(Table.class));
+        Index[] indexes = clazz.getAnnotation(Table.class).indexes();
+        Arrays.asList(indexes).stream().forEach(e -> System.out.println(e));
+        System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).appliesTo());
+        System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).comment());
     }
 }

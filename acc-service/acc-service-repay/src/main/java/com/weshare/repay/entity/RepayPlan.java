@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.Table;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -26,12 +23,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@javax.persistence.Table(indexes = {
+@Table(indexes = {
         @Index(name = "idx_repay_plan_due_bill_no", columnList = "dueBillNo, term", unique = true),
         @Index(name = "idx_repay_plan_batch_date", columnList = "batchDate"),
         @Index(name = "idx_repay_plan_project_no", columnList = "projectNo")
 })
-@Table(appliesTo = "repay_plan", comment = "还款计划表")
+@org.hibernate.annotations.Table(appliesTo = "repay_plan", comment = "还款计划表")
 public class RepayPlan {
 
     @Id

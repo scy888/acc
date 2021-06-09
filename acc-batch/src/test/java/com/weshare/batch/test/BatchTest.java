@@ -9,15 +9,14 @@ import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
 import common.ReflectUtils;
 import common.SnowFlake;
+import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author: scyang
@@ -93,6 +93,7 @@ public class BatchTest {
         //byte[] bytes = inputStream.readAllBytes();
         byte[] bytes = new byte[inputStream.available()];
         inputStream.read(bytes);
+        inputStream.close();
         String string = new String(bytes);
         jdbcTemplate.batchUpdate(string.split(";"));
     }
@@ -585,6 +586,29 @@ public class BatchTest {
         }
         for (File file : Objects.requireNonNull(new File(zipPath.toUri()).listFiles())) {
             file.delete();
+        }
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(String.valueOf(zipPath), "yxms.zip")));
+        for (File file : Objects.requireNonNull(new File(writePath.toUri()).listFiles())) {
+            //ZipUtil.addToZip(zipOutputStream, file, file.getName(), "zip", false);
+            //ZipUtil.addToZip(zipOutputStream, Files.readAllBytes(Paths.get(file.getAbsolutePath())), file.getName(), "zip");
+            FileInputStream fileInputStream = new FileInputStream(new File(file.getAbsolutePath()));
+            byte[] bytes = new byte[fileInputStream.available()];
+            fileInputStream.read(bytes);
+            fileInputStream.close();
+            ZipUtil.addToZip(zipOutputStream,bytes,file.getName(),"");
+        }
+        zipOutputStream.close();
+        //解压
+        Path unzipPath = Paths.get("/yxms", dateStr, "unzip");
+        if (Files.notExists(unzipPath)) {
+            Files.createDirectories(unzipPath);
+        }
+        for (File file : Objects.requireNonNull(new File(unzipPath.toUri()).listFiles())) {
+            file.delete();
+        }
+        for (File file : Objects.requireNonNull(new File(zipPath.toUri()).listFiles())) {
+            //ZipUtil.unzip(file, new File(unzipPath.toUri()));
+            ZipUtil.unzip(file.getAbsoluteFile().toString(),unzipPath.toString());
         }
     }
 }
