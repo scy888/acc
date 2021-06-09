@@ -10,13 +10,14 @@ import common.DateUtils;
 import common.ReflectUtils;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +26,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +41,14 @@ import java.util.stream.Collectors;
 
 @SpringBootTest
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("模拟放款数据")
 public class BatchTest {
     @Autowired
-    @Qualifier("secondJdbcTemplate")
-    //private JdbcTemplate secondJdbcTemplate;
+    //@Qualifier("secondJdbcTemplate")
+    private JdbcTemplate secondJdbcTemplate;
+    @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private AsyncController asyncController;
@@ -55,7 +59,7 @@ public class BatchTest {
 
     @Test
     public void test0() {
-        String username = jdbcTemplate.queryForObject("select username from user limit 1", String.class);
+        String username = secondJdbcTemplate.queryForObject("select username from user limit 1", String.class);
         System.out.println("username:" + username);
     }
 
@@ -82,6 +86,20 @@ public class BatchTest {
     }
 
     @Test
+    @Order(0)
+    @DisplayName("执行清除脚本")
+    public void testdelete() throws IOException {
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("delete.sql");
+        //byte[] bytes = inputStream.readAllBytes();
+        byte[] bytes = new byte[inputStream.available()];
+        inputStream.read(bytes);
+        String string = new String(bytes);
+        jdbcTemplate.batchUpdate(string.split(";"));
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("5月15日放款两笔数据")
     public void test0515LoanContract() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-05-15");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -126,7 +144,6 @@ public class BatchTest {
         repaymentDetailReqs = new ArrayList<>(repaymentDetailReqs);
         //repaymentDetailReqs.clear();
 
-
         List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
 
@@ -142,20 +159,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -176,6 +184,8 @@ public class BatchTest {
     }
 
     @Test
+    @Order(6)
+    @DisplayName("5月30日借据号YX-101退票")
     public void test0530RefundTicket() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-05-30");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -205,7 +215,6 @@ public class BatchTest {
         repaymentDetailReqs = new ArrayList<>(repaymentDetailReqs);
         //repaymentDetailReqs.clear();
 
-
         List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
 
@@ -221,20 +230,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -255,6 +255,8 @@ public class BatchTest {
     }
 
     @Test
+    @Order(7)
+    @DisplayName("6月15日借据号YX-102第一期正常还款")
     public void test0615Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-06-15");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -309,20 +311,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -343,6 +336,8 @@ public class BatchTest {
     }
 
     @Test
+    @Order(8)
+    @DisplayName("7月20日借据号YX-102第二期逾期正常还款")
     public void test0720Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-07-20");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -397,20 +392,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -429,7 +415,10 @@ public class BatchTest {
 
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
     }
+
     @Test
+    @Order(9)
+    @DisplayName("8月20日借据号YX-102第三期期逾期减免正常还款")
     public void test0820Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-08-20");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -478,20 +467,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -510,7 +490,10 @@ public class BatchTest {
 
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
     }
+
     @Test
+    @Order(10)
+    @DisplayName("8月20日借据号YX-102第四.五.六期提前还款")
     public void test1015Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-10-15");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -557,20 +540,11 @@ public class BatchTest {
         List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
-        Path path = Paths.get("/yxms", dateStr, "create");
-        if (Files.notExists(path)) {
-            Files.createDirectories(path);
+        try {
+            createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        File file = new File(path.toUri());
-        for (File listFile : Objects.requireNonNull(file.listFiles())) {
-            listFile.delete();
-        }
-
-        Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
-        Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
-        Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
 
         adapterFeignClient.saveAllLoanDetail(loanDetailReqs);//保存adapter库的放款明细
         adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(loanDetailReqs, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
@@ -588,5 +562,29 @@ public class BatchTest {
         adapterFeignClient.createAllReceiptDetail(repaymentDetailReqs, batchDate.toString());//保存repay的库receipt_detail表(实还记录，更新还款计划和用户还款主信息表)
 
         loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate.toString());//最后刷新repay_summary当前期数
+    }
+
+    private void createFile(String dateStr, List<String> loanDetailReqList, List<String> repaymentPlanReqList, List<String> refundTicketReqList, List<String> rebackDetailReqList, List<String> repaymentDetailReqList) throws IOException {
+        //写入
+        Path writePath = Paths.get("/yxms", dateStr, "write");
+        if (Files.notExists(writePath)) {
+            Files.createDirectories(writePath);
+        }
+        for (File file : new File(writePath.toUri()).listFiles()) {
+            file.delete();
+        }
+        Files.write(Paths.get(String.valueOf(writePath), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
+        Files.write(Paths.get(String.valueOf(writePath), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
+        Files.write(Paths.get(String.valueOf(writePath), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
+        Files.write(Paths.get(String.valueOf(writePath), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
+        Files.write(Paths.get(String.valueOf(writePath), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
+        //压缩
+        Path zipPath = Paths.get("/yxms", dateStr, "zip");
+        if (Files.notExists(zipPath)) {
+            Files.createDirectories(zipPath);
+        }
+        for (File file : Objects.requireNonNull(new File(zipPath.toUri()).listFiles())) {
+            file.delete();
+        }
     }
 }
