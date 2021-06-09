@@ -9,6 +9,7 @@ import com.weshare.repay.repo.RepayPlanRepo;
 import com.weshare.repay.repo.RepaySummaryRepo;
 import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
+import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
@@ -76,21 +77,23 @@ class RepayProviderTest {
     @Test
     public void testFourth() {
         List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayClient.getRepayPlanFourth("YX-102").getData();
-        System.out.println("tuple4s:\n"+ JsonUtil.toJson(tuple4s,true));
+        System.out.println("tuple4s:\n" + JsonUtil.toJson(tuple4s, true));
     }
+
     @Test
-    public void testTwo(){
+    public void testTwo() {
         List<Tuple2<BigDecimal, FeeTypeEnum>> tuple2s = repayClient.getReceiptDetailTwo("YX-102", 1).getData();
-        System.out.println("tuple2s:\n"+ JsonUtil.toJson(tuple2s,true));
+        System.out.println("tuple2s:\n" + JsonUtil.toJson(tuple2s, true));
     }
+
     @Test
-    public void testSorted(){
+    public void testSorted() {
         List<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> tuple4s = repayClient.getRepayPlanFourth("YX-102").getData();
-        List<LocalDate> dateList = tuple4s.stream().sorted(Comparator.comparing(Tuple4::getThird,Comparator.reverseOrder()))
+        List<LocalDate> dateList = tuple4s.stream().sorted(Comparator.comparing(Tuple4::getThird, Comparator.reverseOrder()))
                 .map(Tuple4::getThird).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
         System.out.println(dateList);
 
-        LocalDate min = tuple4s.stream().max(Comparator.comparing(Tuple4::getThird,Comparator.reverseOrder())).map(Tuple4::getThird).orElse(null);
+        LocalDate min = tuple4s.stream().max(Comparator.comparing(Tuple4::getThird, Comparator.reverseOrder())).map(Tuple4::getThird).orElse(null);
         System.out.println(min);
         Optional<Tuple4<BigDecimal, BigDecimal, LocalDate, Integer>> or = tuple4s.stream().max(Comparator.comparing(Tuple4::getThird)).or(() -> Optional.of(Tuple4.of(BigDecimal.ZERO, BigDecimal.ZERO, LocalDate.now(), 12)));
         LocalDate min_ = tuple4s.stream().map(Tuple4::getThird).max(Comparator.comparing(localDate -> localDate, Comparator.reverseOrder())).orElse(null);
@@ -103,58 +106,85 @@ class RepayProviderTest {
         List<String> list1 = List.of("2020/06/15 12:12:25", "2020/06/15 12:12:25", "2020/06/15 12:12:25");
         System.out.println(list1.stream().map(e -> LocalDateTime.parse(e, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))).collect(Collectors.toList()));
     }
+
     @Test
-    public void testOneRepayPlan(){
+    public void testOneRepayPlan() {
         RepayPlan repayPlan = repayDao.getRepayPlan("YX-102", 1);
-        log.info("repayPlan:{}",JsonUtil.toJson(repayPlan,true));
+        log.info("repayPlan:{}", JsonUtil.toJson(repayPlan, true));
         System.out.println(repayPlan.getTermStatus() == TermStatusEnum.REPAID);
     }
+
     @Test
-    public void testOneMap(){
+    public void testOneMap() {
         Map<String, Object> map = repayDao.getRepayPlan(1, "YX-102");
-        log.info("map:{}",JsonUtil.toJson(map,true));
+        log.info("map:{}", JsonUtil.toJson(map, true));
         System.out.println(TermStatusEnum.valueOf(map.get("term_status").toString()) == TermStatusEnum.REPAID);
     }
+
     @Test
-    public void testListRepayPlan(){
+    public void testListRepayPlan() {
         List<RepayPlan> repayPlanList = repayDao.getRepayPlanList("YX-102", List.of(1, 2));
-        log.info("repayPlanList:{}",JsonUtil.toJson(repayPlanList,true));
+        log.info("repayPlanList:{}", JsonUtil.toJson(repayPlanList, true));
 
     }
+
     @Test
-    public void testListMap(){
+    public void testListMap() {
         List<Map<String, Object>> mapList = repayDao.getRepayPlanList(List.of(1, 2), "YX-102");
-        log.info("mapList:{}",JsonUtil.toJson(mapList,true));
+        log.info("mapList:{}", JsonUtil.toJson(mapList, true));
 
     }
 
     @Test
-    public void testTuple3(){
+    public void testTuple3() {
         Tuple3<LocalDate, BigDecimal, TermStatusEnum> tuple3 = repayDao.getTuple3("YX-102", 1);
-        log.info("tuple3:{}",JsonUtil.toJson(tuple3,true));
+        log.info("tuple3:{}", JsonUtil.toJson(tuple3, true));
 
     }
+
     @Test
-    public void testTuple3List(){
+    public void testTuple3List() {
         List<Tuple3<LocalDate, BigDecimal, TermStatusEnum>> tuple3s = repayDao.getTuple3("YX-102", List.of(1, 2));
-        log.info("tuple3:{}",JsonUtil.toJson(tuple3s,true));
+        log.info("tuple3:{}", JsonUtil.toJson(tuple3s, true));
 
     }
+
     @Test
-    public void testRepayList(){
+    public void testRepayList() {
         List<RepayDao.Repay> list = repayDao.getRepayList("YX-102", List.of(1, 2));
-        log.info("list:{}",JsonUtil.toJson(list,true));
+        log.info("list:{}", JsonUtil.toJson(list, true));
 
     }
+
     @Test
-    public void testMapList(){
+    public void testMapList() {
         List<Map<String, Object>> mapList = repayDao.getMapList("YX-102", List.of(1, 2));
-        log.info("mapList:{}",JsonUtil.toJson(mapList,true));
+        log.info("mapList:{}", JsonUtil.toJson(mapList, true));
     }
-    @Test
-    public void testBoth(){
-        List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s = repayDao.getBoth("WS121212");
-        log.info("tuple3s:{}",JsonUtil.toJson(tuple3s,true));
 
+    @Test
+    public void testBoth() {
+        List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s = repayDao.getBoth("WS121212");
+        log.info("tuple3s:{}", JsonUtil.toJson(tuple3s, true));
+    }
+
+    @Test
+    public void testLike() {
+        List<RepayPlan> plans = repayPlanRepo.findByDueBillNoLikeAndTerm("YX-%", 2);
+        log.info("plans:{}", JsonUtil.toJson(plans, true));
+
+    }
+
+    @Test
+    public void testSpec() {
+        List<RepayPlanReq> data = repayClient.getRepayPlanPage(new RepayClient.PageReq()
+                .setPageNum(1)
+                .setPageSize(2)
+                .setDueBillNo("YX-102")
+                .setTerms(List.of(2,3,4))
+                .setTermStatus(TermStatusEnum.REPAID)
+                .setStartDate(LocalDate.parse("2020-01-01"))
+                .setEndDate(LocalDate.parse("2020-12-31"))).getData();
+        log.info("data:{}", JsonUtil.toJson(data, true));
     }
 }

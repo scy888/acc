@@ -10,7 +10,7 @@ import java.util.List;
 public class PageBean<T> implements Serializable {
     private Integer pageNum;
     private Integer pageSize;
-    private Integer tatolCount;
+    private Integer totallCount;
     private Integer totalPage;
     private List<T> data;
 
@@ -30,12 +30,12 @@ public class PageBean<T> implements Serializable {
         this.pageSize = pageSize;
     }
 
-    public Integer getTatolCount() {
-        return tatolCount;
+    public Integer getTotallCount() {
+        return totallCount;
     }
 
-    public void setTatolCount(Integer tatolCount) {
-        this.tatolCount = tatolCount;
+    public void setTotallCount(Integer totallCount) {
+        this.totallCount = totallCount;
     }
 
     public Integer getTotalPage() {

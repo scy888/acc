@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaAuditing//自动加载时间的
 @EnableDiscoveryClient
 @EnableFeignClients
-//@EnableAsync
 public class RepayApplication {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();

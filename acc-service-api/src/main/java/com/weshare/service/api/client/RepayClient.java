@@ -83,13 +83,26 @@ public interface RepayClient {
     @GetMapping("/getRepayPlan/{dueBillNo}/{termStatus}")
     Result<List<RepayPlanReq>> getRepayPlan(@PathVariable("dueBillNo") String dueBillNo, @PathVariable("termStatus") TermStatusEnum termStatus);
 
+    @PostMapping("/getRepayPlanPage")
+    Result<List<RepayPlanReq>> getRepayPlanPage(@RequestBody PageReq pageReq);
+
     @Data
     @Accessors(chain = true)
     class UpdateRepaySummaryCurrentTerm {
-
         private String batchDate;
         private String dueBillNo;
         private Integer currentTerm;
     }
 
+    @Data
+    @Accessors(chain = true)
+    class PageReq {
+        private Integer pageNum;
+        private Integer pageSize;
+        private String dueBillNo;
+        private List<Integer> terms;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private TermStatusEnum termStatus;
+    }
 }

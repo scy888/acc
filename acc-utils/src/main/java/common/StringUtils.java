@@ -323,7 +323,7 @@ public class StringUtils {
      * @Author: scyang
      * @Date: 2019/10/13 9:43
      */
-        return (str == null || "".equals(str.trim())) ? true : false;
+        return str == null || "".equals(str.trim());
     }
 
     @Test

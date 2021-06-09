@@ -25,10 +25,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -271,7 +274,47 @@ public class RepayProvider implements RepayClient {
 
     @Override
     public Result<List<RepayPlanReq>> getRepayPlan(String dueBillNo, TermStatusEnum termStatus) {
-        List<RepayPlan> planList = repayPlanRepo.findByDueBillNoAndTermStatusNot(dueBillNo,termStatus);
-        return Result.result(true,planList);
+        List<RepayPlan> planList = repayPlanRepo.findByDueBillNoAndTermStatusNot(dueBillNo, termStatus);
+        return Result.result(true, planList);
+    }
+
+    @Override
+    public Result<List<RepayPlanReq>> getRepayPlanPage(PageReq pageReq) {
+
+        Integer pageNum = pageReq.getPageNum();
+        Integer pageSize = pageReq.getPageSize();
+        String dueBillNo = pageReq.getDueBillNo();
+        List<Integer> termList = pageReq.getTerms();
+        LocalDate startDate = pageReq.getStartDate();
+        LocalDate endDate = pageReq.getEndDate();
+        TermStatusEnum termStatus = pageReq.getTermStatus();
+
+        Specification<RepayPlan> spec = new Specification<RepayPlan>() {
+            @Override
+            public Predicate toPredicate(Root<RepayPlan> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                List<Predicate> predicateList = new ArrayList<>();
+                if (!StringUtils.isEmpyStr(dueBillNo)) {
+                    predicateList.add(cb.equal(root.get("dueBillNo").as(String.class), dueBillNo));
+                }
+                if (!termList.isEmpty()) {
+                    CriteriaBuilder.In<Object> in = cb.in(root.get("term"));
+                    for (Integer integer : termList) {
+                        in.value(integer);
+                    }
+                    predicateList.add(in);
+                }
+                if (termStatus != null) {
+                    predicateList.add(cb.equal(root.get("termStatus").as(TermStatusEnum.class), termStatus));
+                }
+                if (startDate != null && endDate != null) {
+                    predicateList.add(cb.between(root.get("repayDate").as(LocalDate.class), startDate, endDate));
+                }
+                return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
+            }
+        };
+        Page<RepayPlan> page = repayPlanRepo.findAll(spec, PageRequest.of(pageNum - 1, pageSize, Sort.Direction.DESC, "term"));
+        log.info("page:{}", JsonUtil.toJson(page, true));
+        List<RepayPlan> list = page.getContent();
+        return Result.result(true, list);
     }
 }
