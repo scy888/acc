@@ -1,9 +1,6 @@
 package com.weshare.service.api.client;
 
-import com.weshare.service.api.entity.ReceiptDetailReq;
-import com.weshare.service.api.entity.RepayPlanReq;
-import com.weshare.service.api.entity.RepaySummaryReq;
-import com.weshare.service.api.entity.RepayTransFlowReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.result.Result;
@@ -85,6 +82,12 @@ public interface RepayClient {
 
     @PostMapping("/getRepayPlanPage")
     Result<List<RepayPlanReq>> getRepayPlanPage(@RequestBody PageReq pageReq);
+
+    @PostMapping("/addPictureFile")
+    Result addPictureFile(@RequestBody PictureFileReq pictureFileReq);
+
+    @GetMapping("/viewPictureFile/{id}")
+    Result<PictureFileReq> viewPictureFile(@PathVariable("id") String id);
 
     @Data
     @Accessors(chain = true)

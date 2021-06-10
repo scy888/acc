@@ -1,8 +1,11 @@
 package com.weshare.batch.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.weshare.batch.feignClient.RepayFeignClient;
+import com.weshare.service.api.entity.PictureFileReq;
 import common.FreemarkerUtil;
 import common.JsonUtil;
+import common.SnowFlake;
 import entity.Result;
 import entity.User;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -40,6 +45,8 @@ public class BatchController {
     private JobLauncher jobLauncher;
     @Autowired
     private JavaMailSender javaMailSender;
+    @Autowired
+    private RepayFeignClient repayFeignClient;
     @Value("${sendMessage.send-from}")
     private String sendFrom;
     @Value("${sendMessage.send-to}")
@@ -105,5 +112,38 @@ public class BatchController {
                 .addString("pathStr", pathStr);
         JobExecution jobExecution = jobLauncher.run(job, parametersBuilder.toJobParameters());
         return jobExecution.toString();
+    }
+
+    @PostMapping("/addPictureFile")
+    public String addPictureFile(@RequestBody MultipartFile[] multipartFiles) throws IOException {
+        log.info("要上传的文件个数:{}", multipartFiles.length);
+        for (MultipartFile multipartFile : multipartFiles) {
+            PictureFileReq pictureFileReq = new PictureFileReq();
+            pictureFileReq.setDueBillNo(SnowFlake.getInstance().nextId() + "")
+                    .setByteArray(multipartFile.getBytes())
+                    .setFileName(multipartFile.getOriginalFilename())
+                    .setCreateTime(LocalDateTime.now());
+            repayFeignClient.addPictureFile(pictureFileReq);
+        }
+        return "success";
+    }
+
+    @GetMapping("/viewPictureFile/{id}")
+    public String viewPictureFile(@PathVariable String id, HttpServletResponse response) throws IOException {
+        PictureFileReq pictureFileReq = repayFeignClient.viewPictureFile(id).getData();
+        String fileName = pictureFileReq.getFileName();
+        byte[] byteArray = pictureFileReq.getByteArray();
+        ServletOutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            outputStream.write(byteArray);
+            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            outputStream.close();
+        }
+        return "success";
     }
 }

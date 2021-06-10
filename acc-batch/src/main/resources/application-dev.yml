@@ -61,6 +61,11 @@ mybatis:
   mapper-locations: classpath:com/weshare/batch/mapper/*Mapper.xml
   #type-handlers-package: org.apache.ibatis.type.LocalDateTypeHandler
 
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
 
 
 

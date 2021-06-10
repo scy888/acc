@@ -1,18 +1,9 @@
 package com.weshare.repay.provider;
 
-import com.weshare.repay.entity.ReceiptDetail;
-import com.weshare.repay.entity.RepayPlan;
-import com.weshare.repay.entity.RepaySummary;
-import com.weshare.repay.entity.RepayTransFlow;
-import com.weshare.repay.repo.ReceiptDetailRepo;
-import com.weshare.repay.repo.RepayPlanRepo;
-import com.weshare.repay.repo.RepaySummaryRepo;
-import com.weshare.repay.repo.RepayTransFlowRepo;
+import com.weshare.repay.entity.*;
+import com.weshare.repay.repo.*;
 import com.weshare.service.api.client.RepayClient;
-import com.weshare.service.api.entity.ReceiptDetailReq;
-import com.weshare.service.api.entity.RepayPlanReq;
-import com.weshare.service.api.entity.RepaySummaryReq;
-import com.weshare.service.api.entity.RepayTransFlowReq;
+import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.*;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
@@ -57,6 +48,8 @@ public class RepayProvider implements RepayClient {
     private RepayTransFlowRepo repayTransFlowRepo;
     @Autowired
     private ReceiptDetailRepo receiptDetailRepo;
+    @Autowired
+    private PictureFileRepo pictureFileRepo;
     private Integer pageSize = 1;
 
     @Override
@@ -316,5 +309,30 @@ public class RepayProvider implements RepayClient {
         log.info("page:{}", JsonUtil.toJson(page, true));
         List<RepayPlan> list = page.getContent();
         return Result.result(true, list);
+    }
+
+    @Override
+    public Result addPictureFile(PictureFileReq pictureFileReq) {
+        log.info("pictureFileReq:{}", JsonUtil.toJson(pictureFileReq, true));
+        PictureFile pictureFile = new PictureFile();
+        BeanUtils.copyProperties(pictureFileReq, pictureFile);
+        pictureFileRepo.save(pictureFile.setId(UUID.randomUUID().toString().replaceAll("-", "")));
+        return Result.result(true);
+    }
+
+    @Override
+    public Result<PictureFileReq> viewPictureFile(String id) {
+        Result<PictureFileReq> result = new Result();
+        PictureFileReq pictureFileReq = new PictureFileReq();
+        pictureFileRepo.findById(id).ifPresentOrElse(e -> {
+            BeanUtils.copyProperties(e, pictureFileReq);
+            result.setIsFlag(true);
+            result.setData(pictureFileReq);
+        }, () -> {
+            log.info("该id:{},在表中不存在...", id);
+            result.setIsFlag(true);
+            result.setData(pictureFileReq);
+        });
+        return result;
     }
 }
