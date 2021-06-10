@@ -2,6 +2,7 @@ package com.weshare.batch.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.weshare.batch.feignClient.RepayFeignClient;
+import com.weshare.batch.task.BaseTask;
 import com.weshare.service.api.entity.PictureFileReq;
 import common.FreemarkerUtil;
 import common.JsonUtil;
@@ -132,6 +133,7 @@ public class BatchController {
     public String viewPictureFile(@PathVariable String id, HttpServletResponse response) throws IOException {
         PictureFileReq pictureFileReq = repayFeignClient.viewPictureFile(id).getData();
         String fileName = pictureFileReq.getFileName();
+        log.info("fileName = " + fileName);
         byte[] byteArray = pictureFileReq.getByteArray();
         ServletOutputStream outputStream = null;
         try {

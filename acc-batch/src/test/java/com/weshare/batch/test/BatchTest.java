@@ -3,6 +3,8 @@ package com.weshare.batch.test;
 import com.weshare.batch.controller.AsyncController;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
+import com.weshare.batch.task.BaseTask;
+import com.weshare.batch.task.instance.YxmsTask;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
@@ -56,6 +58,19 @@ public class BatchTest {
     private AdapterFeignClient adapterFeignClient;
     @Autowired
     private LoanFeignClient loanFeignClient;
+    @Autowired
+    private YxmsTask yxmsTask;
+
+    @Test
+    public void test00(){
+
+        System.out.println(yxmsTask.getTaskName());
+        System.out.println(yxmsTask.num);
+        System.out.println(yxmsTask.getNum());
+
+
+    }
+
 
     @Test
     public void test0() {
