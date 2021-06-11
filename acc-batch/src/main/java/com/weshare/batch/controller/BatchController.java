@@ -18,6 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +33,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author: scyang
@@ -147,5 +152,15 @@ public class BatchController {
             outputStream.close();
         }
         return "success";
+    }
+
+    @Autowired
+    ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    //@Scheduled(cron = "0/40 * * * * ?")
+    public void test() throws InterruptedException {
+        // threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(() -> System.out.println("当前时间：" + LocalDateTime.now() + "执行了..."), new CronTrigger("0/30 * * * * ?"));
+        //scheduledFuture.cancel(true);
     }
 }

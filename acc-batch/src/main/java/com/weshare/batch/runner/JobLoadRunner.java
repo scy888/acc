@@ -1,5 +1,6 @@
 package com.weshare.batch.runner;
 
+import com.weshare.batch.controller.BatchController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -23,10 +24,13 @@ public class JobLoadRunner implements ApplicationRunner {
     private JobRegistry jobRegistry;
     @Autowired
     private JobExplorer jobExplorer;
+    @Autowired
+    public BatchController batchController;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("job注册表中的job有:{}", jobRegistry.getJobNames());
         log.info("job浏览器中的job有:{}", jobExplorer.getJobNames());
+        batchController.test();
     }
 }

@@ -25,12 +25,12 @@ public abstract class BaseTask implements Runnable {
         return simpleName;
     }
 
+    public abstract void execte();
+
     @Override
     public void run() {
-
+        execte();
     }
-
-    public abstract void execte();
 
     public abstract Map<String, Object> getTaskParams();
 }
