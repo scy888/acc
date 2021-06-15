@@ -197,8 +197,5 @@ class RepayProviderTest {
         System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).appliesTo());
         System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).comment());
         System.out.println(UUID.randomUUID().toString().replaceAll("-",""));
-        System.out.println(UUID.fromString("scy").toString());
-        System.out.println(UUID.fromString("scy").toString());
-        System.out.println(UUID.fromString("scy").toString());
     }
 }

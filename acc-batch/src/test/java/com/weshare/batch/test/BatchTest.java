@@ -1,10 +1,11 @@
 package com.weshare.batch.test;
 
+import com.weshare.batch.config.AppConfig;
 import com.weshare.batch.controller.AsyncController;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
-import com.weshare.batch.task.BaseTask;
 import com.weshare.batch.task.instance.YxmsTask;
+import com.weshare.batch.tasklet.YxmsTasklet;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
@@ -19,6 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +65,7 @@ public class BatchTest {
     private YxmsTask yxmsTask;
 
     @Test
-    public void test00(){
+    public void test00() {
 
         System.out.println(yxmsTask.getTaskName());
         System.out.println(yxmsTask.num);
@@ -509,7 +512,7 @@ public class BatchTest {
 
     @Test
     @Order(10)
-    @DisplayName("8月20日借据号YX-102第四.五.六期提前还款")
+    @DisplayName("10月15日借据号YX-102第四.五.六期提前还款")
     public void test1015Repayment() throws Exception {
         LocalDate batchDate = LocalDate.parse("2020-10-15");
         String dateStr = batchDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -610,7 +613,7 @@ public class BatchTest {
             byte[] bytes = new byte[fileInputStream.available()];
             fileInputStream.read(bytes);
             fileInputStream.close();
-            ZipUtil.addToZip(zipOutputStream,bytes,file.getName(),"");
+            ZipUtil.addToZip(zipOutputStream, bytes, file.getName(), "");
         }
         zipOutputStream.close();
         //解压
@@ -623,7 +626,113 @@ public class BatchTest {
         }
         for (File file : Objects.requireNonNull(new File(zipPath.toUri()).listFiles())) {
             //ZipUtil.unzip(file, new File(unzipPath.toUri()));
-            ZipUtil.unzip(file.getAbsoluteFile().toString(),unzipPath.toString());
+            ZipUtil.unzip(file.getAbsoluteFile().toString(), unzipPath.toString());
+        }
+    }
+
+    @Test
+    public void configTest(@Autowired AppConfig appConfig) {
+        System.out.println(appConfig.getCreate());
+        System.out.println(appConfig.getZip());
+        System.out.println(appConfig.getUnzip());
+    }
+
+    @Test
+    @Order(15)
+    @DisplayName("batch-5月15日放款两笔数据")
+    public void taskletTest0515(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-05-15")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+
+
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("batch-5月30日借据号YX-101退票")
+    public void taskletTest0530(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-05-30")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("batch-6月15日借据号YX-102第一期正常还款")
+    public void taskletTest0615(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-06-15")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("batch-7月20日借据号YX-102第二期逾期正常还款") //8月20日借据号YX-102第三期期逾期减免正常还款
+    public void taskletTest0720(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-07-20")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("batch-8月20日借据号YX-102第三期期逾期减免正常还款") //
+    public void taskletTest0820(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-08-20")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+    }
+    @Test
+    @Order(20)
+    @DisplayName("batch-10月15日借据号YX-102第四.五.六期提前还款")
+    public void taskletTest1015(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig) throws Exception {
+
+        String dateStr = LocalDate.parse("2020-10-15")
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        createFile(yxmsTasklet, appConfig, dateStr);
+    }
+
+    private void createFile(@Autowired YxmsTasklet yxmsTasklet, @Autowired AppConfig appConfig, String dateStr) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Path createPath = Paths.get(appConfig.getCreate(), dateStr);
+        if (Files.notExists(createPath)) {
+            Files.createDirectories(createPath);
+        }
+        for (File file : Objects.requireNonNull(new File(createPath.toUri()).listFiles())) {
+            file.delete();
+        }
+        Class<? extends YxmsTasklet> clazz = yxmsTasklet.getClass();
+        Method method = clazz.getDeclaredMethod("createFile", String.class, Path.class);
+        method.setAccessible(true);
+        method.invoke(clazz.newInstance(), LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyyMMdd")).toString(), Paths.get(String.valueOf(createPath)));
+
+        Path zipPath = Paths.get(appConfig.getZip(), dateStr);
+        if (Files.notExists(zipPath)) {
+            Files.createDirectories(zipPath);
+        }
+        for (File file : Objects.requireNonNull(new File(zipPath.toUri()).listFiles())) {
+            file.delete();
+        }
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(zipPath.toString(), "yxms.zip")))) {
+            for (File file : new File(appConfig.getCreate(), dateStr).listFiles()) {
+                ZipUtil.addToZip(zipOutputStream, file, file.getName(), "zip22", false);
+            }
+        }
+
+        Path unzipPath = Paths.get(appConfig.getUnzip(), dateStr);
+        if (Files.notExists(unzipPath)) {
+            Files.createDirectories(unzipPath);
+        }
+        for (File file : Objects.requireNonNull(new File(unzipPath.toUri()).listFiles())) {
+            file.delete();
+        }
+        for (File file : Objects.requireNonNull(new File(appConfig.getZip(), dateStr).listFiles())) {
+            ZipUtil.unzip(file, new File(unzipPath.toUri()));
         }
     }
 }

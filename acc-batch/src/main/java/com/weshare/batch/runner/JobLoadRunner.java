@@ -1,8 +1,8 @@
 package com.weshare.batch.runner;
 
 import com.weshare.batch.controller.BatchController;
+import com.weshare.batch.task.TaskListScheduler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,15 @@ public class JobLoadRunner implements ApplicationRunner {
     @Autowired
     private JobExplorer jobExplorer;
     @Autowired
-    public BatchController batchController;
+    private BatchController batchController;
+    @Autowired
+    private TaskListScheduler taskListScheduler;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("job注册表中的job有:{}", jobRegistry.getJobNames());
         log.info("job浏览器中的job有:{}", jobExplorer.getJobNames());
-        batchController.test();
+        //batchController.test();
+        //taskListScheduler.initTask();
     }
 }

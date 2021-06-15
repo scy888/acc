@@ -1,7 +1,6 @@
 package com.weshare.batch.task;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import java.util.Map;
  * @describe:
  */
 @Slf4j
-@Component
 public abstract class BaseTask implements Runnable {
 
     public int num = 6;
@@ -25,11 +23,15 @@ public abstract class BaseTask implements Runnable {
         return simpleName;
     }
 
+
+
     public abstract void execte();
 
     @Override
     public void run() {
-        execte();
+
+        this.execte();
+        //this.getTaskParams();
     }
 
     public abstract Map<String, Object> getTaskParams();

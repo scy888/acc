@@ -1,16 +1,15 @@
 package com.weshare.batch.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.weshare.batch.feignClient.RepayFeignClient;
-import com.weshare.batch.task.BaseTask;
 import com.weshare.service.api.entity.PictureFileReq;
 import common.FreemarkerUtil;
-import common.JsonUtil;
 import common.SnowFlake;
-import entity.Result;
 import entity.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -18,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 /**
@@ -95,6 +95,23 @@ public class BatchController {
 
         return "success";
     }
+
+    @GetMapping("/startJob/{jobName}/{batchDate}/{projectNo}")
+    public String startJob(@PathVariable String jobName,
+                           @PathVariable String batchDate,
+                           @PathVariable String projectNo,
+                           @RequestParam String remark) throws Exception {
+
+        Job job = jobRegistry.getJob(jobName);//job名
+        JobParameters jobParameters = new JobParametersBuilder()//构建job参数
+                .addString("batchDate", batchDate)
+                .addString("projectNo", projectNo)
+                .addString("remark", remark).toJobParameters();
+
+        JobExecution execution = jobLauncher.run(job, jobParameters);
+        return execution.toString();
+    }
+
 
     @GetMapping("testBatch/{jobName}")
     public String testBatch(@PathVariable String jobName, @RequestParam String remark) throws Exception {

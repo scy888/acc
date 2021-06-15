@@ -1,6 +1,9 @@
 package com.weshare.batch.config;
 
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * @author: scyang
@@ -9,7 +12,14 @@ import org.springframework.context.annotation.Configuration;
  * @date: 2021-05-08 16:48:08
  * @describe:
  */
-@Configuration
-public class AppConfig {
 
+@Configuration
+@Data
+public class AppConfig {
+    @Value("${yxms.create}")
+    private String create;
+    @Value("${yxms.zip}")
+    private String zip;
+    @Value("${yxms.unzip}")
+    private String unzip;
 }

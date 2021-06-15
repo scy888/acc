@@ -27,6 +27,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -347,7 +348,8 @@ public class TestBatch {
     }
 
     private Integer data;
-    ThreadLocal<Integer> threadLocal=new ThreadLocal();
+    ThreadLocal<Integer> threadLocal = new ThreadLocal();
+
     @Test
     public void testThreadDate() throws Exception {
         for (int i = 1; i <= 4; i++) {
@@ -355,21 +357,21 @@ public class TestBatch {
                 @Override
                 public Integer call() throws Exception {
                     Integer date = getDate(6);
-                    System.out.println("当前线程名:{}"+Thread.currentThread().getName()+" get的值: "+date);
+                    System.out.println("当前线程名:{}" + Thread.currentThread().getName() + " get的值: " + date);
                     return date;
                 }
             });
             new Thread(
-                    task,"thread "+i
-         ).start();
+                    task, "thread " + i
+            ).start();
             //System.out.println("当前线程名:{}"+Thread.currentThread().getName()+" get的值: "+task.get());
         }
     }
 
     private Integer getDate(Integer num) {
-            data=new Random().nextInt(num);
-            threadLocal.set(data);
-        System.out.println("当前线程名:{}" + Thread.currentThread().getName()+" set的值："+threadLocal.get());
+        data = new Random().nextInt(num);
+        threadLocal.set(data);
+        System.out.println("当前线程名:{}" + Thread.currentThread().getName() + " set的值：" + threadLocal.get());
         return threadLocal.get();
     }
 
@@ -380,15 +382,21 @@ public class TestBatch {
     }
 
     @Test
-    public void test(){
-        Student instance1 = Student.getInstance("赵敏",20);
+    public void test() {
+        Student instance1 = Student.getInstance("赵敏", 20);
         instance1.setName("赵敏2");
         instance1.setAge(202);
-        Student instance2 = Student.getInstance("周芷若",19);
+        Student instance2 = Student.getInstance("周芷若", 19);
         instance2.setName("周芷若2");
         instance2.setAge(191);
-        System.out.println(instance1==instance2);
+        System.out.println(instance1 == instance2);
         System.out.println(instance1);
         System.out.println(instance2);
+        System.out.println(LocalDateTime.now());
+        System.out.println(LocalDateTime.now().withNano(0));
+        System.out.println(LocalDateTime.now().with(ChronoField.MICRO_OF_SECOND, 0));
+        System.out.println(LocalDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0));
+
+        System.out.println(LocalDate.parse("20200512",DateTimeFormatter.ofPattern("yyyyMMdd")));
     }
 }

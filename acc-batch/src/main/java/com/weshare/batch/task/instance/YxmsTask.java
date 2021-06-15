@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.Map;
 
 /**
@@ -30,15 +31,18 @@ public class YxmsTask extends BaseTask {
     }
 
 
-
     @Override
     public void execte() {
-        System.out.println("当前时间：" + LocalDateTime.now() + "执行了...");
+        Map<String, Object> params = this.getTaskParams();
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        }
     }
 
     @Override
     public Map<String, Object> getTaskParams() {
-        return null;
+
+        return Map.ofEntries(Map.entry("执行的当前时间", LocalDateTime.now().withNano(0)));
     }
 
 }

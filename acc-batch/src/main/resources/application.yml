@@ -14,3 +14,8 @@ host:
   acc-loan-host: 127.0.0.1:9003/loan
   acc-repay-host: 127.0.0.1:9004/repay
 
+yxms:
+  create: /yxms/${spring.profiles.active}/create
+  zip: /yxms/${spring.profiles.active}/zip
+  unzip: /yxms/${spring.profiles.active}/unzip
+
