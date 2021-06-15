@@ -595,7 +595,7 @@ public class BatchTest {
         Files.write(Paths.get(String.valueOf(writePath), "loan_detail_" + dateStr + ".csv"), loanDetailReqList);
         Files.write(Paths.get(String.valueOf(writePath), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList);
         Files.write(Paths.get(String.valueOf(writePath), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList);
-        Files.write(Paths.get(String.valueOf(writePath), "reback_detail" + dateStr + ".csv"), rebackDetailReqList);
+        Files.write(Paths.get(String.valueOf(writePath), "reback_detail_" + dateStr + ".csv"), rebackDetailReqList);
         Files.write(Paths.get(String.valueOf(writePath), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList);
         //压缩
         Path zipPath = Paths.get("/yxms", dateStr, "zip");

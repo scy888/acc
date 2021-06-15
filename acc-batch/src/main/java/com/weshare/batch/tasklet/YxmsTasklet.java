@@ -1,6 +1,10 @@
 package com.weshare.batch.tasklet;
 
 import com.weshare.batch.config.AppConfig;
+import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
+import com.weshare.batch.entity.Person;
+import com.weshare.batch.feignClient.AdapterFeignClient;
+import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
@@ -9,15 +13,26 @@ import common.SnowFlake;
 import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,7 +61,27 @@ import java.util.zip.ZipOutputStream;
 public class YxmsTasklet {
 
     @Autowired
+    private AdapterFeignClient adapterFeignClient;
+    @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public Tasklet clearAllTasklet() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                String batchDate = (String) chunkContext.getStepContext().getJobParameters().get("batchDate");
+                if ("2020-05-15".equals(batchDate)) {
+                    InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("delete.sql");
+                    byte[] bytes = inputStream.readAllBytes();
+                    String[] split = new String(bytes).split(";");
+                    jdbcTemplate.batchUpdate(split);
+                }
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
 
     public Tasklet createCsvTasklet() {
         return new Tasklet() {
@@ -113,6 +148,197 @@ public class YxmsTasklet {
             }
         };
     }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<LoanDetailReq> getLoanDetailRead(@Value("#{jobParameters[batchDate]}") String batchDate) {
+        String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setNames(ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setStrict(false);
+
+        DefaultLineMapper<LoanDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
+        detailReqDefaultLineMapper.setLineTokenizer(lineTokenizer);
+        detailReqDefaultLineMapper.setFieldSetMapper(new CsvBeanWrapperFieldSetMapper<>(LoanDetailReq.class));
+
+        return new FlatFileItemReaderBuilder<LoanDetailReq>()
+                .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/loan_detail_" + dateStr + ".csv"))
+                .name("放款明细.csv")
+                .addComment("放款明细.csv")
+                .linesToSkip(1)
+                .lineMapper(detailReqDefaultLineMapper)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<LoanDetailReq> getLoanDetailWrite(@Value("#{jobParameters[batchDate]}") String batchDate) {
+
+        return new ItemWriter<LoanDetailReq>() {
+            @Override
+            public void write(List<? extends LoanDetailReq> items) throws Exception {
+                items = items.stream().peek(e -> e.setBatchDate(LocalDate.parse(batchDate))).collect(Collectors.toList());
+                log.info("getLoanDetailWrite:{}条", items.size());
+                adapterFeignClient.saveAllLoanDetail(items);//保存adapter库的放款明细
+                adapterFeignClient.saveAllLoanContractAndLoanTransFlowAndRepaySummary(items, batchDate.toString());//保存loan库的放款明细和放款流水,repay库的用户主信息
+            }
+        };
+    }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<RepaymentPlanReq> getRepaymentPlanRead(@Value("#{jobParameters[batchDate]}") String batchDate) {
+        String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setNames(ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate").split(","));
+        lineTokenizer.setStrict(false);
+
+        DefaultLineMapper<RepaymentPlanReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
+        detailReqDefaultLineMapper.setLineTokenizer(lineTokenizer);
+        detailReqDefaultLineMapper.setFieldSetMapper(new CsvBeanWrapperFieldSetMapper<>(RepaymentPlanReq.class));
+
+        return new FlatFileItemReaderBuilder<RepaymentPlanReq>()
+                .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/repayment_plan_" + dateStr + ".csv"))
+                .name("还款计划.csv")
+                .addComment("还款计划.csv")
+                .linesToSkip(1)
+                .lineMapper(detailReqDefaultLineMapper)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<RepaymentPlanReq> getRepaymentPlanWrite(@Value("#{jobParameters[batchDate]}") String batchDate) {
+
+        return new ItemWriter<RepaymentPlanReq>() {
+            @Override
+            public void write(List<? extends RepaymentPlanReq> items) throws Exception {
+                items = items.stream().peek(e -> e.setBatchDate(LocalDate.parse(batchDate))).collect(Collectors.toList());
+                log.info("getRepaymentPlanWrite:{}条", items.size());
+                adapterFeignClient.saveAllRepaymentPlan(items);//保存adapter库的还款计划
+                adapterFeignClient.saveAllRepayPlanUpdateLoanContractAndRepaySummary(items);//更新loan库的放款明细,repay库的用户主信息
+            }
+        };
+    }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<RefundTicketReq> getRefundTicketRead(@Value("#{jobParameters[batchDate]}") String batchDate) {
+        String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setNames(ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate").split(","));
+        lineTokenizer.setStrict(false);
+
+        DefaultLineMapper<RefundTicketReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
+        detailReqDefaultLineMapper.setLineTokenizer(lineTokenizer);
+        detailReqDefaultLineMapper.setFieldSetMapper(new CsvBeanWrapperFieldSetMapper<>(RefundTicketReq.class));
+
+        return new FlatFileItemReaderBuilder<RefundTicketReq>()
+                .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/refund_ticket_" + dateStr + ".csv"))
+                .name("退票文件.csv")
+                .addComment("退票文件.csv")
+                .linesToSkip(1)
+                .lineMapper(detailReqDefaultLineMapper)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<RefundTicketReq> getRefundTicketWrite(@Value("#{jobParameters[batchDate]}") String batchDate) {
+
+        return new ItemWriter<RefundTicketReq>() {
+            @Override
+            public void write(List<? extends RefundTicketReq> items) throws Exception {
+                items = items.stream().peek(e -> e.setBatchDate(LocalDate.parse(batchDate))).collect(Collectors.toList());
+                log.info("getRefundTicketWrite:{}条", items.size());
+                adapterFeignClient.saveAllRefundTicket(items);//报存adapter库的退票文件
+                adapterFeignClient.saveRefundDownRepayTransFlowAndReceiptDetail(items, batchDate.toString());//保存实还更新还款计划(用户还款主信息,放款主信息,新增放款流水)
+            }
+        };
+    }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<RebackDetailReq> getRebackDetailRead(@Value("#{jobParameters[batchDate]}") String batchDate) {
+        String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setNames(ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setStrict(false);
+
+        DefaultLineMapper<RebackDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
+        detailReqDefaultLineMapper.setLineTokenizer(lineTokenizer);
+        detailReqDefaultLineMapper.setFieldSetMapper(new CsvBeanWrapperFieldSetMapper<>(RebackDetailReq.class));
+
+        return new FlatFileItemReaderBuilder<RebackDetailReq>()
+                .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/reback_detail_" + dateStr + ".csv"))
+                .name("扣款明细文件.csv")
+                .addComment("扣款明细文件.csv")
+                .linesToSkip(1)
+                .lineMapper(detailReqDefaultLineMapper)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<RebackDetailReq> getRebackDetailWrite(@Value("#{jobParameters[batchDate]}") String batchDate) {
+
+        return new ItemWriter<RebackDetailReq>() {
+            @Override
+            public void write(List<? extends RebackDetailReq> items) throws Exception {
+                items = items.stream().peek(e -> e.setBatchDate(LocalDate.parse(batchDate))).collect(Collectors.toList());
+                log.info("getRebackDetailWrite:{}条", items.size());
+                adapterFeignClient.saveAllRebackDetal(items);//保存adapter库的reback_detail表（扣款明细表）
+                adapterFeignClient.createAllRepayTransFlow(items, batchDate.toString());//保存repay库的repay_trans_flow表（还款流水表）
+            }
+        };
+    }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<RepaymentDetailReq> getRepaymentDetailRead(@Value("#{jobParameters[batchDate]}") String batchDate) {
+        String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setNames(ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setStrict(false);
+
+        DefaultLineMapper<RepaymentDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
+        detailReqDefaultLineMapper.setLineTokenizer(lineTokenizer);
+        detailReqDefaultLineMapper.setFieldSetMapper(new CsvBeanWrapperFieldSetMapper<>(RepaymentDetailReq.class));
+
+        return new FlatFileItemReaderBuilder<RepaymentDetailReq>()
+                .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/repayment_detail_" + dateStr + ".csv"))
+                .name("还款明细文件.csv")
+                .addComment("还款明细文件.csv")
+                .linesToSkip(1)
+                .lineMapper(detailReqDefaultLineMapper)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<RepaymentDetailReq> getRepaymentDetailWrite(@Value("#{jobParameters[batchDate]}") String batchDate) {
+
+        return new ItemWriter<RepaymentDetailReq>() {
+            @Override
+            public void write(List<? extends RepaymentDetailReq> items) throws Exception {
+                items = items.stream().peek(e -> e.setBatchDate(LocalDate.parse(batchDate))).collect(Collectors.toList());
+                log.info("getRepaymentDetailWrite:{}条", items.size());
+                adapterFeignClient.saveAllRepaymentDetail(items);//保存adapter库的repayment_detail表（还款明细表）
+                adapterFeignClient.createAllReceiptDetail(items, batchDate.toString());//保存repay的库receipt_detail表(实还记录，更新还款计划和用户还款主信息表)
+            }
+        };
+    }
+
 
     private void createFile(String strDate, Path path) throws IOException {
         LocalDate batchDate = LocalDate.parse(strDate);
@@ -282,7 +508,7 @@ public class YxmsTasklet {
         Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-        Files.write(Paths.get(String.valueOf(path), "reback_detail" + dateStr + ".csv"), rebackDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+        Files.write(Paths.get(String.valueOf(path), "reback_detail_" + dateStr + ".csv"), rebackDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
     }
 }

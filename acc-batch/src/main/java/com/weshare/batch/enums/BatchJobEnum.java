@@ -10,4 +10,5 @@ package com.weshare.batch.enums;
 public enum BatchJobEnum {
     testJob,
     personJob,
+    yxmsJob,
 }

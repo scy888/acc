@@ -65,7 +65,7 @@ public class AdapterProvider implements AdapterClient {
                     BeanUtils.copyProperties(e, loanDetail);
                     loanDetail.setId(SnowFlake.getInstance().nextId() + "")
                             .setLoanStatus(ChangeEnumUtils.changeEnum("WS121212", "loanStatus", e.getLoanStatus(), LoanDetail.LoanStatusEnum.class))
-                            .setCreatedDate(LocalDateTime.now().withYear(((LoanDetailReq) e).getBatchDate().getYear()).withMonth(e.getBatchDate().getMonthValue()).withDayOfMonth(e.getBatchDate().getDayOfMonth()))
+                            .setCreatedDate(LocalDateTime.now().withYear(e.getBatchDate().getYear()).withMonth(e.getBatchDate().getMonthValue()).withDayOfMonth(e.getBatchDate().getDayOfMonth()))
                             .setLastModifiedDate(loanDetail.getCreatedDate());
                     return loanDetail;
                 }).collect(Collectors.toSet())

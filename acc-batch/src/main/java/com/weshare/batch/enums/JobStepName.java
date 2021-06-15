@@ -19,4 +19,17 @@ public class JobStepName {
         public static final String 创建personCsv步骤 = "创建personCsv步骤";
         public static final String 读取personCsv步骤 = "读取personCsv步骤";
     }
+
+    public static class YsmsJob {
+        public static final String 创建文件步骤 = "创建文件步骤";
+        public static final String 压缩文件步骤 = "压缩文件步骤";
+        public static final String 解压文件步骤 = "解压文件步骤";
+        public static final String 清除相关表的数据步骤 = "清除相关表的数据步骤";
+        public static final String 读写放款明细步骤 = "读写放款明细步骤";
+        public static final String 读写还款计划步骤 = "读写还款计划步骤";
+        public static final String 读写退票步骤 = "读写退票步骤";
+        public static final String 读写扣款明细步骤 = "读写扣款明细步骤";
+        public static final String 读写实还明细步骤 = "读写实还明细步骤";
+        public static final String 更新repay_summary表的当前期次 = "更新repay_summary表的当前期次";
+    }
 }

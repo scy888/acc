@@ -96,10 +96,10 @@ public class BatchController {
         return "success";
     }
 
-    @GetMapping("/startJob/{jobName}/{batchDate}/{projectNo}")
+    @GetMapping("/startJob/{jobName}")
     public String startJob(@PathVariable String jobName,
-                           @PathVariable String batchDate,
-                           @PathVariable String projectNo,
+                           @RequestParam String batchDate,
+                           @RequestParam String projectNo,
                            @RequestParam String remark) throws Exception {
 
         Job job = jobRegistry.getJob(jobName);//job名
