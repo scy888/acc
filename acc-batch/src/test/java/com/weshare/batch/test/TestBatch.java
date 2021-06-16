@@ -396,7 +396,11 @@ public class TestBatch {
         System.out.println(LocalDateTime.now().withNano(0));
         System.out.println(LocalDateTime.now().with(ChronoField.MICRO_OF_SECOND, 0));
         System.out.println(LocalDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0));
-
         System.out.println(LocalDate.parse("20200512",DateTimeFormatter.ofPattern("yyyyMMdd")));
+        System.out.println(LocalDate.parse("2020-05-15").withDayOfMonth(30));
+        System.out.println(LocalDate.parse("2020-05-30").with(ChronoField.MONTH_OF_YEAR, 6).with(ChronoField.DAY_OF_MONTH, 15));
+        System.out.println(LocalDate.parse("2020-05-30").toEpochDay() - LocalDate.parse("2020-05-15").toEpochDay());
+        System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"),ChronoUnit.DAYS));
+        System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30")).get(ChronoUnit.DAYS));
     }
 }

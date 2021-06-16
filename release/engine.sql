@@ -13,6 +13,8 @@ select year(now())-year(substr('422202199109091016',7,8)) 年龄;
 select year('2021/12/12')-year(substr('422202199109091016',7,8)) 年龄;
 select year(now())-substr('422202199109091016',7,4) 年龄;
 
+SELECT replace(a.project_no,'WS','') FROM acc_repay.repay_plan a;
+
 SELECT * FROM AA a where a.id not in (select b.id from bb b );
 SELECT * FROM AA a where a.id in (select b.id from bb b );
 select * from aa a where not EXISTS (select b.id from bb b where a.id=b.id)

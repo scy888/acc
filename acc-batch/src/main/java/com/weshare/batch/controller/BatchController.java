@@ -28,11 +28,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 /**
@@ -99,14 +98,17 @@ public class BatchController {
     @GetMapping("/startJob/{jobName}")
     public String startJob(@PathVariable String jobName,
                            @RequestParam String batchDate,
+                           @RequestParam(required = false) String endDate,
                            @RequestParam String projectNo,
                            @RequestParam String remark) throws Exception {
 
         Job job = jobRegistry.getJob(jobName);//job名
         JobParameters jobParameters = new JobParametersBuilder()//构建job参数
-                .addString("batchDate", batchDate)
+                .addString("batchDate", Optional.ofNullable(batchDate).orElse(LocalDate.now().minusDays(2).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+                .addString("endDate", Objects.requireNonNull(Optional.ofNullable(endDate).orElse(batchDate)))
                 .addString("projectNo", projectNo)
-                .addString("remark", remark).toJobParameters();
+                .addString("remark", remark)
+                .toJobParameters();
 
         JobExecution execution = jobLauncher.run(job, jobParameters);
         return execution.toString();
