@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue入门案例</title>
+    <!--引入vue.js-->
+    <script src="vue.js"></script>
+</head>
+<body>
+<h1 align="center" style="color: red">vue入门案例</h1>
+<div id="app">
+    {{message}}<br/>
+    <input type="button" value="按钮" @click="fun()"/> <br/>
+    {{num+1}}<br/>
+    {{num>18? "成年":"未成年"}}<br/>
+    {{arrys}}<br/>
+    {{date}}<br/>
+    用户名: <input type="text" v-model="user.username"/><br/>
+    密码: <input type="text" v-model="user.password"/><br/>
+    <input type="button" value="按钮" @click="fun2()"/> <br/>
+</div>
+<script>
+    new Vue({
+        el: "#app",//vue接管app区域控制
+        data: {
+            message: "盛重阳",
+            num: 25,
+            arrys: [1, 2, 3],
+            date: new Date(),
+            user: {"username": "scy", "password": "123"}
+        },
+        methods: {
+            fun: function () {
+                this.message = "盛重阳在深圳工作"
+                alert("请注意内容发生了变化...")
+            },
+            fun2: function () {
+                alert("点击前的\n" + "用户名:" + this.user.username + "\n" + "密码:" + this.user.password)
+                this.user.username = "盛重阳";
+                this.user.password = "盛重阳";
+                alert("点击后的\n" + "用户名:" + this.user.username + "\n" + "密码:" + this.user.password)
+            }
+        }
+    })
+</script>
+</body>
+</html>

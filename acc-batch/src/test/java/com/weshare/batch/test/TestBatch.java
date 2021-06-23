@@ -19,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -382,7 +384,7 @@ public class TestBatch {
     }
 
     @Test
-    public void test() {
+    public void test() throws UnknownHostException {
         Student instance1 = Student.getInstance("赵敏", 20);
         instance1.setName("赵敏2");
         instance1.setAge(202);
@@ -402,5 +404,6 @@ public class TestBatch {
         System.out.println(LocalDate.parse("2020-05-30").toEpochDay() - LocalDate.parse("2020-05-15").toEpochDay());
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"),ChronoUnit.DAYS));
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30")).get(ChronoUnit.DAYS));
+        System.out.println(Inet4Address.getLocalHost().getHostAddress());
     }
 }

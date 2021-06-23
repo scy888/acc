@@ -1,7 +1,10 @@
 package com.weshare.batch.runner;
 
 import com.weshare.batch.controller.BatchController;
+import com.weshare.batch.enums.BatchJobEnum;
 import com.weshare.batch.task.TaskListScheduler;
+import com.weshare.batch.task.entity.BatchJobControl;
+import com.weshare.batch.task.repo.BatchJobControlRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -9,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
  * @author: scyang
@@ -28,6 +33,8 @@ public class JobLoadRunner implements ApplicationRunner {
     private BatchController batchController;
     @Autowired
     private TaskListScheduler taskListScheduler;
+    @Autowired
+    private BatchJobControlRepo batchJobControlRepo;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -35,5 +42,21 @@ public class JobLoadRunner implements ApplicationRunner {
         log.info("job浏览器中的job有:{}", jobExplorer.getJobNames());
         //batchController.test();
         //taskListScheduler.initTask();
+
+        //初始化job任务表
+        for (String jobName : jobRegistry.getJobNames()) {
+            if (jobRegistry.getJob(BatchJobEnum.yxmsJob.name()).getName().equals(jobName)) {
+                batchJobControlRepo.findById(jobName).ifPresentOrElse(e ->
+                        log.info("该jobName:{},在batch_job_control表中存在无需初始化...", jobName), () ->
+                        batchJobControlRepo.save(
+                                new BatchJobControl()
+                                        .setJobName(jobName)
+                                        .setIsRunning(false)
+                                        .setCreateDate(LocalDateTime.now())
+                                        .setLastModifyDate(LocalDateTime.now())
+                        ));
+                break;
+            }
+        }
     }
 }

@@ -196,6 +196,17 @@ class RepayProviderTest {
         Arrays.asList(indexes).stream().forEach(e -> System.out.println(e));
         System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).appliesTo());
         System.out.println(clazz.getAnnotation(org.hibernate.annotations.Table.class).comment());
-        System.out.println(UUID.randomUUID().toString().replaceAll("-",""));
+        System.out.println(UUID.randomUUID().toString().replaceAll("-", ""));
+    }
+
+    @Test
+    public void tes002t() {
+        List<String> list = new ArrayList<>();
+        List<List<Integer>> collect = list.stream().map(e -> {
+            List<Integer> list2 = new ArrayList<>();
+            list2.add(Integer.parseInt(e));
+            return list2;
+        }).collect(Collectors.toList());
+        System.out.println(collect);
     }
 }

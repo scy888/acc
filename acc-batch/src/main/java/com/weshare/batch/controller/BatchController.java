@@ -1,6 +1,7 @@
 package com.weshare.batch.controller;
 
 import com.weshare.batch.feignClient.RepayFeignClient;
+import com.weshare.batch.task.repo.BatchJobControlRepo;
 import com.weshare.service.api.entity.PictureFileReq;
 import common.FreemarkerUtil;
 import common.SnowFlake;
@@ -12,7 +13,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -52,6 +52,8 @@ public class BatchController {
     private JavaMailSender javaMailSender;
     @Autowired
     private RepayFeignClient repayFeignClient;
+    @Autowired
+    private BatchJobControlRepo batchJobControlRepo;
     @Value("${sendMessage.send-from}")
     private String sendFrom;
     @Value("${sendMessage.send-to}")
@@ -110,8 +112,47 @@ public class BatchController {
                 .addString("remark", remark)
                 .toJobParameters();
 
-        JobExecution execution = jobLauncher.run(job, jobParameters);
-        return execution.toString();
+        //控制一个job同时被多个实例执行
+        final String[] resultMsg = {null};
+        batchJobControlRepo.findById(jobName).ifPresentOrElse(e -> {
+            if (e.getIsRunning()) {
+                resultMsg[0] = String.format("该jobName:%s,正在执行...请勿重新发起跑批...", jobName);
+                log.info(resultMsg[0]);
+            } else {
+                batchJobControlRepo.save(e.setIsRunning(true)
+                        .setLastModifyDate(LocalDateTime.now()));
+                try {
+                    JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+
+                    resultMsg[0] = jobExecution.toString();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                } finally {
+                    batchJobControlRepo.save(e.setIsRunning(false)
+                            .setLastModifyDate(LocalDateTime.now()));
+                }
+            }
+        }, () -> {
+            log.info("该jobName:{}在batch_job_control表中没有初始化...");
+        });
+
+//        BatchJobControl batchJobControl = batchJobControlRepo.findByjobName(jobName);
+//        try {
+//            if (batchJobControl.getIsRunning()) {
+//                String format = String.format("该jobName:%s,正在执行...请勿重新发起跑批...", jobName);
+//                return format;
+//            } else {
+//                batchJobControlRepo.save(batchJobControl.setIsRunning(true)
+//                        .setLastModifyDate(LocalDateTime.now()));
+//                JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            batchJobControlRepo.save(batchJobControl.setIsRunning(false)
+//                    .setLastModifyDate(LocalDateTime.now()));
+//        }
+        return resultMsg[0];
     }
 
 
@@ -135,8 +176,30 @@ public class BatchController {
                 .addString("batchDate", batchDate)
                 .addString("remark", remark)
                 .addString("pathStr", pathStr);
-        JobExecution jobExecution = jobLauncher.run(job, parametersBuilder.toJobParameters());
-        return jobExecution.toString();
+
+        //控制一个job同时被多个实例执行
+        final String[] resultMsg = {null};
+        batchJobControlRepo.findById(job.getName()).ifPresentOrElse(e -> {
+            if (e.getIsRunning()) {
+                resultMsg[0] = String.format("该jobName:%s,正在执行...请勿重新发起跑批...", jobName);
+                log.info(resultMsg[0]);
+            } else {
+                batchJobControlRepo.save(e.setIsRunning(true)
+                        .setLastModifyDate(LocalDateTime.now()));
+                try {
+                    JobExecution jobExecution = jobLauncher.run(job, parametersBuilder.toJobParameters());
+                    resultMsg[0] = jobExecution.toString();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                } finally {
+                    batchJobControlRepo.save(e.setIsRunning(false)
+                            .setLastModifyDate(LocalDateTime.now()));
+                }
+            }
+        }, () -> {
+            log.info("该jobName:{}在batch_job_control表中没有初始化...");
+        });
+        return resultMsg[0];
     }
 
     @PostMapping("/addPictureFile")

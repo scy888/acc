@@ -7,9 +7,9 @@ alter table acc_batch.tb_person drop column create_date;
 alter table acc_loan.loan_contract add loan_status_enum varchar(10) null comment '放款状态' after repay_day;
 alter table acc_loan.loan_contract modify loan_status_enum varchar(10) not null comment '放款状态';
 create unique index tb_person_name_index on tb_person(name);
-alter table tb_person add unique index tb_person_status (status);
 drop index tb_person_name_index on tb_person;
-
+alter table tb_person add unique index tb_person_status (status);
+alter table tb_person drop index tb_person_status;
 -- netstat -nao findstr 9002
 select datediff(a.repay_date,a.term_due_date) from acc_repay.repay_plan a where a.due_bill_no='YX-102' and a.term=2
 select year(now())-year(substr('422202199109091016',7,8)) 年龄;
@@ -37,6 +37,10 @@ UNION
 select n.due_bill_no,m.sum_repay_amount,n.sum_amount from
 (select due_bill_no, sum(term_repay_int+term_repay_prin+term_repay_penalty+term_reduce_int) sum_repay_amount from acc_repay.repay_plan where project_no='WS121212' group by due_bill_no) m right join
 (select due_bill_no,sum(amount) sum_amount from acc_repay.receipt_detail where project_no='WS121212' group by due_bill_no) n on m.due_bill_no=n.due_bill_no where m.sum_repay_amount!=n.sum_amount or m.due_bill_no is null
+
+select m.due_bill_no,m.sum_repay_amount,n.sum_amount from
+(select due_bill_no, sum(term_repay_int+term_repay_prin+term_repay_penalty+term_reduce_int) sum_repay_amount from acc_repay.repay_plan where project_no='WS121212' group by due_bill_no) m left join
+(select due_bill_no,sum(amount) sum_amount from acc_repay.receipt_detail where project_no='WS121212' group by due_bill_no) n on m.due_bill_no=n.due_bill_no where m.sum_repay_amount!=ifnull(n.sum_amount,0);
 
 select n.due_bill_no,m.sum_trans_amount,n.sum_amount from
 (select due_bill_no,sum(trans_amount) sum_trans_amount from acc_repay.repay_trans_flow where project_no='WS121212' group by due_bill_no) m

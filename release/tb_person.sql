@@ -9,5 +9,6 @@ create table if not exists acc_batch.tb_person(
 create unique index tb_person_name_index on tb_person(name);
 alter table tb_person add index tb_person_status (status);
 drop index tb_person_name_index on tb_person;
+alter table tb_person drop index tb_person_name_index;
 show index from tb_person;
 

@@ -2,6 +2,7 @@ package com.weshare.batch.test;
 
 import com.weshare.batch.config.AppConfig;
 import com.weshare.batch.controller.AsyncController;
+import com.weshare.batch.controller.BatchController;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.batch.task.instance.YxmsTask;
@@ -14,6 +15,8 @@ import common.ReflectUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.concurrent.FutureCallback;
+import org.aspectj.weaver.ast.Var;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +36,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -63,6 +71,8 @@ public class BatchTest {
     private LoanFeignClient loanFeignClient;
     @Autowired
     private YxmsTask yxmsTask;
+    @Autowired
+    private BatchController batchController;
 
     @Test
     public void test00() {
@@ -688,6 +698,7 @@ public class BatchTest {
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         createFile(yxmsTasklet, appConfig, dateStr);
     }
+
     @Test
     @Order(20)
     @DisplayName("batch-10月15日借据号YX-102第四.五.六期提前还款")
@@ -733,6 +744,22 @@ public class BatchTest {
         }
         for (File file : Objects.requireNonNull(new File(appConfig.getZip(), dateStr).listFiles())) {
             ZipUtil.unzip(file, new File(unzipPath.toUri()));
+        }
+    }
+
+
+    @Test
+    public void testJob_() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            FutureTask<String> task = new FutureTask<>(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    System.out.println(Thread.currentThread().getName() + "aaaaa");
+                    return String.valueOf(new Random().nextInt(100));
+                }
+            });
+            new Thread(task).start();
+            System.out.println(task.get());
         }
     }
 }

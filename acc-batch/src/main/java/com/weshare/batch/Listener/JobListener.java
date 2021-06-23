@@ -2,6 +2,8 @@ package com.weshare.batch.Listener;
 
 import com.weshare.batch.controller.BatchController;
 import com.weshare.batch.entity.StartEvent;
+import com.weshare.batch.task.entity.BatchJobControl;
+import com.weshare.batch.task.repo.BatchJobControlRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -14,6 +16,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 
 /**
@@ -30,6 +33,8 @@ public class JobListener implements JobExecutionListener {
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private BatchJobControlRepo batchJobControlRepo;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -44,6 +49,11 @@ public class JobListener implements JobExecutionListener {
         log.info("当前执行的job名称:{},状态:{}", jobName, status);
 
         JobParameters jobParameters = jobExecution.getJobParameters();
+        BatchJobControl jobControl = batchJobControlRepo.findByjobName(jobName);
+        if (jobControl.getIsRunning()) {
+            batchJobControlRepo.save(jobControl.setIsRunning(false)
+                    .setLastModifyDate(LocalDateTime.now()));
+        }
         //发布事件广播
         applicationEventPublisher.publishEvent(
                 new StartEvent()
@@ -100,7 +110,7 @@ public class JobListener implements JobExecutionListener {
 
             try {
                 log.info("开始跑:{}日期的批...", startBatch);
-                Thread.sleep(3 * 1000);
+                Thread.sleep(2 * 1000);
                 applicationContext.getBean(BatchController.class).startJob(jobName, startBatch.toString(), endDate, projectNo, remark);
             } catch (Exception e) {
                 e.printStackTrace();
