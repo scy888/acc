@@ -4,6 +4,7 @@ import com.weshare.repay.RepayApplication;
 import com.weshare.repay.dao.RepayDao;
 import com.weshare.repay.entity.RepayPlan;
 import com.weshare.repay.entity.RepaySummary;
+import com.weshare.repay.entity.RepaySummaryBack;
 import com.weshare.repay.repo.ReceiptDetailRepo;
 import com.weshare.repay.repo.RepayPlanRepo;
 import com.weshare.repay.repo.RepaySummaryRepo;
@@ -17,12 +18,15 @@ import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.JsonUtil;
+import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.Index;
@@ -58,6 +62,8 @@ class RepayProviderTest {
     private ReceiptDetailRepo receiptDetailRepo;
     @Autowired
     private RepayDao repayDao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void count() {
@@ -208,5 +214,27 @@ class RepayProviderTest {
             return list2;
         }).collect(Collectors.toList());
         System.out.println(collect);
+    }
+
+    @Test
+    public void testInsertBatch() {
+        long start = System.currentTimeMillis();
+        jdbcTemplate.batchUpdate("truncate table acc_repay.repay_summary_back");
+        RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo("YX-101");
+        for (int i = 1; i <= 1000; i++) {
+            List<RepaySummaryBack> list = new ArrayList<>();
+            for (int j = 1; j <= 1000; j++) {
+                RepaySummaryBack repaySummaryBack = new RepaySummaryBack();
+                BeanUtils.copyProperties(repaySummary, repaySummaryBack);
+                repaySummaryBack.setId((i - 1) * 1000 + j);
+                repaySummaryBack.setDueBillNo("SCY-" + (i - 1) * 1000 + j);
+                list.add(repaySummaryBack);
+            }
+            String sql = StringUtils.getInsertSql("acc_repay.repay_summary_back", RepaySummaryBack.class);
+            List<Object[]> objects = list.stream().map(e -> StringUtils.getFieldValue(e)).collect(Collectors.toList());
+            jdbcTemplate.batchUpdate(sql, objects);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("耗时:" + (end - start) / 1000.0 + "秒");
     }
 }

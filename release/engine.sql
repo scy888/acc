@@ -1,15 +1,18 @@
 select version(); -- 查看数据库的版本号
 show table status; -- 查看所有表状态
 show table status from acc_loan where name='link_man'; -- 产看某张表的状态
+
 alter table acc_loan.link_man engine innodb; -- 修改表的储存引擎
 alter table acc_batch.tb_person add column create_date datetime comment '创建时间';
 alter table acc_batch.tb_person drop column create_date;
 alter table acc_loan.loan_contract add loan_status_enum varchar(10) null comment '放款状态' after repay_day;
 alter table acc_loan.loan_contract modify loan_status_enum varchar(10) not null comment '放款状态';
+drop table if exists acc_repay.repay_plan_back;
 create unique index tb_person_name_index on tb_person(name);
 drop index tb_person_name_index on tb_person;
 alter table tb_person add unique index tb_person_status (status);
 alter table tb_person drop index tb_person_status;
+
 -- netstat -nao findstr 9002
 select datediff(a.repay_date,a.term_due_date) from acc_repay.repay_plan a where a.due_bill_no='YX-102' and a.term=2
 select year(now())-year(substr('422202199109091016',7,8)) 年龄;

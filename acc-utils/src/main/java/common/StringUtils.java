@@ -191,7 +191,7 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public static <T> Object[] getFieldValue(T t, String... fieldNames) throws Exception {
+    public static <T> Object[] getFieldValue(T t, String... fieldNames) {
         /**
          * @Description: 获取忽略字段后的属性这
          * @methodName: getFieldValue
@@ -213,11 +213,16 @@ public class StringUtils {
         }
         for (Field field : fieldList) {
             field.setAccessible(true);
-            Object o = field.get(t);
-            if (o instanceof Enum) {
-                list.add(((Enum) o).name());
-            } else {
-                list.add(o);
+            Object o = null;
+            try {
+                o = field.get(t);
+                if (o instanceof Enum) {
+                    list.add(((Enum) o).name());
+                } else {
+                    list.add(o);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
         //System.out.println(list);
