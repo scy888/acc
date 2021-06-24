@@ -21,8 +21,27 @@ public enum ProjectEnum {
     YXMS("WS121212", "易鑫民生", List.of(new Product("0101", "乐花卡"),
             new Product("0102", "乐福卡")),
             new BigDecimal("10000.00"),
-            LocalDate.parse("2099-12-31"));
+            LocalDate.parse("2099-12-31")),
 
+    BDGM("WS121213", "百度国民", List.of(new Product("0101", "乐花卡"),
+            new Product("0102", "乐福卡")),
+            new BigDecimal("10000.00"),
+            LocalDate.parse("2099-12-31")),
+
+    HTGY("WS121214", "汇通国银", List.of(new Product("0101", "乐花卡"),
+            new Product("0102", "乐福卡")),
+            new BigDecimal("10000.00"),
+            LocalDate.parse("2099-12-31")),
+
+    LXYX("WS121215", "乐信云信", List.of(new Product("0101", "乐花卡"),
+            new Product("0102", "乐福卡")),
+            new BigDecimal("10000.00"),
+            LocalDate.parse("2099-12-31")),
+
+    GQZL("WS121216", "广汽租赁", List.of(new Product("0101", "乐花卡"),
+            new Product("0102", "乐福卡")),
+            new BigDecimal("10000.00"),
+            LocalDate.parse("2099-12-31"));
 
     private String projectNo;
     private String projectName;
@@ -75,11 +94,11 @@ public enum ProjectEnum {
 //        }
 //        return "未知";
 
-      return Arrays.stream(ProjectEnum.values())
-               .filter(project->project.getProjectNo().equals(projectNo))
-               .findFirst()
-               .flatMap(project->project.getProducts().stream().filter(product->product.getProductNo().equals(productNo)).findFirst())
-               .map(Product::getProductName)
-               .orElse("未知");
+        return Arrays.stream(ProjectEnum.values())
+                .filter(project -> project.getProjectNo().equals(projectNo))
+                .findFirst()
+                .flatMap(project -> project.getProducts().stream().filter(product -> product.getProductNo().equals(productNo)).findFirst())
+                .map(Product::getProductName)
+                .orElse("未知");
     }
 }

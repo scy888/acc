@@ -12,6 +12,7 @@ import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.RepayPlanReq;
 import com.weshare.service.api.enums.FeeTypeEnum;
+import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TermStatusEnum;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import com.weshare.service.api.vo.Tuple2;
@@ -221,18 +222,78 @@ class RepayProviderTest {
         long start = System.currentTimeMillis();
         jdbcTemplate.batchUpdate("truncate table acc_repay.repay_summary_back");
         RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo("YX-101");
+        LocalDate batchDate = LocalDate.parse("2020-12-16");
         for (int i = 1; i <= 1000; i++) {
             List<RepaySummaryBack> list = new ArrayList<>();
+            repaySummary.setBatchDate(batchDate.plusDays(i));
+            if (i % 5 == 0) {
+                repaySummary.setProjectNo(ProjectEnum.YXMS.getProjectNo());
+            } else if (i % 5 == 1) {
+                repaySummary.setProjectNo(ProjectEnum.BDGM.getProjectNo());
+            } else if (i % 5 == 2) {
+                repaySummary.setProjectNo(ProjectEnum.GQZL.getProjectNo());
+            } else if (i % 5 == 3) {
+                repaySummary.setProjectNo(ProjectEnum.HTGY.getProjectNo());
+            } else {
+                repaySummary.setProjectNo(ProjectEnum.LXYX.getProjectNo());
+            }
             for (int j = 1; j <= 1000; j++) {
                 RepaySummaryBack repaySummaryBack = new RepaySummaryBack();
                 BeanUtils.copyProperties(repaySummary, repaySummaryBack);
-                repaySummaryBack.setId((i - 1) * 1000 + j);
+                repaySummaryBack.setId((i - 1) * 1000 + j + "");
                 repaySummaryBack.setDueBillNo("SCY-" + (i - 1) * 1000 + j);
+                repaySummaryBack.setLastModifiedBy("scy");
                 list.add(repaySummaryBack);
             }
-            String sql = StringUtils.getInsertSql("acc_repay.repay_summary_back", RepaySummaryBack.class);
-            List<Object[]> objects = list.stream().map(e -> StringUtils.getFieldValue(e)).collect(Collectors.toList());
+            String sql = StringUtils.getInsertSql("acc_repay.repay_summary_back", RepaySummaryBack.class, "product_no", "repay_day", "last_modified_by");
+            List<Object[]> objects = list.stream().map(e -> StringUtils.getFieldValue(e, "productNo", "repayDay", "lastModifiedBy")).collect(Collectors.toList());
             jdbcTemplate.batchUpdate(sql, objects);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("耗时:" + (end - start) / 1000.0 + "秒");
+    }
+
+    @Test
+    public void testInsertBatch_() {
+        long start = System.currentTimeMillis();
+        jdbcTemplate.batchUpdate("truncate table acc_repay.repay_summary_back");
+        RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo("YX-101");
+        List<RepaySummaryBack> list = new ArrayList<>();
+        for (int i = 1; i <= 1000012; i++) {
+            RepaySummaryBack repaySummaryBack = new RepaySummaryBack();
+            BeanUtils.copyProperties(repaySummary, repaySummaryBack);
+            if (i % 5 == 0) {
+                repaySummaryBack.setProjectNo(ProjectEnum.YXMS.getProjectNo());
+            } else if (i % 5 == 1) {
+                repaySummaryBack.setProjectNo(ProjectEnum.BDGM.getProjectNo());
+            } else if (i % 5 == 2) {
+                repaySummaryBack.setProjectNo(ProjectEnum.GQZL.getProjectNo());
+            } else if (i % 5 == 3) {
+                repaySummaryBack.setProjectNo(ProjectEnum.HTGY.getProjectNo());
+            } else {
+                repaySummaryBack.setProjectNo(ProjectEnum.LXYX.getProjectNo());
+            }
+            list.add(repaySummaryBack);
+        }
+        //每1000条提交一次
+        List<RepaySummaryBack> tempList = new ArrayList<>();
+        int num = 0;
+        LocalDate batchDate = LocalDate.parse("2020-12-16");
+        for (int i = 0; i < list.size(); i++) {
+            RepaySummaryBack repaySummaryBack = list.get(i);
+            repaySummaryBack.setId(String.valueOf(i + 1));
+            repaySummaryBack.setDueBillNo("SCY-" + i + 1);
+            tempList.add(repaySummaryBack);
+            num++;
+            if (num % 1000 == 0 || num == list.size()) {
+                String sql = StringUtils.getInsertSql("acc_repay.repay_summary_back", RepaySummaryBack.class, "product_no", "repay_day", "last_modified_by");
+                int finalI = i;
+                List<Object[]> objects = tempList.stream().map(e -> {
+                    return StringUtils.getFieldValue(e.setBatchDate(batchDate.plusDays(finalI % 1000 == 0 ? finalI / 1000 : finalI / 1000 + 1)), "productNo", "repayDay", "lastModifiedBy");
+                }).collect(Collectors.toList());
+                jdbcTemplate.batchUpdate(sql, objects);
+                tempList.clear();
+            }
         }
         long end = System.currentTimeMillis();
         System.out.println("耗时:" + (end - start) / 1000.0 + "秒");

@@ -147,4 +147,39 @@ public class DomeTest {
 
         System.out.println(list1);
     }
+
+    @Test
+    public void test04() {
+        List<String> list = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+        list = new ArrayList<>(list);
+        List<String> list1 = list.subList(0, 3);
+        List<String> list2 = list.subList(3, 6);
+        List<String> list3 = list.subList(6, list.size());
+
+        System.out.println(list1);
+        System.out.println(list2);
+        System.out.println(list3);
+
+        System.out.println("===================================================");
+        list.clear();
+        for (int i = 1; i <= 1001; i++) {
+            list.add(String.valueOf(i));
+        }
+        List<String> list4 = list.subList(0, 250);
+        List<String> list5 = list.subList(250, 500);
+        List<String> list6 = list.subList(500, 750);
+        List<String> list7 = list.subList(750, list.size());
+        System.out.println(list4);
+        System.out.println(list5);
+        System.out.println(list6);
+        System.out.println(list7);
+    }
+
+    @Test
+    public void test05() {
+        System.out.println((long) Math.ceil(13 / 3));
+        System.out.println((int)Math.ceil(13 * 1.0 / 3));
+        System.out.println((int)Math.ceil(13 / (3 * 1.0)));
+        System.out.println((int)Math.ceil(13 / 3 * 1.0));
+    }
 }

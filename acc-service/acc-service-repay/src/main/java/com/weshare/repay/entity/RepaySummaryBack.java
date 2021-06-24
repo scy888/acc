@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class RepaySummaryBack {
 
-    private Integer id;
+    private String id;
     private String projectNo;
     private String productNo;
     private String dueBillNo;
