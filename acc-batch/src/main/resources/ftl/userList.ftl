@@ -14,7 +14,7 @@
     您好：<br>
     ${content!}
     <table border="1" cellspacing="0">
-        <thead>
+      <#--  <thead>-->
         <tr>
             <th>姓名</th>
             <th>生日</th>
@@ -26,23 +26,23 @@
             <th>薪水</th>
             <th>状态</th>
         </tr>
-        </thead>
-        <tbody>
+        <#--</thead>-->
+       <#-- <tbody>-->
         <#list userList as list>
         <tr>
-            <td>${list.username!}</td>
-            <td>${list.birthday?string('yyyy-MM-dd')!}</td>
+            <td>${list.username}</td>
+            <td>${list.birthday?string('yyyy-MM-dd')}</td>
             <#--<td <#if !dataCheckResult.success> style="color: red" </#if>>${dataCheckResult.success?string("是","否")}</td>-->
-            <td>${list.age!}</td>
-            <td>${list.sex!}</td>
-            <td>${list.address!}</td>
-            <td>${list.password!}</td>
-            <td>${list.mobile!}</td>
-            <td>${list.money!}</td>
-            <td>${list.status!}</td>
+            <td>${list.age}</td>
+            <td>${list.sex}</td>
+            <td>${list.address}</td>
+            <td>${list.password}</td>
+            <td>${list.mobile}</td>
+            <td>${list.money}</td>
+            <td>${list.status}</td>
         </tr>
         </#list>
-        </tbody>
+       <#-- </tbody>-->
     </table>
 </div>
 </body>

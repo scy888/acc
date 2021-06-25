@@ -259,7 +259,7 @@ class RepayProviderTest {
         jdbcTemplate.batchUpdate("truncate table acc_repay.repay_summary_back");
         RepaySummary repaySummary = repaySummaryRepo.findByDueBillNo("YX-101");
         List<RepaySummaryBack> list = new ArrayList<>();
-        for (int i = 1; i <= 1000012; i++) {
+        for (int i = 1; i <= 100012; i++) {
             RepaySummaryBack repaySummaryBack = new RepaySummaryBack();
             BeanUtils.copyProperties(repaySummary, repaySummaryBack);
             if (i % 5 == 0) {
@@ -284,8 +284,9 @@ class RepayProviderTest {
             repaySummaryBack.setId(String.valueOf(i + 1));
             repaySummaryBack.setDueBillNo("SCY-" + i + 1);
             tempList.add(repaySummaryBack);
-            num++;
-            if (num % 1000 == 0 || num == list.size()) {
+            // num++; (num%1000==0||num=list.size())
+            if (tempList.size() % 1000 == 0 || (tempList.size() == list.size() % 1000 && num == list.size() / 1000)) {
+                num++;
                 String sql = StringUtils.getInsertSql("acc_repay.repay_summary_back", RepaySummaryBack.class, "product_no", "repay_day", "last_modified_by");
                 int finalI = i;
                 List<Object[]> objects = tempList.stream().map(e -> {
