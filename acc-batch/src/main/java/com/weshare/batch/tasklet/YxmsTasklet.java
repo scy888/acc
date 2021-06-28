@@ -5,6 +5,7 @@ import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
 import com.weshare.batch.entity.Person;
 import com.weshare.batch.feignClient.AdapterFeignClient;
 import com.weshare.batch.feignClient.LoanFeignClient;
+import com.weshare.batch.service.DataCheckService;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
@@ -66,6 +67,8 @@ public class YxmsTasklet {
     private AppConfig appConfig;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private DataCheckService dataCheckService;
 
     public Tasklet clearAllTasklet() {
         return new Tasklet() {
@@ -144,6 +147,19 @@ public class YxmsTasklet {
                 for (File file : new File(appConfig.getZip(), dateStr).listFiles()) {
                     ZipUtil.unzip(file, new File(path.toUri()));
                 }
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
+
+    public Tasklet dataCheckTasklet() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+                String projectNo = (String) jobParameters.get("projectNo");
+                String batchDate = (String) jobParameters.get("batchDate");
+                dataCheckService.checkDataResult(projectNo, batchDate);
                 return RepeatStatus.FINISHED;
             }
         };

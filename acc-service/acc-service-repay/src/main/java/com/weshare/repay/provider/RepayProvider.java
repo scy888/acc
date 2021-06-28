@@ -1,10 +1,12 @@
 package com.weshare.repay.provider;
 
+import com.weshare.repay.dao.RepayDao;
 import com.weshare.repay.entity.*;
 import com.weshare.repay.repo.*;
 import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.*;
+import com.weshare.service.api.result.DataCheckResult;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
 import com.weshare.service.api.vo.Tuple2;
@@ -32,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: scyang
@@ -53,6 +56,9 @@ public class RepayProvider implements RepayClient {
     private ReceiptDetailRepo receiptDetailRepo;
     @Autowired
     private PictureFileRepo pictureFileRepo;
+    @Autowired
+    private RepayDao repayDao;
+
     private Integer pageSize = 1;
 
     @Override
@@ -338,4 +344,84 @@ public class RepayProvider implements RepayClient {
         });
         return result;
     }
+
+    @Override
+    public Result<List<DataCheckResult>> checkDataResult(String projectNo) {
+        List<DataCheckResult> list = new ArrayList<>();
+
+        List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s_1 = repayDao.checkLoanAmount(projectNo);
+        //tuple3s_1.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验借款合同金额等于还款计划应还本金之和, tuple3s_1.size(),
+                        tuple3s_1.stream().map(Tuple3::getFirst).collect(Collectors.toList()),
+                        "放款金额:" + tuple3s_1.stream().map(Tuple3::getThird).reduce(BigDecimal.ZERO, BigDecimal::add) + "元," +
+                                "应还本金金额之和:" + tuple3s_1.stream().map(Tuple3::getSecond).reduce(BigDecimal.ZERO, BigDecimal::add) + "元")
+        );
+
+        List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s_2 = repayDao.checkRemainPrin(projectNo);
+        //tuple3s_2.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验还款主信息剩余本金等于还款计划剩余本金之和, tuple3s_2.size(),
+                        tuple3s_2.stream().map(Tuple3::getFirst).collect(Collectors.toList()),
+                        "还款计划剩余本金额:" + tuple3s_2.stream().map(Tuple3::getSecond).reduce(BigDecimal::add).orElse(BigDecimal.ZERO) + "元," +
+                                "还款主信息剩余本金额:" + tuple3s_2.stream().map(Tuple3::getThird).reduce(BigDecimal.ZERO, BigDecimal::add) + "元")
+        );
+
+        List<Tuple4<String, BigDecimal, BigDecimal, BigDecimal>> tuple4s_1 = repayDao.checkActualAmount(projectNo);
+        //tuple4s_1.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.检验还款计划的实还金额等于还款流水或实还之和, tuple4s_1.size(),
+                        tuple4s_1.stream().map(Tuple4::getFirst).collect(Collectors.toList()),
+                        "还款计划的已还金额:" + tuple4s_1.stream().map(Tuple4::getSecond).reduce(BigDecimal.ZERO, BigDecimal::add) + "元," +
+                                "还款流水金额:" + tuple4s_1.stream().map(Tuple4::getThird).reduce(BigDecimal.ZERO, BigDecimal::add) + "元," +
+                                "实还金额:" + tuple4s_1.stream().map(Tuple4::getFourth).reduce(BigDecimal.ZERO, BigDecimal::add) + "元")
+        );
+
+        List<Tuple4<String, String, BigDecimal, BigDecimal>> tuple4s_2 = repayDao.checkFlowSn(projectNo);
+        //tuple4s_2.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验还款流水表流水号等于实还表流流水号, tuple4s_2.size(),
+                        tuple4s_2.stream().map(Tuple4::getFirst).collect(Collectors.toList()),
+                        "还款流水金额:" + tuple4s_2.stream().map(Tuple4::getThird).reduce(BigDecimal.ZERO, BigDecimal::add) + "元," +
+                                "实还金额:" + tuple4s_2.stream().map(Tuple4::getFourth).reduce(BigDecimal.ZERO, BigDecimal::add) + "元")
+        );
+
+        List<Tuple3<String, Integer, Integer>> tuple3s_3 = repayDao.checkTotalTerm(projectNo);
+        //tuple3s_3.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验用户还款主信息期次等于还款计划总期次, tuple3s_3.size(),
+                        tuple3s_3.stream().map(Tuple3::getFirst).collect(Collectors.toList()),
+                        "还款计划总期次:" + tuple3s_3.stream().map(Tuple3::getThird).reduce(0, Integer::sum) + "," +
+                                "还款主信息总期次:" + tuple3s_3.stream().mapToInt(Tuple3::getSecond).sum())
+        );
+
+        List<Tuple3<String, TermStatusEnum, AssetStatusEnum>> tuple3s_4 = repayDao.checkNoamal(projectNo);
+        List<Tuple3<String, Integer, Integer>> tuple3s_5 = repayDao.checkOverdue(projectNo);
+        List<Tuple3<String, Integer, Integer>> tuple3s_6 = repayDao.checkSettled(projectNo);
+
+        List<String> list4 = tuple3s_4.stream().map(Tuple3::getFirst).collect(Collectors.toList());
+        List<String> list5 = tuple3s_5.stream().map(Tuple3::getFirst).collect(Collectors.toList());
+        List<String> list6 = tuple3s_6.stream().map(Tuple3::getFirst).collect(Collectors.toList());
+        list4.addAll(list5);
+        list4.addAll(list6);
+        //list4.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验还款主信息表的借据状态和还款计划表的期次状态一致性, list4.size(),
+                        list4, "")
+        );
+
+        List<Tuple3<String, Integer, Integer>> tuple3s_7 = repayDao.checkOverdueSkip(projectNo);
+        List<Tuple4<String, Integer, Integer, Integer>> tuple4s_3 = repayDao.checkUndueSkip(projectNo);
+        List<String> list7 = tuple3s_7.stream().map(Tuple3::getFirst).collect(Collectors.toList());
+        List<String> list8 = tuple4s_3.stream().map(Tuple4::getFirst).collect(Collectors.toList());
+        list7.addAll(list8);
+        //list7.clear();
+        list.add(
+                DataCheckResult.dataCheckResult(DataCheckType.校验还款计划是否跳期,list7.size(),
+                        list7,"")
+        );
+
+        return Result.result(true, list);
+    }
+
 }

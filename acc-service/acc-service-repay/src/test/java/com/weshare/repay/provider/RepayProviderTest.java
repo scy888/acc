@@ -1,6 +1,5 @@
 package com.weshare.repay.provider;
 
-import com.weshare.repay.RepayApplication;
 import com.weshare.repay.dao.RepayDao;
 import com.weshare.repay.entity.RepayPlan;
 import com.weshare.repay.entity.RepaySummary;
@@ -11,10 +10,11 @@ import com.weshare.repay.repo.RepaySummaryRepo;
 import com.weshare.repay.repo.RepayTransFlowRepo;
 import com.weshare.service.api.client.RepayClient;
 import com.weshare.service.api.entity.RepayPlanReq;
+import com.weshare.service.api.enums.AssetStatusEnum;
 import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TermStatusEnum;
-import com.weshare.service.api.vo.DueBillNoAndTermDueDate;
+import com.weshare.service.api.result.DataCheckResult;
 import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
@@ -22,13 +22,10 @@ import common.JsonUtil;
 import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -38,8 +35,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author: scyang
@@ -298,5 +293,56 @@ class RepayProviderTest {
         }
         long end = System.currentTimeMillis();
         System.out.println("耗时:" + (end - start) / 1000.0 + "秒");
+    }
+
+    @Test
+    public void testCheckResult() {
+        for (Tuple3<String, BigDecimal, BigDecimal> tuple3 : repayDao.checkLoanAmount("WS121212")) {
+            System.out.println("checkLoanAmount:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, BigDecimal, BigDecimal> tuple3 : repayDao.checkRemainPrin("WS121212")) {
+            System.out.println("checkRemainPrin:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple4<String, BigDecimal, BigDecimal, BigDecimal> tuple4 : repayDao.checkActualAmount("WS121212")) {
+            System.out.println("checkActualAmount:"+tuple4);
+        }
+        System.out.println("===================================================================");
+        for (Tuple4<String, String, BigDecimal, BigDecimal> tuple4 : repayDao.checkFlowSn("WS121212")) {
+            System.out.println("checkFlowSn:"+tuple4);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkTotalTerm("WS121212")) {
+            System.out.println("checkTotalTerm:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, TermStatusEnum, AssetStatusEnum> tuple3 : repayDao.checkNoamal("WS121212")) {
+            System.out.println("checkNoamal:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkOverdue("WS121212")) {
+            System.out.println("checkOverdue:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkSettled("WS121212")) {
+            System.out.println("checkSettled:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkOverdueSkip("WS121212")) {
+            System.out.println("checkOverdueSkip:"+tuple3);
+        }
+        System.out.println("===================================================================");
+        for (Tuple4<String, Integer, Integer, Integer> tuple4 : repayDao.checkUndueSkip("WS121212")) {
+            System.out.println("checkUndueSkip:"+tuple4);
+
+        }
+    }
+
+    @Test
+    public void checkResultTest(){
+        for (DataCheckResult result : repayClient.checkDataResult("WS121212").getData()) {
+            System.out.println(JsonUtil.toJson(result,true));
+        }
     }
 }

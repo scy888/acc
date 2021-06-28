@@ -3,6 +3,7 @@ package com.weshare.service.api.client;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.FeeTypeEnum;
 import com.weshare.service.api.enums.TermStatusEnum;
+import com.weshare.service.api.result.DataCheckResult;
 import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
@@ -88,6 +89,10 @@ public interface RepayClient {
 
     @GetMapping("/viewPictureFile/{id}")
     Result<PictureFileReq> viewPictureFile(@PathVariable("id") String id);
+
+    @GetMapping("/checkDataResult/{projectNo}")
+    Result<List<DataCheckResult>> checkDataResult(@PathVariable("projectNo") String projectNo);
+
 
     @Data
     @Accessors(chain = true)

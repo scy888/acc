@@ -19,15 +19,15 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="acc" options="" />
-      <module name="acc-adapter" options="" />
-      <module name="acc-batch" options="" />
-      <module name="acc-eureka" options="" />
-      <module name="acc-service" options="" />
-      <module name="acc-service-api" options="" />
-      <module name="acc-service-loan" options="" />
-      <module name="acc-service-repay" options="" />
-      <module name="acc-utils" options="" />
+      <module name="acc" options="-parameters" />
+      <module name="acc-adapter" options="-parameters" />
+      <module name="acc-batch" options="-parameters" />
+      <module name="acc-eureka" options="-parameters" />
+      <module name="acc-service" options="-parameters" />
+      <module name="acc-service-api" options="-parameters" />
+      <module name="acc-service-loan" options="-parameters" />
+      <module name="acc-service-repay" options="-parameters" />
+      <module name="acc-utils" options="-parameters" />
       <module name="acceureka" options="" />
     </option>
   </component>

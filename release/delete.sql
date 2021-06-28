@@ -90,7 +90,8 @@ on m.due_bill_no=n.due_bill_no where m.count_count=n.total_term;
 -- 校验还款主信息表资产状态为OVERDUE时,还款计划表期次状态至少有一个为OVERDUE
 select m.due_bill_no,m.total_term,n.count_count from
 (select a.due_bill_no,a.asset_status,a.total_term from acc_repay.repay_summary a where a.asset_status='OVERDUE' and a.project_no='WS121212') m,
-(select b.due_bill_no,b.term_status,count(*) count_count from acc_repay.repay_plan b where b.term_status!='OVERDUE' and b.project_no='WS121212' group by b.due_bill_no) n where m.due_bill_no=n.due_bill_no and m.total_term=n.count_count;
+(select b.due_bill_no,b.term_status,count(*) count_count from acc_repay.repay_plan b where b.term_status!='OVERDUE' and b.project_no='WS121212' group by b.due_bill_no) n
+ where m.due_bill_no=n.due_bill_no and m.total_term=n.count_count;
 
 select m.due_bill_no,m.asset_status,n.due_bill_no,n.term_status from
 (select a.due_bill_no,a.asset_status from acc_repay.repay_summary a where a.asset_status='OVERDUE' and a.project_no='WS121212') m
@@ -100,7 +101,8 @@ left join
 -- 校验还款主信息资产状态为SETTLED时,还款主信息表的期次状态全为REPAID
 select m.due_bill_no,m.total_term,n.count_count from
 (select a.due_bill_no,a.asset_status,a.total_term from acc_repay.repay_summary a where a.asset_status='SETTLED' and a.project_no='WS121212') m,
-(select b.due_bill_no,b.term_status,count(*) count_count from acc_repay.repay_plan b where b.term_status='REPAID' and b.project_no='WS121212' group by b.due_bill_no) n where m.due_bill_no=n.due_bill_no and m.total_term!=n.count_count;
+(select b.due_bill_no,b.term_status,count(*) count_count from acc_repay.repay_plan b where b.term_status='REPAID' and b.project_no='WS121212' group by b.due_bill_no) n
+where m.due_bill_no=n.due_bill_no and m.total_term!=n.count_count;
 
 -- 校验还款计划表的min(overdue_term)!=max(repaid_term)+1
 select m.due_bill_no,m.overdue_min_term,n.repaid_max_term from
@@ -116,4 +118,10 @@ left join
 on k.due_bill_no=m.due_bill_no
 left join
 (select a.due_bill_no,a.term_status,max(a.term) overdue_max_term from acc_repay.repay_plan a where a.term_status='OVERDUE' and a.project_no='WS121212' group by a.due_bill_no) n
- on k.due_bill_no=n.due_bill_no where k.undue_min_term!=greatest(ifnull(m.repaid_max_term,0),ifnull(n.overdue_max_term,0))+1
+ on k.due_bill_no=n.due_bill_no where k.undue_min_term!=greatest(ifnull(m.repaid_max_term,0),ifnull(n.overdue_max_term,0))+1;
+
+ -- 校验还款主信息表的期次是否等于还款计划的的总期次
+ select m.due_bill_no,m.count_count,a.total_term from acc_repay.repay_summary a
+ right join
+ (select b.due_bill_no,count(*) count_count from acc_repay.repay_plan b where b.project_no='WS121212' group by b.due_bill_no) m
+ on a.project_no='WS121212'and m.due_bill_no=a.due_bill_no where m.count_count!=ifnull(a.total_term,0);
