@@ -12,7 +12,7 @@
 <body>
 <div style="line-height: 180%;">
     您好：<br>
-    ${content!}
+    ${content}
     <table border="1" cellspacing="0">
         <thead>
         <tr>
@@ -24,13 +24,13 @@
         </tr>
         </thead>
         <tbody>
-        <#list dataCheckResultList as dataCheckResult>
+        <#list dataCheckList as dataCheckResult>
         <tr>
-            <td>${dataCheckResult.name!}</td>
-            <td>${dataCheckResult.description!}</td>
-            <td <#if !dataCheckResult.success> style="color: red" </#if>>${dataCheckResult.success?string("是","否")}</td>
-            <td>${dataCheckResult.errorCount!}</td>
-            <td>${dataCheckResult.remark!}</td>
+            <td>${dataCheckResult.checkName}</td>
+            <td>${dataCheckResult.checkDesc}</td>
+            <td <#if !dataCheckResult.checkResult> style="color: red" </#if>>${dataCheckResult.checkResult?string("是","否")}</td>
+            <td>${dataCheckResult.errorCount}</td>
+            <td>${dataCheckResult.remark}</td>
         </tr>
         </#list>
         </tbody>

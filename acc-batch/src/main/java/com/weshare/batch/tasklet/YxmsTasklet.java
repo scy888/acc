@@ -179,6 +179,35 @@ public class YxmsTasklet {
         };
     }
 
+    public Tasklet sendStartEmailTasklet() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+                String batchDate = (String) jobParameters.get("batchDate");
+                if ("2020-05-15".equals(batchDate)) {
+                    dataCheckService.sendStartEmail(batchDate);
+                }
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
+
+    public Tasklet sendDataCheckEmailTasklet() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+                String batchDate = (String) jobParameters.get("batchDate");
+                String projectNo = (String) jobParameters.get("projectNo");
+                if ("2020-10-15".equals(batchDate)) {
+                    dataCheckService.sendCheckDataEmail(batchDate, dataCheckService.getDataCheckList(batchDate, projectNo));
+                }
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
+
     @Bean
     @StepScope
     public FlatFileItemReader<LoanDetailReq> getLoanDetailRead(@Value("#{jobParameters[batchDate]}") String batchDate) {

@@ -85,6 +85,20 @@ public class YxmsJob {
                 .build();
     }
 
+    public Step sendStartEmailStep() {
+        return stepBuilderFactory.get(JobStepName.YsmsJob.开始发送邮件步骤)
+                .tasklet(yxmsTasklet.sendStartEmailTasklet())
+                .allowStartIfComplete(true)
+                .build();
+    }
+
+    public Step sendDataCheckEmailStep() {
+        return stepBuilderFactory.get(JobStepName.YsmsJob.开始发送数据校验邮件步骤)
+                .tasklet(yxmsTasklet.sendDataCheckEmailTasklet())
+                .allowStartIfComplete(true)
+                .build();
+    }
+
     @Bean
     public Step loanDetailCsvStep(FlatFileItemReader<LoanDetailReq> getLoanDetailRead,
                                   ItemWriter<LoanDetailReq> getLoanDetailWrite,
@@ -177,8 +191,10 @@ public class YxmsJob {
                             loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate);
                             return RepeatStatus.FINISHED;
                         }).build())
+                .next(sendStartEmailStep())
                 .next(batchUpdateStep())
                 .next(dataCheckStep())
+                .next(sendDataCheckEmailStep())
                 .build();
     }
 }

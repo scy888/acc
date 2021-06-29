@@ -48,7 +48,7 @@ spring:
 
 sendMessage:
   send-from: 348691356@qq.com
-  send-to: 348691356@qq.com,61906806@qq.com
+  send-to: 348691356@qq.com
 
 swagger:
   basic:

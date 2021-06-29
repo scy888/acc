@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author: scyang
@@ -22,4 +23,5 @@ public interface DataCheckRepo extends JpaRepository<DataCheck, String> {
     @Query("delete from #{#entityName} e where e.projectNo=:projectNo and e.batchDate=:batchDate and e.checkName=:checkName")
     void deleteByProjectNoAndBatchDateAndCheckName(String projectNo, LocalDate batchDate, String checkName);
 
+    List<DataCheck> findByBatchDateAndProjectNo(LocalDate batchDate, String projectNo);
 }
