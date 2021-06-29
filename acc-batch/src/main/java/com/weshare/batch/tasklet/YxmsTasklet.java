@@ -165,6 +165,20 @@ public class YxmsTasklet {
         };
     }
 
+    public Tasklet batchUpdate() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
+                String batchDate = (String) jobParameters.get("batchDate");
+                if ("2020-10-15".equals(batchDate)) {
+                    dataCheckService.batchUpdate();
+                }
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
+
     @Bean
     @StepScope
     public FlatFileItemReader<LoanDetailReq> getLoanDetailRead(@Value("#{jobParameters[batchDate]}") String batchDate) {

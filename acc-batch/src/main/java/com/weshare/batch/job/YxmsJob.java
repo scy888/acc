@@ -78,6 +78,13 @@ public class YxmsJob {
                 .build();
     }
 
+    public Step batchUpdateStep() {
+        return stepBuilderFactory.get(JobStepName.YsmsJob.批量修改步骤)
+                .tasklet(yxmsTasklet.batchUpdate())
+                .allowStartIfComplete(true)
+                .build();
+    }
+
     @Bean
     public Step loanDetailCsvStep(FlatFileItemReader<LoanDetailReq> getLoanDetailRead,
                                   ItemWriter<LoanDetailReq> getLoanDetailWrite,
@@ -170,6 +177,7 @@ public class YxmsJob {
                             loanFeignClient.UpdateRepaySummaryCurrentTerm(ProjectEnum.YXMS.getProjectNo(), batchDate);
                             return RepeatStatus.FINISHED;
                         }).build())
+                .next(batchUpdateStep())
                 .next(dataCheckStep())
                 .build();
     }

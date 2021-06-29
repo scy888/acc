@@ -9,10 +9,16 @@ import com.weshare.service.api.result.DataCheckResult;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,6 +37,8 @@ public class DataCheckService {
     private DataCheckRepo dataCheckRepo;
     @Autowired
     private DataCheckDetailRepo dataCheckDetailRepo;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public void checkDataResult(String projectNo, String batchDate) {
         List<DataCheckResult> checkResults = repayClient.checkDataResult(projectNo).getData();
@@ -53,7 +61,7 @@ public class DataCheckService {
             );
             //保存校验明细
             if (!checkResult.getIsPass()) {
-                dataCheckDetailRepo.deleteByProjectNoAndBatchDateAndCheckType(projectNo,LocalDate.parse(batchDate),checkResult.getName().name());
+                dataCheckDetailRepo.deleteByProjectNoAndBatchDateAndCheckType(projectNo, LocalDate.parse(batchDate), checkResult.getName().name());
                 for (String dueBillNo : checkResult.getDueBillNoList()) {
                     dataCheckDetailRepo.save(
                             new DataCheckDetail()
@@ -69,5 +77,11 @@ public class DataCheckService {
                 }
             }
         }
+    }
+
+    public int batchUpdate() throws URISyntaxException, IOException {
+        List<String> readAllLines = Files.readAllLines(Paths.get(this.getClass().getClassLoader().getResource("update.sql").toURI()));
+        String[] split = String.join(System.lineSeparator(), readAllLines).split(";");
+        return jdbcTemplate.batchUpdate(split).length;
     }
 }
