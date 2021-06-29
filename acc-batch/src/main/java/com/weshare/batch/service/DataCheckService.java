@@ -131,7 +131,7 @@ public class DataCheckService {
         try {
             mimeMessageHelper.setFrom(sendFrom);
             mimeMessageHelper.setTo(sendTos);
-            mimeMessageHelper.setSubject("【" + springActive + "】" + ProjectEnum.YXMS.getProjectName() + batchDate + "数据校验问题");
+            mimeMessageHelper.setSubject("跑批环境 【" + springActive + "】" + ProjectEnum.YXMS.getProjectName() + batchDate + "数据校验问题如下:");
             mimeMessageHelper.setText(outputContent, true);
             javaMailSender.send(mimeMessage);
             stopWatch.stop();
