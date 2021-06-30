@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -31,4 +32,6 @@ public interface RepayPlanRepo extends JpaRepository<RepayPlan, String>, JpaSpec
     List<RepayPlan> findByDueBillNoAndTermStatusNot(String dueBillNo, TermStatusEnum termStatus);
 
     List<RepayPlan> findByDueBillNoLikeAndTerm(String dueBillNo, Integer term);
+
+    List<RepayPlan> findByBatchDateBetweenAndDueBillNoInAndProjectNo(LocalDate minBatchDate,LocalDate maxBatchDate,List<String> dueBillNoList,String projectNo);
 }

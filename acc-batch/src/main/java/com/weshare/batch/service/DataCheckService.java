@@ -123,7 +123,7 @@ public class DataCheckService {
         Map<String, Object> map = new HashMap<>();
         String checkResult = list.stream().mapToInt(DataCheck::getErrorCount).sum() < 1 ? "通过" : "不通过";
         checkResult = list.stream().map(DataCheck::getCheckResult).noneMatch(e -> e.equals(false)) ? "通过" : "不通过";
-        map.put("content", "批量日期:" + batchDate + ",数据校验结果:" + checkResult + ",明细如下");
+        map.put("content", "批量日期:" + batchDate + ",数据校验结果:" + checkResult + ",明细如下:");
         map.put("dataCheckList", list);
         String outputContent = FreemarkerUtil.parse(templateContent, map);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
