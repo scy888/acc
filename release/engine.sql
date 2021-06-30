@@ -18,6 +18,9 @@ select datediff(a.repay_date,a.term_due_date) from acc_repay.repay_plan a where 
 select year(now())-year(substr('422202199109091016',7,8)) 年龄;
 select year('2021/12/12')-year(substr('422202199109091016',7,8)) 年龄;
 select year(now())-substr('422202199109091016',7,4) 年龄;
+select sum(a.contract_amount) 放款总额度,count(*) 放款总笔数,sum(a.contract_amount)/count(*) 平均额度,
+sum(a.contract_amount)/(datediff(now(),'2020-05-15')-1) 日均放款额度 from acc_loan.loan_contract a
+where a.project_no='WS121212';
 
 SELECT replace(a.project_no,'WS','') FROM acc_repay.repay_plan a;
 

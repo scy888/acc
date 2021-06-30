@@ -11,4 +11,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @describe:
  */
 public interface TaskConfigRepo extends JpaRepository<TaskConfig, String> {
+    TaskConfig findByTaskName(String taskName);
 }

@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -199,8 +200,16 @@ public class TestBatch {
         System.out.println(LocalDateTime.now().with(ChronoField.DAY_OF_MONTH, 12).withNano(0));
         System.out.println(LocalDateTime.of(2021, 5, 12, 15, 30, 30));
 
-        System.out.println(LocalDate.parse("2020-03-12").until(LocalDate.parse("2020-06-12"), ChronoUnit.DAYS));
-        System.out.println(LocalDate.parse("2020-06-12").toEpochDay() - LocalDate.parse("2020-03-12").toEpochDay());
+        System.out.println(LocalDate.parse("2020-03-12").until(LocalDate.parse("2020-06-13"), ChronoUnit.DAYS));
+        System.out.println(LocalDate.parse("2020-06-13").toEpochDay() - LocalDate.parse("2020-03-12").toEpochDay());
+        System.out.println(Duration.between(LocalDateTime.parse("2020-03-12 12:20:35", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.parse("2020-06-13 12:20:40", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toDays());
+        System.out.println(LocalDateTime.parse("2020-03-12 12:20:35", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).until(LocalDateTime.parse("2020-06-13 12:20:40", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), ChronoUnit.DAYS));
+        System.out.println(Duration.between(LocalDate.parse("2020-03-12").atStartOfDay(), LocalDate.parse("2020-06-13").atStartOfDay()).toDays());
+        System.out.println(LocalDate.parse("2020-03-12").until(LocalDate.parse("2020-06-13")).get(ChronoUnit.DAYS));
+        System.out.println("==============================================================");
+        System.out.println(Duration.between(LocalDateTime.parse("2020-03-12 12:20:35", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.parse("2020-03-12 12:21:40", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes());
+        System.out.println(Duration.between(LocalDateTime.parse("2020-03-12 12:20:35", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.parse("2020-03-12 12:21:40", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).getSeconds());
+        System.out.println(Duration.between(LocalDateTime.parse("2020-03-12 12:20:35", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.parse("2020-03-12 12:21:40", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMillis());
     }
 
     @Test
@@ -398,11 +407,11 @@ public class TestBatch {
         System.out.println(LocalDateTime.now().withNano(0));
         System.out.println(LocalDateTime.now().with(ChronoField.MICRO_OF_SECOND, 0));
         System.out.println(LocalDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0));
-        System.out.println(LocalDate.parse("20200512",DateTimeFormatter.ofPattern("yyyyMMdd")));
+        System.out.println(LocalDate.parse("20200512", DateTimeFormatter.ofPattern("yyyyMMdd")));
         System.out.println(LocalDate.parse("2020-05-15").withDayOfMonth(30));
         System.out.println(LocalDate.parse("2020-05-30").with(ChronoField.MONTH_OF_YEAR, 6).with(ChronoField.DAY_OF_MONTH, 15));
         System.out.println(LocalDate.parse("2020-05-30").toEpochDay() - LocalDate.parse("2020-05-15").toEpochDay());
-        System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"),ChronoUnit.DAYS));
+        System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"), ChronoUnit.DAYS));
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30")).get(ChronoUnit.DAYS));
         System.out.println(Inet4Address.getLocalHost().getHostAddress());
     }

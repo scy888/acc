@@ -4,13 +4,19 @@ import com.weshare.batch.controller.BatchController;
 import com.weshare.batch.enums.BatchJobEnum;
 import com.weshare.batch.task.TaskListScheduler;
 import com.weshare.batch.task.entity.BatchJobControl;
+import com.weshare.batch.task.entity.TaskConfig;
+import com.weshare.batch.task.instance.YxmsTask;
 import com.weshare.batch.task.repo.BatchJobControlRepo;
+import com.weshare.batch.task.repo.TaskConfigRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -35,6 +41,13 @@ public class JobLoadRunner implements ApplicationRunner {
     private TaskListScheduler taskListScheduler;
     @Autowired
     private BatchJobControlRepo batchJobControlRepo;
+    @Autowired
+    private TaskConfigRepo taskConfigRepo;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -58,5 +71,21 @@ public class JobLoadRunner implements ApplicationRunner {
                 break;
             }
         }
+        //初始化定时任务
+        taskConfigRepo.findById(new YxmsTask().getTaskName()).ifPresentOrElse(e -> {
+
+            threadPoolTaskScheduler.schedule((Runnable)applicationContext.getBean(new YxmsTask().getTaskName()), new CronTrigger(e.getCron()));
+            log.info("定时任务已初始化,无需初始化...");
+        }, () -> {
+            TaskConfig taskConfig = new TaskConfig();
+            taskConfig.setTaskName(new YxmsTask().getTaskName());
+            taskConfig.setDescription("易鑫民生跑批任务");
+            taskConfig.setCron("0 0/1 * * * ?");
+            taskConfig.setIsEnabled(true);
+            taskConfig.setIsRunning(false);
+            taskConfig.setCreatedDate(LocalDateTime.now());
+            taskConfigRepo.save(taskConfig);
+            //threadPoolTaskScheduler.schedule((Runnable)applicationContext.getBean(new YxmsTask().getTaskName()), new CronTrigger(taskConfig.getCron()));
+        });
     }
 }

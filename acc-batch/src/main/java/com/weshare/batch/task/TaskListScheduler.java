@@ -25,6 +25,7 @@ public class TaskListScheduler {
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     @Autowired
     private YxmsTask yxmsTask;
+    @Autowired
 
     public void initTask() {
         threadPoolTaskScheduler.schedule((Runnable) applicationContext.getBean(yxmsTask.getTaskName()), new CronTrigger("0/30 * * * * ?"));
