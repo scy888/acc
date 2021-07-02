@@ -14,7 +14,7 @@ import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.DateUtils;
 import common.JsonUtil;
-import common.ReflectUtils;
+import common.ReflectUtil;
 import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -203,13 +203,13 @@ class AdapterControllerTest {
         for (File file : new File(path.toUri()).listFiles()) {
             file.delete();
         }
-        String fieldNames1 = ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate");
-        List<String> list1 = rebackDetailReqs_01.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        String fieldNames1 = ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate");
+        List<String> list1 = rebackDetailReqs_01.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         list1.add(0, fieldNames1);
         Files.write(Paths.get(String.valueOf(path), "rebackDetailReqs_01.csv"), list1);
 
-        String fieldNames2 = ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate");
-        List<String> list2 = rebackDetailReqs_02.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        String fieldNames2 = ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate");
+        List<String> list2 = rebackDetailReqs_02.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
         list2.add(0, fieldNames2);
         Files.write(Paths.get(String.valueOf(path), "rebackDetailReqs_02.csv"), list2);
 
@@ -218,7 +218,7 @@ class AdapterControllerTest {
         Stream<String> stream1 = list3.stream().skip(1);
         Stream<String> stream2 = list4.stream().skip(1);
         List<String> listConcat = Stream.concat(stream1, stream2).collect(Collectors.toList());
-        listConcat.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        listConcat.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
         Files.write(Paths.get(String.valueOf(path), "rebackDetailReqs.csv"), listConcat);
 
     }

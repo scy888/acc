@@ -33,11 +33,11 @@ import java.util.zip.ZipOutputStream;
  * @date: 2020-04-01 23:38:18
  * @describe: 反射调用工具类
  */
-public class ReflectUtils {
-    private static final Logger logger = LoggerFactory.getLogger(ReflectUtils.class);
-    private static final ReflectUtils instance_ = new ReflectUtils();
+public class ReflectUtil {
+    private static final Logger logger = LoggerFactory.getLogger(ReflectUtil.class);
+    private static final ReflectUtil instance_ = new ReflectUtil();
 
-    public static ReflectUtils getInstance() {
+    public static ReflectUtil getInstance() {
         return instance_;
     }
 

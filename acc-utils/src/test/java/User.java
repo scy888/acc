@@ -1,7 +1,4 @@
-import common.ReflectUtils;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import common.ReflectUtil;
 import lombok.Value;
 import org.junit.Test;
 
@@ -43,7 +40,7 @@ public class User {
                 new user("小昭", 18, user.AddressEnum.波斯, LocalDate.parse("2021-05-12"), LocalDateTime.now()),
                 new user("阿离", 17, user.AddressEnum.明教, LocalDate.parse("2021-05-12"), LocalDateTime.now()));
 
-        List<String> list = userList.stream().map(e -> ReflectUtils.getFieldValues(e).replace(",","|")).collect(Collectors.toList());
+        List<String> list = userList.stream().map(e -> ReflectUtil.getFieldValues(e).replace(",","|")).collect(Collectors.toList());
         System.out.println(String.join(System.lineSeparator(), list));
     }
 }

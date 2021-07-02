@@ -2,14 +2,12 @@ package com.weshare.batch.tasklet;
 
 import com.weshare.batch.config.AppConfig;
 import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
-import com.weshare.batch.entity.Person;
 import com.weshare.batch.feignClient.AdapterFeignClient;
-import com.weshare.batch.feignClient.LoanFeignClient;
 import com.weshare.batch.service.DataCheckService;
 import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
-import common.ReflectUtils;
+import common.ReflectUtil;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -215,7 +213,7 @@ public class YxmsTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<LoanDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
@@ -253,7 +251,7 @@ public class YxmsTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<RepaymentPlanReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
@@ -291,7 +289,7 @@ public class YxmsTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<RefundTicketReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
@@ -329,7 +327,7 @@ public class YxmsTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<RebackDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
@@ -367,7 +365,7 @@ public class YxmsTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<RepaymentDetailReq> detailReqDefaultLineMapper = new DefaultLineMapper<>();
@@ -549,20 +547,20 @@ public class YxmsTasklet {
 
     private void createFile(Path path, String dateStr, List<LoanDetailReq> loanDetailReqs, List<RepaymentPlanReq> repaymentPlanReqs, List<RefundTicketReq> refundTicketReqs, List<RebackDetailReq> rebackDetailReqs, List<RepaymentDetailReq> repaymentDetailReqs) throws IOException {
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         Files.write(Paths.get(String.valueOf(path), "loan_detail_" + dateStr + ".csv"), loanDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "repayment_plan_" + dateStr + ".csv"), repaymentPlanReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);

@@ -15,11 +15,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author: scyang
@@ -28,7 +35,7 @@ import java.time.LocalDateTime;
  * @date: 2021-05-14 16:11:42
  * @describe:
  */
-@Component
+@RestController
 @Slf4j
 public class JobLoadRunner implements ApplicationRunner {
     @Autowired
@@ -49,12 +56,13 @@ public class JobLoadRunner implements ApplicationRunner {
     @Autowired
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
+    private ScheduledFuture<?> scheduledFuture;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("job注册表中的job有:{}", jobRegistry.getJobNames());
         log.info("job浏览器中的job有:{}", jobExplorer.getJobNames());
-        //batchController.test();
-        //taskListScheduler.initTask();
+        // batchController.test();
 
         //初始化job任务表
         for (String jobName : jobRegistry.getJobNames()) {
@@ -73,19 +81,44 @@ public class JobLoadRunner implements ApplicationRunner {
         }
         //初始化定时任务
         taskConfigRepo.findById(new YxmsTask().getTaskName()).ifPresentOrElse(e -> {
+                    log.info("定时任务已初始化,无需初始化...");
+                    taskConfigRepo.save(
+                            taskConfigRepo.findByTaskName(e.getTaskName())
+                                    .setIsEnabled(true)
+                                    .setIsRunning(false)
+                                    .setLastModifiedDate(LocalDateTime.now())
+                    );
+                }, () -> {
+                    log.info("定时任务初始化...");
+                    TaskConfig taskConfig = new TaskConfig();
+                    taskConfig.setTaskName(new YxmsTask().getTaskName());
+                    taskConfig.setDescription("易鑫民生跑批任务");
+                    taskConfig.setCron("0 0/1 * * * ?");
+                    taskConfig.setIsEnabled(true);
+                    taskConfig.setIsRunning(false);
+                    taskConfig.setCreatedDate(LocalDateTime.now());
+                    taskConfigRepo.save(taskConfig);
+                }
+        );
+    }
 
-            threadPoolTaskScheduler.schedule((Runnable)applicationContext.getBean(new YxmsTask().getTaskName()), new CronTrigger(e.getCron()));
-            log.info("定时任务已初始化,无需初始化...");
-        }, () -> {
-            TaskConfig taskConfig = new TaskConfig();
-            taskConfig.setTaskName(new YxmsTask().getTaskName());
-            taskConfig.setDescription("易鑫民生跑批任务");
-            taskConfig.setCron("0 0/1 * * * ?");
-            taskConfig.setIsEnabled(true);
-            taskConfig.setIsRunning(false);
-            taskConfig.setCreatedDate(LocalDateTime.now());
-            taskConfigRepo.save(taskConfig);
-            //threadPoolTaskScheduler.schedule((Runnable)applicationContext.getBean(new YxmsTask().getTaskName()), new CronTrigger(taskConfig.getCron()));
-        });
+
+    @GetMapping("/initTask")
+    public List<TaskConfig> initTask() {
+        log.info("开始重新初始化定时任务配置...");
+        List<TaskConfig> taskConfigList = taskListScheduler.initTasks();
+        log.info("重新初始化定时任务配置结束...");
+        return taskConfigList;
+    }
+
+    @GetMapping("/cancelTask/{taskName}")
+    public TaskConfig cancelTask(@PathVariable String taskName) {
+        log.info("开始取消定时任务:{}", taskName);
+        return taskListScheduler.cancelTask(taskName);
+    }
+
+    @GetMapping("/schedulerInfo")
+    public Map<String, Object> schedulerInfo() {
+        return taskListScheduler.schedulerInfo();
     }
 }

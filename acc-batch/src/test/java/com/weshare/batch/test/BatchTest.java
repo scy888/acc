@@ -11,12 +11,10 @@ import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.ProjectEnum;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
-import common.ReflectUtils;
+import common.ReflectUtil;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.concurrent.FutureCallback;
-import org.aspectj.weaver.ast.Var;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,8 +36,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
@@ -173,20 +169,20 @@ public class BatchTest {
         repaymentDetailReqs = new ArrayList<>(repaymentDetailReqs);
         //repaymentDetailReqs.clear();
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
@@ -244,20 +240,20 @@ public class BatchTest {
         repaymentDetailReqs = new ArrayList<>(repaymentDetailReqs);
         //repaymentDetailReqs.clear();
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
@@ -325,20 +321,20 @@ public class BatchTest {
         //repaymentDetailReqs.clear();
 
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
@@ -406,20 +402,20 @@ public class BatchTest {
         //repaymentDetailReqs.clear();
 
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
@@ -481,20 +477,20 @@ public class BatchTest {
         //repaymentDetailReqs.clear();
 
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);
@@ -554,20 +550,20 @@ public class BatchTest {
         //repaymentDetailReqs.clear();
 
 
-        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        loanDetailReqList.add(0, ReflectUtils.getFieldNames(LoanDetailReq.class, "batchDate"));
+        List<String> loanDetailReqList = loanDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        loanDetailReqList.add(0, ReflectUtil.getFieldNames(LoanDetailReq.class, "batchDate"));
 
-        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentPlanReqList.add(0, ReflectUtils.getFieldNames(RepaymentPlanReq.class, "batchDate"));
+        List<String> repaymentPlanReqList = repaymentPlanReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentPlanReqList.add(0, ReflectUtil.getFieldNames(RepaymentPlanReq.class, "batchDate"));
 
-        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        refundTicketReqList.add(0, ReflectUtils.getFieldNames(RefundTicketReq.class, "batchDate"));
+        List<String> refundTicketReqList = refundTicketReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        refundTicketReqList.add(0, ReflectUtil.getFieldNames(RefundTicketReq.class, "batchDate"));
 
-        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        rebackDetailReqList.add(0, ReflectUtils.getFieldNames(RebackDetailReq.class, "batchDate"));
+        List<String> rebackDetailReqList = rebackDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        rebackDetailReqList.add(0, ReflectUtil.getFieldNames(RebackDetailReq.class, "batchDate"));
 
-        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        repaymentDetailReqList.add(0, ReflectUtils.getFieldNames(RepaymentDetailReq.class, "batchDate"));
+        List<String> repaymentDetailReqList = repaymentDetailReqs.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        repaymentDetailReqList.add(0, ReflectUtil.getFieldNames(RepaymentDetailReq.class, "batchDate"));
 
         try {
             createFile(dateStr, loanDetailReqList, repaymentPlanReqList, refundTicketReqList, rebackDetailReqList, repaymentDetailReqList);

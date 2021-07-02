@@ -295,7 +295,7 @@ public class LoanProvider implements LoanClient {
     @Override
     public Result<List<LoanContractReq>> findLoanContractByDueBillNoIn(List<String> list) {
         List<LoanContract> loanContractList = loanContractRepo.findByDueBillNoIn(list);
-        List<LoanContractReq> loanContractReqList = ReflectUtils.getBeanUtils(loanContractList, LoanContractReq.class);
+        List<LoanContractReq> loanContractReqList = ReflectUtil.getBeanUtils(loanContractList, LoanContractReq.class);
         Result result = Result.result(true, loanContractReqList);
         return result;
 

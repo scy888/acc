@@ -4,10 +4,9 @@ import com.weshare.batch.entity.Person;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.enums.TermStatusEnum;
 import common.ChangeEnumUtils;
-import common.ReflectUtils;
+import common.ReflectUtil;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -73,8 +72,8 @@ public class TestBatch {
                 new Person().setId(SnowFlake.getInstance().nextId() + "").setName("阿离").setAddress("灵蛇岛").setAge(17).setBirthday(LocalDate.parse("1995-12-16")).setSalary(new BigDecimal("1995.1216")).setStatus(Person.Status.N));
 
 
-        List<String> list = personList.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate")).collect(Collectors.toList());
-        list.add(0, ReflectUtils.getFieldNames(Person.class, "batchDate"));
+        List<String> list = personList.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate")).collect(Collectors.toList());
+        list.add(0, ReflectUtil.getFieldNames(Person.class, "batchDate"));
         System.out.println(String.format("原始数据的打印: \n%s", String.join(System.lineSeparator(), list)) + "\n");
 
         Path createPath = Paths.get("/person", "create");

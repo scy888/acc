@@ -2,7 +2,7 @@ package com.weshare.batch.tasklet;
 
 import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
 import com.weshare.batch.entity.Person;
-import common.ReflectUtils;
+import common.ReflectUtil;
 import common.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
@@ -60,9 +60,9 @@ public class PersonTasklet {
                 if (Files.notExists(path)) {
                     Files.createDirectories(path);
                 }
-                List<String> list = personList.stream().map(e -> ReflectUtils.getFieldValues(e, "batchDate"))
+                List<String> list = personList.stream().map(e -> ReflectUtil.getFieldValues(e, "batchDate"))
                         .collect(Collectors.toList());
-                String fieldNames = ReflectUtils.getFieldNames(Person.class, "batchDate");
+                String fieldNames = ReflectUtil.getFieldNames(Person.class, "batchDate");
                 list.add(0, fieldNames);
                 path = Paths.get(String.valueOf(path), "person.csv");
                 log.info("createCsvTasklet=>" + path);
@@ -76,7 +76,7 @@ public class PersonTasklet {
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
-        lineTokenizer.setNames(ReflectUtils.getFieldNames(Person.class, "batchDate").split(","));
+        lineTokenizer.setNames(ReflectUtil.getFieldNames(Person.class, "batchDate").split(","));
         lineTokenizer.setStrict(false);
 
         DefaultLineMapper<Person> lineMapper = new DefaultLineMapper<>();
@@ -113,7 +113,7 @@ public class PersonTasklet {
             @Override
             public void write(List<? extends Person> personList) throws Exception {
                 log.info("当前的线程名字:{},personWriter:{}条,内容:{}", Thread.currentThread().getName(), personList.size(), personList);
-                List<String> list = personList.stream().map(e -> ReflectUtils.getFieldValues(e))
+                List<String> list = personList.stream().map(e -> ReflectUtil.getFieldValues(e))
                         .collect(Collectors.toList());
                 Path path = Paths.get("/batch", "write");
                 if (Files.notExists(path)) {

@@ -1,6 +1,7 @@
 package com.weshare.batch.task.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.Table;
 
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(appliesTo = "task_config", comment = "任务配置表")
+@Accessors(chain = true)
 public class TaskConfig {
 
     @Id

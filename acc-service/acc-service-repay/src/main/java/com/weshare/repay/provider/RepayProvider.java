@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author: scyang
@@ -116,7 +115,7 @@ public class RepayProvider implements RepayClient {
     @Override
     public Result<List<RepaySummaryReq>> findRepaySummaryByDueBillNoIn(List<String> list) {
         List<RepaySummary> repaySummaryList = repaySummaryRepo.findByDueBillNoIn(list);
-        List<RepaySummaryReq> summaryReqList = ReflectUtils.getBeanUtils(repaySummaryList, RepaySummaryReq.class);
+        List<RepaySummaryReq> summaryReqList = ReflectUtil.getBeanUtils(repaySummaryList, RepaySummaryReq.class);
         Result result = Result.result(true, summaryReqList);
         return result;
     }
@@ -214,7 +213,7 @@ public class RepayProvider implements RepayClient {
     @Override
     public Result<List<RepayPlanReq>> findRepayPlanListByDueBillNo(String dueBillNo) {
         List<RepayPlan> repayPlanList = repayPlanRepo.findByDueBillNo(dueBillNo);
-        List<RepayPlanReq> repayPlanReqList = ReflectUtils.getBeanUtils(repayPlanList, RepayPlanReq.class);
+        List<RepayPlanReq> repayPlanReqList = ReflectUtil.getBeanUtils(repayPlanList, RepayPlanReq.class);
         Result result = Result.result(true, repayPlanReqList);
         return result;
     }

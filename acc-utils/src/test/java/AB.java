@@ -1,4 +1,4 @@
-import common.ReflectUtils;
+import common.ReflectUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,6 +37,6 @@ public class AB {
 
     @Test
     public void test() {
-        System.out.println(ReflectUtils.getBeanUtils(new ArrayList<A>(), B.class));
+        System.out.println(ReflectUtil.getBeanUtils(new ArrayList<A>(), B.class));
     }
 }

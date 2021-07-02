@@ -37,6 +37,11 @@ public class YxmsTask extends BaseTask {
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             System.out.println(entry.getKey() + ":" + entry.getValue());
         }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

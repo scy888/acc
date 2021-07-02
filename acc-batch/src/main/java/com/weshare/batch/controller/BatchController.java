@@ -238,11 +238,17 @@ public class BatchController {
 
     @Autowired
     ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private ScheduledFuture<?> scheduledFuture;
 
     //@Scheduled(cron = "0/40 * * * * ?")
     public void test() throws InterruptedException {
         // threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(() -> System.out.println("当前时间：" + LocalDateTime.now() + "执行了..."), new CronTrigger("0/30 * * * * ?"));
-        //scheduledFuture.cancel(true);
+        scheduledFuture = threadPoolTaskScheduler.schedule(() -> System.out.println("当前时间：" + LocalDateTime.now() + "执行了..."), new CronTrigger("0/30 * * * * ?"));
+
+    }
+
+    @GetMapping("/cancelTask")
+    public Boolean cancelTask() {
+        return scheduledFuture.cancel(true);
     }
 }

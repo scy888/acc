@@ -104,7 +104,7 @@ public abstract class BaseTask implements Runnable {
             e.setEndTime(LocalDateTime.now());
             e.setTotalTimeCost(
                     new BigDecimal(
-                            Duration.between(e.getStartTime(), e.getEndTime()).getSeconds()
+                            Duration.between(e.getStartTime(), e.getEndTime()).toMillis()
                     ).setScale(3, RoundingMode.HALF_UP)
             );
             taskRunLogRepo.save(e);
