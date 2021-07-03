@@ -355,4 +355,8 @@ public class RepayDao {
             }
         },projectNo,projectNo,projectNo);
     }
+
+    public String getStr(String msg){
+        return msg;
+    }
 }

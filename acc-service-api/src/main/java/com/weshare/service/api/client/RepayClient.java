@@ -8,7 +8,9 @@ import com.weshare.service.api.result.Result;
 import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.catalina.startup.Bootstrap;
 import org.springframework.web.bind.annotation.*;
@@ -93,6 +95,8 @@ public interface RepayClient {
     @GetMapping("/checkDataResult/{projectNo}")
     Result<List<DataCheckResult>> checkDataResult(@PathVariable("projectNo") String projectNo);
 
+    @GetMapping("/getStr/{msg}")
+    public String getStr(String msg);
 
     @Data
     @Accessors(chain = true)

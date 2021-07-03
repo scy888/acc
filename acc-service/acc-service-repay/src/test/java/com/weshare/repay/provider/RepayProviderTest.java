@@ -19,6 +19,7 @@ import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.JsonUtil;
+import common.ProxyUtils;
 import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -298,51 +300,59 @@ class RepayProviderTest {
     @Test
     public void testCheckResult() {
         for (Tuple3<String, BigDecimal, BigDecimal> tuple3 : repayDao.checkLoanAmount("WS121212")) {
-            System.out.println("checkLoanAmount:"+tuple3);
+            System.out.println("checkLoanAmount:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, BigDecimal, BigDecimal> tuple3 : repayDao.checkRemainPrin("WS121212")) {
-            System.out.println("checkRemainPrin:"+tuple3);
+            System.out.println("checkRemainPrin:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple4<String, BigDecimal, BigDecimal, BigDecimal> tuple4 : repayDao.checkActualAmount("WS121212")) {
-            System.out.println("checkActualAmount:"+tuple4);
+            System.out.println("checkActualAmount:" + tuple4);
         }
         System.out.println("===================================================================");
         for (Tuple4<String, String, BigDecimal, BigDecimal> tuple4 : repayDao.checkFlowSn("WS121212")) {
-            System.out.println("checkFlowSn:"+tuple4);
+            System.out.println("checkFlowSn:" + tuple4);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkTotalTerm("WS121212")) {
-            System.out.println("checkTotalTerm:"+tuple3);
+            System.out.println("checkTotalTerm:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, TermStatusEnum, AssetStatusEnum> tuple3 : repayDao.checkNoamal("WS121212")) {
-            System.out.println("checkNoamal:"+tuple3);
+            System.out.println("checkNoamal:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkOverdue("WS121212")) {
-            System.out.println("checkOverdue:"+tuple3);
+            System.out.println("checkOverdue:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkSettled("WS121212")) {
-            System.out.println("checkSettled:"+tuple3);
+            System.out.println("checkSettled:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple3<String, Integer, Integer> tuple3 : repayDao.checkOverdueSkip("WS121212")) {
-            System.out.println("checkOverdueSkip:"+tuple3);
+            System.out.println("checkOverdueSkip:" + tuple3);
         }
         System.out.println("===================================================================");
         for (Tuple4<String, Integer, Integer, Integer> tuple4 : repayDao.checkUndueSkip("WS121212")) {
-            System.out.println("checkUndueSkip:"+tuple4);
+            System.out.println("checkUndueSkip:" + tuple4);
 
         }
     }
 
     @Test
-    public void checkResultTest(){
+    public void checkResultTest() {
         for (DataCheckResult result : repayClient.checkDataResult("WS121212").getData()) {
-            System.out.println(JsonUtil.toJson(result,true));
+            System.out.println(JsonUtil.toJson(result, true));
         }
+
+    }
+
+    @Test
+    public void testReflect() {
+        RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance(new RepayProvider());
+        String str = proxyInstance.getStr("WS121212");
+        System.out.println(str);
     }
 }

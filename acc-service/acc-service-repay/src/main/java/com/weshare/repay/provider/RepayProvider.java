@@ -13,6 +13,7 @@ import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.*;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -55,7 +57,7 @@ public class RepayProvider implements RepayClient {
     private ReceiptDetailRepo receiptDetailRepo;
     @Autowired
     private PictureFileRepo pictureFileRepo;
-    @Autowired
+    @Resource
     private RepayDao repayDao;
 
     private Integer pageSize = 1;
@@ -416,11 +418,18 @@ public class RepayProvider implements RepayClient {
         list7.addAll(list8);
         //list7.clear();
         list.add(
-                DataCheckResult.dataCheckResult(DataCheckType.校验还款计划是否跳期,list7.size(),
-                        list7,"")
+                DataCheckResult.dataCheckResult(DataCheckType.校验还款计划是否跳期, list7.size(),
+                        list7, "")
         );
 
         return Result.result(true, list);
+    }
+
+    @Override
+    public String getStr(String msg) {
+        return new RepayDao().getStr(msg);
+        //return repayDao.getStr(msg);
+        // return msg;
     }
 
 }

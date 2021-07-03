@@ -1,17 +1,18 @@
 package com.weshare.batch.service;
 
-import com.google.common.base.CaseFormat;
 import com.weshare.batch.task.repo.TaskConfigDao;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author: scyang
@@ -40,5 +41,30 @@ class DataCheckServiceTest {
     @Test
     public void test() {
         taskConfigDao.lockTask("yxmsTask");
+    }
+
+    @Test
+    public void testReflect() {
+        Class<DataCheckService> clazz = DataCheckService.class;
+        try {
+            Method method = clazz.getMethod("getDataCheckList", String.class, String.class);
+            String name = method.getName();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            Parameter[] parameters = method.getParameters();
+            Class<?> returnType = method.getReturnType();
+            String[] objects = new String[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                objects[i] = parameterTypes[i].getSimpleName() + " " + parameters[i].getName();
+            }
+            System.out.println(Modifier.toString(method.getModifiers()));
+            System.out.println(clazz.getName() + "." + method.getName() + "()");
+            System.out.println(Arrays.asList(objects));
+            System.out.println(returnType.getName());
+            String s = Modifier.toString(method.getModifiers()) + " " + method.getReturnType().getSimpleName() + " " + method.getName() + "(" + Arrays.stream(objects).collect(Collectors.joining(",")) + ")";
+            System.out.println(s);
+
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 }

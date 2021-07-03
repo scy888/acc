@@ -39,5 +39,4 @@ public class DataCheckResult implements Serializable {
         dataCheckResult.setRemark(dataCheckResult.isPass ? dataCheckResult.getRemark() : dataCheckResult.getRemark() + "," + remark);
         return dataCheckResult;
     }
-
 }
