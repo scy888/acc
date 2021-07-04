@@ -4,6 +4,7 @@ import com.weshare.batch.entity.DataCheckDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -19,5 +20,5 @@ public interface DataCheckDetailRepo extends JpaRepository<DataCheckDetail, Stri
     @Modifying
     @Transactional
     @Query("delete from DataCheckDetail where projectNo=:projectNo and batchDate=:batchDate and checkType=:checkType")
-    void deleteByProjectNoAndBatchDateAndCheckType(String projectNo, LocalDate batchDate, String checkType);
+    void deleteByProjectNoAndBatchDateAndCheckType(@Param("projectNo") String projectNo,@Param("batchDate") LocalDate batchDate,@Param("checkType") String checkType);
 }

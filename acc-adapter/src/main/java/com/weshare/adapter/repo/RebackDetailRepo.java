@@ -17,10 +17,10 @@ import java.util.List;
  * @date: 2021-06-01 11:29:45
  * @describe:
  */
-public interface RebackDetailRepo extends JpaRepository<RebackDetail,String> {
+public interface RebackDetailRepo extends JpaRepository<RebackDetail, String> {
 
     @Transactional
     @Modifying
-    @Query(value = "delete from reback_detail where batch_date=:batchDate and due_bill_no in :dueBillNoList",nativeQuery = true)
-    void deleteByBatchDateAndDueBillNoIn( LocalDate batchDate, List<String> dueBillNoList);
+    @Query(value = "delete from reback_detail where batch_date=:batchDate and due_bill_no in :dueBillNoList", nativeQuery = true)
+    void deleteByBatchDateAndDueBillNoIn(@Param("batchDate") LocalDate batchDate, @Param("dueBillNoList") List<String> dueBillNoList);
 }

@@ -16,6 +16,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -77,7 +79,7 @@ class DataCheckServiceTest {
 
     @Test
     public void testInsertSql() {
-        SysLog sysLog = new SysLog().setId(SnowFlake.getInstance().nextId()+"")
+        SysLog sysLog = new SysLog().setId(SnowFlake.getInstance().nextId() + "")
                 .setClassName("ClassName")
                 .setMethodName("MethodName")
                 .setParamsName("ParamsName")
@@ -88,5 +90,12 @@ class DataCheckServiceTest {
 
         int update = jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
         int update1 = jdbcTemplate.update(StringUtils.getUpdateSql(sysLog, "id", "class_name", "return_value"));
+
+        LocalDateTime start = LocalDateTime.of(2020, 5, 12, 12, 12, 12);
+        LocalDateTime end = LocalDateTime.of(2020, 5, 12, 13, 14, 12);
+        System.out.println(end.getSecond() - start.getSecond());
+        System.out.println(Duration.between(start, end).getSeconds());
+        System.out.println(Duration.between(start, end).toMillis());
+        System.out.println(Duration.between(start, end).toMinutes());
     }
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -209,8 +210,11 @@ public class StringUtils {
                 field.setAccessible(true);
                 Object value = field.get(t);
                 if (null != value) {
+                    if (value instanceof LocalDateTime) {
+                        value = value.toString().replace("T", " ");
+                    }
                     nameList.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName()));
-                    valueList.add(field.get(t));
+                    valueList.add(value);
                 }
             }
             sql.append(nameList.stream().collect(Collectors.joining(",", "(", ")")));

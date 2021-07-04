@@ -4,6 +4,7 @@ import com.weshare.adapter.entity.RepaymentDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -21,5 +22,5 @@ public interface RepaymentDetailRepo extends JpaRepository<RepaymentDetail,Strin
     @Transactional
     @Modifying
     @Query("delete from #{#entityName} e where e.batchDate=:batchDate and e.dueBillNo in :dueBillNoList")
-    void deleteByBatchDateAndDueBillNoIn(LocalDate batchDate, List<String> dueBillNoList);
+    void deleteByBatchDateAndDueBillNoIn(@Param("batchDate") LocalDate batchDate, @Param("dueBillNoList")List<String> dueBillNoList);
 }

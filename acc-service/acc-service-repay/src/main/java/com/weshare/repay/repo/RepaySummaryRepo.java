@@ -23,7 +23,7 @@ public interface RepaySummaryRepo extends JpaRepository<RepaySummary, String> {
     int countByProjectNo(String projectNo);
 
     @Query("select t.dueBillNo from #{#entityName} t where t.projectNo=projectNo")
-    Page<String> findByProjectNo(String projectNo, PageRequest pageRequest);
+    Page<String> findByProjectNo(@Param("projectNo")String projectNo, PageRequest pageRequest);
 
     @Query("select t.userId from #{#entityName} t where t.dueBillNo=:dueBillNo")
     String findByDueBillNo_(@Param("dueBillNo") String dueBillNo);
@@ -31,5 +31,5 @@ public interface RepaySummaryRepo extends JpaRepository<RepaySummary, String> {
     RepaySummary findByDueBillNo(String dueBillNo);
 
     @Query("select e.totalTerm from #{#entityName} e where e.dueBillNo=:dueBillNo and e.projectNo=:projectNo")
-    Integer findByDueBillNoAndProjectNo(String dueBillNo, String projectNo);
+    Integer findByDueBillNoAndProjectNo(@Param("dueBillNo") String dueBillNo, @Param("projectNo") String projectNo);
 }

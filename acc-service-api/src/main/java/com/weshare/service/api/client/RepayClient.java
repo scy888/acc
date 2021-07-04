@@ -96,7 +96,7 @@ public interface RepayClient {
     Result<List<DataCheckResult>> checkDataResult(@PathVariable("projectNo") String projectNo);
 
     @GetMapping("/getStr/{msg}")
-    public String getStr(String msg);
+    String getStr(@PathVariable String msg);
 
     @Data
     @Accessors(chain = true)

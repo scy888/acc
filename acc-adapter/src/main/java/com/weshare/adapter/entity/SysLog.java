@@ -1,4 +1,4 @@
-package com.weshare.batch.entity;
+package com.weshare.adapter.entity;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.StringJoiner;
 
 /**
  * @author: scyang
