@@ -1,5 +1,6 @@
 package com.weshare.loan.dao;
 
+import com.weshare.loan.entity.SysLog;
 import com.weshare.loan.entity.UserBase;
 import com.weshare.service.api.entity.UserBaseReq;
 import common.Md5Utils;
@@ -66,5 +67,9 @@ public class LoanDao {
                 e.getId(), e.getBatchDate(),
                 e.getDueBillNo()
         }).collect(Collectors.toList()));
+    }
+
+    public void addSysLog(SysLog sysLog){
+        jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
     }
 }

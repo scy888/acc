@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Aspect
 @Slf4j
 @EnableAspectJAutoProxy
-public class SysLogAspect {
+public class SysLogRepayAspect {
     @Autowired
     private HttpServletRequest request;
     @Autowired
@@ -61,16 +61,18 @@ public class SysLogAspect {
         Object[] args = jp.getArgs();
         //返回值类型字节码
         Class<?> returnType = method.getReturnType();
-        LocalDateTime star = LocalDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0);
+        LocalDateTime star = LocalDateTime.now();
+        LocalDateTime star2 = LocalDateTime.now().with(ChronoField.MILLI_OF_SECOND, 0);
         //执行目标方法
         Object object = jp.proceed();
-        LocalDateTime end = LocalDateTime.now().withNano(0);
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime end2 = LocalDateTime.now().withNano(0);
         //保存日志记录
         sysLog.setId(SnowFlake.getInstance().nextId() + "");
         sysLog.setIp(InetAddress.getLocalHost().getHostAddress());
         sysLog.setUri(request.getRequestURI());
-        sysLog.setStartTime(star);
-        sysLog.setEndTime(end);
+        sysLog.setStartTime(star2);
+        sysLog.setEndTime(end2);
         sysLog.setLostTime(
                 new BigDecimal(Duration.between(star, end).toMillis()).setScale(2, BigDecimal.ROUND_HALF_UP)
         );
@@ -78,8 +80,8 @@ public class SysLogAspect {
         sysLog.setMethodName(methodName);
         sysLog.setParamsType(Arrays.stream(parameters).map(e -> e.getType().getSimpleName()).collect(Collectors.joining(",")));
         sysLog.setParamsName(Arrays.stream(parameters).map(Parameter::getName).collect(Collectors.joining(",")));
-        sysLog.setParamsValue(Arrays.stream(args).map(Object::toString).collect(Collectors.joining(",")));
-        if (object != null) {
+        String paramsValue = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(","));
+        sysLog.setParamsValue(paramsValue.length() > 100 ? paramsValue.substring(0, 100) : paramsValue);        if (object != null) {
             sysLog.setReturnClassName(returnType.getSimpleName());
             sysLog.setReturnValue(object.toString().length() > 100 ? object.toString().substring(0, 100) : object.toString());
         }
