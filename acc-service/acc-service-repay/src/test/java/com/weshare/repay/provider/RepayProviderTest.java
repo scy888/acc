@@ -30,6 +30,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -62,7 +63,8 @@ class RepayProviderTest {
     private RepayDao repayDao;
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    @Autowired
+    private HttpServletRequest request;
     @Test
     void count() {
         System.out.println(repaySummaryRepo.countByProjectNo("WS121212"));
@@ -354,5 +356,8 @@ class RepayProviderTest {
         RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance(new RepayProvider());
         String str = proxyInstance.getStr("WS121212");
         System.out.println(str);
+        System.out.println(request.getRequestURI());
+        System.out.println(request.getRemoteAddr());
+        System.out.println(request.getLocalAddr());
     }
 }

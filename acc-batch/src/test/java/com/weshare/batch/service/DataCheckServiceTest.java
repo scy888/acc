@@ -1,15 +1,20 @@
 package com.weshare.batch.service;
 
+import com.weshare.batch.entity.SysLog;
 import com.weshare.batch.task.repo.TaskConfigDao;
 
+import common.SnowFlake;
+import common.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -27,6 +32,8 @@ class DataCheckServiceTest {
     private DataCheckService dataCheckService;
     @Autowired
     private TaskConfigDao taskConfigDao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void checkDataResult() {
@@ -66,5 +73,20 @@ class DataCheckServiceTest {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testInsertSql() {
+        SysLog sysLog = new SysLog().setId(SnowFlake.getInstance().nextId()+"")
+                .setClassName("ClassName")
+                .setMethodName("MethodName")
+                .setParamsName("ParamsName")
+                .setParamsType("ParamsType")
+                .setReturnClassName("ReturnClassName")
+                .setReturnValue("ReturnValue")
+                .setLostTime(new BigDecimal("12.03"));
+
+        int update = jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
+        int update1 = jdbcTemplate.update(StringUtils.getUpdateSql(sysLog, "id", "class_name", "return_value"));
     }
 }

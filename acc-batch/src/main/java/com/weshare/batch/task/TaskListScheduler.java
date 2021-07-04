@@ -4,6 +4,8 @@ import com.weshare.batch.task.entity.TaskConfig;
 import com.weshare.batch.task.instance.YxmsTask;
 import com.weshare.batch.task.repo.TaskConfigRepo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.jdbc.SQL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,7 +60,7 @@ public class TaskListScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/20 * * * ?")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public List<TaskConfig> initTasks() {
         map.forEach((k, v) -> {

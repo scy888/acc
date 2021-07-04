@@ -1,5 +1,6 @@
 package common;
 
+import com.google.common.base.CaseFormat;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -189,6 +190,90 @@ public class StringUtils {
         str_ = str_.substring(0, 1) + str_.substring(2 * strs.length + 1);
         sb.append(str_);
         return sb.toString();
+    }
+
+    public static <T> String getInsertSql(T t) {
+        //insert into table_name (a,b,c) values ('a','b','c');
+        StringBuilder sql = null;
+        try {
+            Class<?> clazz = t.getClass();
+            //获取表名
+            String table_name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, clazz.getSimpleName());
+            sql = new StringBuilder("insert into " + table_name + " ");
+            //获取属性值
+            Field[] fields = clazz.getDeclaredFields();
+            List<String> nameList = new ArrayList<>();
+            List<Object> valueList = new ArrayList<>();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                Object value = field.get(t);
+                if (null != value) {
+                    nameList.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName()));
+                    valueList.add(field.get(t));
+                }
+            }
+            sql.append(nameList.stream().collect(Collectors.joining(",", "(", ")")));
+            sql.append(" values ");
+            sql.append(valueList.stream().map(e -> "'" + e + "'").collect(Collectors.joining(",", "(", ")")));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        System.out.println("sql:" + sql);
+        return sql.toString();
+    }
+
+    public static <T> String getUpdateSql(T t, String... names) {
+        StringBuilder sql = null;
+        try {
+            Class<?> clazz = t.getClass();
+            //获取表名
+            String table_name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, clazz.getSimpleName());
+            sql = new StringBuilder("update " + table_name + " set ");
+            List<String> list = new ArrayList<>();
+            Field[] fields = clazz.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                Object value = field.get(t);
+                String fieldName = field.getName();
+                if (value != null) {
+                    if (!Arrays.asList(names).contains(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName))) {
+                        list.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName) + "=" + "'" + value + "'");
+                    }
+                }
+            }
+            sql.append(list.stream().collect(Collectors.joining(",")));
+            if (names.length > 0) {
+                list.clear();
+                sql.append(" where ");
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    for (int j = 0; j < fields.length; j++) {
+                        Field field = fields[j];
+                        field.setAccessible(true);
+                        String fieldName = field.getName();
+                        Object value = field.get(t);
+                        if (name.equals(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName))) {
+                            list.add(name + "=" + "'" + value + "'");
+                            break;
+                        }
+                    }
+                }
+                sql.append(list.stream().collect(Collectors.joining(" and ")));
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        System.out.println("sql:" + sql);
+        return sql.toString();
+    }
+
+    @Test
+    public void test_() {
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "batchData"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "batch_data"));
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "BatchDate"));
     }
 
     public static <T> Object[] getFieldValue(T t, String... fieldNames) {

@@ -1,5 +1,6 @@
 package com.weshare.batch.service;
 
+import com.google.common.base.CaseFormat;
 import com.weshare.batch.entity.DataCheck;
 import com.weshare.batch.entity.DataCheckDetail;
 import com.weshare.batch.repo.DataCheckDetailRepo;
