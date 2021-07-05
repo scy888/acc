@@ -22,7 +22,7 @@ public interface DataCheckRepo extends JpaRepository<DataCheck, String> {
     @Modifying
     @Transactional
     @Query("delete from #{#entityName} e where e.projectNo=:projectNo and e.batchDate=:batchDate and e.checkName=:checkName")
-    void deleteByProjectNoAndBatchDateAndCheckName(@Param("projectNo") String projectNo, @Param("LocalDate") LocalDate batchDate, @Param("checkName") String checkName);
+    void deleteByProjectNoAndBatchDateAndCheckName(@Param("projectNo") String projectNo, @Param("batchDate") LocalDate batchDate, @Param("checkName") String checkName);
 
     List<DataCheck> findByBatchDateAndProjectNo(LocalDate batchDate, String projectNo);
 }
