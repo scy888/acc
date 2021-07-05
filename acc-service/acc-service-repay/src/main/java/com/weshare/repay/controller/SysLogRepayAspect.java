@@ -6,11 +6,12 @@ import common.SnowFlake;
 import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +43,14 @@ public class SysLogRepayAspect {
     private HttpServletRequest request;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    private static final String pointCut = "execution(* com.weshare..*.*(..))";
 
-    @Around("execution(* com.weshare..*.*(..))")
+    @Pointcut(pointCut)
+    public void pointCut() {
+
+    }
+
+    //@Around("pointCut()")
     public Object saveSysLog(ProceedingJoinPoint jp) throws Throwable {
         SysLog sysLog = new SysLog();
         //获取目标对象字节码
@@ -81,7 +88,8 @@ public class SysLogRepayAspect {
         sysLog.setParamsType(Arrays.stream(parameters).map(e -> e.getType().getSimpleName()).collect(Collectors.joining(",")));
         sysLog.setParamsName(Arrays.stream(parameters).map(Parameter::getName).collect(Collectors.joining(",")));
         String paramsValue = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(","));
-        sysLog.setParamsValue(paramsValue.length() > 100 ? paramsValue.substring(0, 100) : paramsValue);        if (object != null) {
+        sysLog.setParamsValue(paramsValue.length() > 100 ? paramsValue.substring(0, 100) : paramsValue);
+        if (object != null) {
             sysLog.setReturnClassName(returnType.getSimpleName());
             sysLog.setReturnValue(object.toString().length() > 100 ? object.toString().substring(0, 100) : object.toString());
         }
@@ -94,7 +102,12 @@ public class SysLogRepayAspect {
         sysLog.setMethodDesc(Modifier.toString(method.getModifiers()) + " " + returnType.getSimpleName() + " " + methodName + "("
                 + Arrays.stream(objects).collect(Collectors.joining(",")) + ")");
         System.out.println(JsonUtil.toJson(sysLog, true));
-        jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
+        try {
+            jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            log.error("acc-repay 服务端保存日志出险异常:",e);
+        }
         return object;
     }
 }

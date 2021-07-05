@@ -10,9 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +40,7 @@ import java.util.stream.Collectors;
 @Component
 @Aspect
 @Slf4j
-//@EnableAspectJAutoProxy
+@EnableAspectJAutoProxy
 public class SysLogLoanAspect {
     @Autowired
     private HttpServletRequest request;
@@ -48,8 +50,14 @@ public class SysLogLoanAspect {
     private SysLogRepayRepo sysLogRepayRepo;
     @Autowired
     private LoanDao loanDao;
+    private static final String pointCut = "execution(* com.weshare.loan..*.*(..))";
 
-    @Around("execution(* com.weshare.loan..*.*(..))")
+    @Pointcut(pointCut)
+    public void pointCut() {
+
+    }
+
+    //@Around("pointCut()")
     public Object saveSysLog(ProceedingJoinPoint jp) throws Throwable {
         SysLog sysLog = new SysLog();
         //获取目标对象字节码
@@ -76,7 +84,7 @@ public class SysLogLoanAspect {
         //保存日志记录
         sysLog.setId(SnowFlake.getInstance().nextId() + "");
         sysLog.setIp(InetAddress.getLocalHost().getHostAddress());
-        sysLog.setUri(request.getRequestURI());
+        //sysLog.setUri(request.getRequestURI());
         sysLog.setStartTime(star2);
         sysLog.setEndTime(end2);
         sysLog.setLostTime(
@@ -101,7 +109,12 @@ public class SysLogLoanAspect {
         sysLog.setMethodDesc(Modifier.toString(method.getModifiers()) + " " + returnType.getSimpleName() + " " + methodName + "("
                 + Arrays.stream(objects).collect(Collectors.joining(",")) + ")");
         System.out.println(JsonUtil.toJson(sysLog, true));
-        jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
+        try {
+            jdbcTemplate.update(StringUtils.getInsertSql(sysLog));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            log.error("acc-loan服务端保存日志出险异常:",e);
+        }
         //sysLogRepayRepo.save(sysLog);
         //loanDao.addSysLog(sysLog);
         return object;
