@@ -5,6 +5,7 @@ import com.weshare.batch.enums.BatchJobEnum;
 import com.weshare.batch.task.TaskListScheduler;
 import com.weshare.batch.task.entity.BatchJobControl;
 import com.weshare.batch.task.entity.TaskConfig;
+import com.weshare.batch.task.instance.HtmsTask;
 import com.weshare.batch.task.instance.YxmsTask;
 import com.weshare.batch.task.repo.BatchJobControlRepo;
 import com.weshare.batch.task.repo.TaskConfigRepo;
@@ -79,6 +80,7 @@ public class JobLoadRunner implements ApplicationRunner {
                 break;
             }
         }
+
         //初始化定时任务
         taskConfigRepo.findById(new YxmsTask().getTaskName()).ifPresentOrElse(e -> {
                     log.info("定时任务已初始化,无需初始化...");
@@ -93,6 +95,28 @@ public class JobLoadRunner implements ApplicationRunner {
                     TaskConfig taskConfig = new TaskConfig();
                     taskConfig.setTaskName(new YxmsTask().getTaskName());
                     taskConfig.setDescription("易鑫民生跑批任务");
+                    taskConfig.setCron("0 0/1 * * * ?");
+                    taskConfig.setIsEnabled(true);
+                    taskConfig.setIsRunning(false);
+                    taskConfig.setCreatedDate(LocalDateTime.now());
+                    taskConfigRepo.save(taskConfig);
+                }
+        );
+
+        //初始化定时任务
+        taskConfigRepo.findById(new HtmsTask().getTaskName()).ifPresentOrElse(e -> {
+                    log.info("定时任务已初始化,无需初始化...");
+                    taskConfigRepo.save(
+                            taskConfigRepo.findByTaskName(e.getTaskName())
+                                    .setIsEnabled(true)
+                                    .setIsRunning(false)
+                                    .setLastModifiedDate(LocalDateTime.now())
+                    );
+                }, () -> {
+                    log.info("定时任务初始化...");
+                    TaskConfig taskConfig = new TaskConfig();
+                    taskConfig.setTaskName(new HtmsTask().getTaskName());
+                    taskConfig.setDescription("汇通民生跑批任务");
                     taskConfig.setCron("0 0/1 * * * ?");
                     taskConfig.setIsEnabled(true);
                     taskConfig.setIsRunning(false);

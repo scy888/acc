@@ -1,5 +1,6 @@
 package com.weshare.batch.task.instance;
 
+import com.weshare.batch.controller.BatchController;
 import com.weshare.batch.task.BaseTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ import java.util.Map;
 @Slf4j
 @Component
 public class YxmsTask extends BaseTask {
+    @Autowired
+    private BatchController batchController;
 
     public int num = 8;
 
@@ -33,13 +36,25 @@ public class YxmsTask extends BaseTask {
 
     @Override
     public void execte() {
-        Map<String, Object> params = this.getTaskParams();
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            System.out.println(entry.getKey() + ":" + entry.getValue());
-        }
+//        Map<String, Object> params = this.getTaskParams();
+//        for (Map.Entry<String, Object> entry : params.entrySet()) {
+//            System.out.println(entry.getKey() + ":" + entry.getValue());
+//        }
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        Map<String, Object> map = this.getTaskParams();
         try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
+            batchController.startJob(
+                    map.get("jobName").toString(),
+                    map.get("batchDate").toString(),
+                    map.get("endDate").toString(),
+                    map.get("projectNo").toString(),
+                    map.get("remark").toString()
+            );
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -47,7 +62,14 @@ public class YxmsTask extends BaseTask {
     @Override
     public Map<String, Object> getTaskParams() {
 
-        return Map.ofEntries(Map.entry("执行的当前时间", LocalDateTime.now().withNano(0)));
-    }
+        //return Map.ofEntries(Map.entry("执行的当前时间", LocalDateTime.now().withNano(0)));
 
+        return Map.ofEntries(
+                Map.entry("jobName", "yxmsJob"),
+                Map.entry("batchDate", "2020-05-15"),
+                Map.entry("endDate", "2020-10-15"),
+                Map.entry("projectNo", "WS121212"),
+                Map.entry("remark", System.currentTimeMillis() + "")
+        );
+    }
 }

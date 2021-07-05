@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -19,6 +20,7 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -97,5 +99,19 @@ class DataCheckServiceTest {
         System.out.println(Duration.between(start, end).getSeconds());
         System.out.println(Duration.between(start, end).toMillis());
         System.out.println(Duration.between(start, end).toMinutes());
+    }
+
+    @Test
+    public void testMap() {
+        Map<String, Object> ofEntries = Map.ofEntries(
+                Map.entry("jobName", "yxmsJob"),
+                Map.entry("batchDate", "2020-05-15"),
+                Map.entry("endDate", "2020-10-15"),
+                Map.entry("projectNo", "WS121212"),
+                Map.entry("remark", System.currentTimeMillis()+"")
+        );
+        ofEntries.forEach((k, v) -> {
+            System.out.println(k + ":" + v);
+        });
     }
 }

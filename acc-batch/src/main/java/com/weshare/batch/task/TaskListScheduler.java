@@ -60,7 +60,7 @@ public class TaskListScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0/20 * * * ?")
+    @Scheduled(cron = "0 30 8 * * ?")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public List<TaskConfig> initTasks() {
         map.forEach((k, v) -> {
