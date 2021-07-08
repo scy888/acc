@@ -69,7 +69,7 @@ public class SftpUtils {
          * @Date 9:51 2020/6/17
          * @Param [channelSftp, path]
          * @return java.util.List<com.jcraft.jsch.ChannelSftp.LsEntry>
-        **/
+         **/
         List<ChannelSftp.LsEntry> list = new ArrayList<>();
         if (channelSftp != null) {
             Vector vv = channelSftp.ls(path);
@@ -111,7 +111,7 @@ public class SftpUtils {
      * @throws SftpException
      * @throws IOException
      */
-    public static void uploadFile(ChannelSftp channelSftp, String remoteFile, String localFile) throws SftpException, IOException {
+    public static void uploadFile(ChannelSftp channelSftp, String localFile, String remoteFile) throws SftpException, IOException {
         try (FileInputStream in = new FileInputStream(new File(localFile))) {
             if (channelSftp == null) {
                 throw new IOException("sftp server not login");
@@ -220,7 +220,7 @@ public class SftpUtils {
         if (isExistDistPath) {
             String fileName = srcSftpFilePath.substring(srcSftpFilePath.lastIndexOf("/") + 1);
             ByteArrayInputStream srcFtpFileStreams = getByteArrayInputStreamFile(channelSftp, srcSftpFilePath);
-            log.info("srcFtpFileStreams:{},fileName:{},srcSftpFilePath:{}",srcFtpFileStreams,fileName,srcSftpFilePath);
+            log.info("srcFtpFileStreams:{},fileName:{},srcSftpFilePath:{}", srcFtpFileStreams, fileName, srcSftpFilePath);
             //                channelSftp.put(srcFtpFileStreams, distSftpFilePath);
             LOGGER.info("new File(distSftpFilePath) = " + new File(distSftpFilePath).getAbsolutePath());
             OutputStream outputStream = new FileOutputStream(new File(distSftpFilePath + "/" + fileName));
@@ -246,12 +246,12 @@ public class SftpUtils {
         boolean b = existFile(channelSftp, sftpFilePath);
         if (b) {
             InputStream inputStream = channelSftp.get(sftpFilePath);
-            log.info("inputStream:{}",inputStream);
+            log.info("inputStream:{}", inputStream);
             byte[] srcFtpFileByte = inputStreamToByte(inputStream);
             ByteArrayInputStream srcFtpFileStreams = new ByteArrayInputStream(srcFtpFileByte);
             return srcFtpFileStreams;
         }
-        log.info("ByteArrayInputStream=>b:{}",b);
+        log.info("ByteArrayInputStream=>b:{}", b);
         return null;
     }
 
@@ -286,7 +286,7 @@ public class SftpUtils {
             Vector<?> vector = channelSftp.ls(path);
             return vector == null ? false : true;
         } catch (SftpException e) {
-            log.info("无法使用sftp的ls命令:{}",e.getMessage());
+            log.info("无法使用sftp的ls命令:{}", e.getMessage());
             return false;
         }
     }

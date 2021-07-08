@@ -1,5 +1,6 @@
 package com.weshare.batch.tasklet;
 
+import com.jcraft.jsch.ChannelSftp;
 import com.weshare.batch.config.AppConfig;
 import com.weshare.batch.config.CsvBeanWrapperFieldSetMapper;
 import com.weshare.batch.feignClient.AdapterFeignClient;
@@ -8,6 +9,7 @@ import com.weshare.service.api.entity.*;
 import com.weshare.service.api.enums.TransFlowTypeEnum;
 import common.DateUtils;
 import common.ReflectUtil;
+import common.SftpUtils;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -41,10 +43,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -567,5 +566,86 @@ public class YxmsTasklet {
         Files.write(Paths.get(String.valueOf(path), "refund_ticket_" + dateStr + ".csv"), refundTicketReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "reback_detail_" + dateStr + ".csv"), rebackDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         Files.write(Paths.get(String.valueOf(path), "repayment_detail_" + dateStr + ".csv"), repaymentDetailReqList, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+    }
+
+    @Value("${spring.downloan.imagePath:true}")
+    private String downImagePath;//从远程下载的路径
+    @Value("${spring.downloan.localPath:true}")
+    private String downLocalPath;//下载到本地的路径
+    @Value("${spring.uploan.imagePath:true}")
+    private String upImagePath;//上传到远程的路径
+    @Value("${spring.uploan.localPath:true}")
+    private String upLocalPath;//重本地上传的路径
+
+    @Value("${spring.sftp.host:true}")
+    private String host;//ip地址
+    @Value("${spring.sftp.port:2020}")
+    private int port;//端口
+    @Value("${spring.sftp.username:true}")
+    private String username;//用户名
+    @Value("${spring.sftp.password:true}")
+    private String password;//密码
+    @Value("${spring.sftp.timeout:30000}")
+    private int timeout;//超时
+
+    public Tasklet downAndUpTask() {
+        return new Tasklet() {
+            @Override
+            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                String batchDate = (String) chunkContext.getStepContext().getJobParameters().get("batchDate");
+                String dateStr = LocalDate.parse(batchDate).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                downloan(dateStr);
+                uploan(dateStr);
+                return RepeatStatus.FINISHED;
+            }
+        };
+    }
+
+    private void uploan(String dateStr) throws Exception {
+        ChannelSftp channel = null;
+        try {
+            channel = (ChannelSftp) SftpUtils.connectServer(host, port, username, password, timeout);
+            upImagePath = upImagePath + "/" + dateStr;
+            upLocalPath = upLocalPath + "/" + dateStr;
+            if (SftpUtils.dirExist(channel, upImagePath)) {
+                SftpUtils.createDirIfNotExists(channel, upImagePath);
+            }
+            File file = new File(upLocalPath);
+            List<File> files = Arrays.stream(Objects.requireNonNull(file.listFiles())).filter(e -> e.getName().startsWith(ZipUtil.ZIP_EXT)).collect(Collectors.toList());
+            for (File file_ : files) {
+                SftpUtils.uploadFile(channel, file_.getAbsolutePath(), upImagePath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            SftpUtils.close(channel);
+        }
+
+    }
+
+    private void downloan(String dateStr) throws Exception {
+        ChannelSftp channel = null;
+        try {
+            channel = (ChannelSftp) SftpUtils.connectServer(host, port, username, password, timeout);
+            downImagePath = downImagePath + "/" + dateStr;
+            downLocalPath = downLocalPath + "/" + dateStr;
+            List<ChannelSftp.LsEntry> lsEntryList = SftpUtils.getDirList(channel, downImagePath);
+            Path localPath = Paths.get(downLocalPath);
+            if (Files.notExists(localPath)) {
+                Files.createDirectories(localPath);//创建本地文件夹
+            }
+            if (lsEntryList.isEmpty()) {
+                for (ChannelSftp.LsEntry file : lsEntryList) {
+                    if (file.getFilename().startsWith(ZipUtil.ZIP_EXT)) {
+                        //开始下载文件
+                        SftpUtils.copyFile(channel, downImagePath + "/" + file.getFilename(), downLocalPath);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            SftpUtils.close(channel);
+        }
     }
 }
