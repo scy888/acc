@@ -13,13 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author: scyang
@@ -51,13 +46,8 @@ public class JobLoadRunner implements ApplicationRunner {
     private BatchJobControlRepo batchJobControlRepo;
     @Autowired
     private TaskConfigRepo taskConfigRepo;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
-    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
-
-    private ScheduledFuture<?> scheduledFuture;
+    @Value("${spring.data.code:盛重阳}")
+    private String code;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
