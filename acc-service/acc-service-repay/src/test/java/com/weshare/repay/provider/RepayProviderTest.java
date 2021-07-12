@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.Index;
@@ -65,6 +66,7 @@ class RepayProviderTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private HttpServletRequest request;
+
     @Test
     void count() {
         System.out.println(repaySummaryRepo.countByProjectNo("WS121212"));
@@ -351,11 +353,16 @@ class RepayProviderTest {
 
     }
 
+    @Autowired
+    private ApplicationContext context;
+
     @Test
     public void testReflect() {
-        RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance(new RepayProvider());
-        String str = proxyInstance.getStr("WS121212");
-        System.out.println(str);
+        //RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance(new RepayProvider());
+        RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance((RepayProvider) context.getBean("repayProvider"));
+        //String str = proxyInstance.getStr("WS121212");
+        List<DataCheckResult> list = proxyInstance.checkDataResult("WS121212").getData();
+        System.out.println(list);
         System.out.println(request.getRequestURI());
         System.out.println(request.getRemoteAddr());
         System.out.println(request.getLocalAddr());

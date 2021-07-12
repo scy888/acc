@@ -1,5 +1,6 @@
 package com.weshare.batch.controller;
 
+import com.weshare.batch.annotation.AdminId;
 import com.weshare.batch.feignClient.RepayFeignClient;
 import com.weshare.batch.task.repo.BatchJobControlRepo;
 import com.weshare.service.api.entity.PictureFileReq;
@@ -73,12 +74,12 @@ public class BatchController {
     }
 
     @GetMapping("/sendMessage")
-    public String sendMessage() throws MessagingException {
+    public String sendMessage(@AdminId String adminId) throws MessagingException {
         List<User> userList = List.of(new User("赵敏", new Date(2020 - 1900, 7 - 1, 6), 20, "女", "蒙古", "123", "123", BigDecimal.ONE, User.Status.F),
                 new User("周芷若", new Date(2020 - 1900, 8 - 1, 9), 19, "女", "峨嵋", "123", "123", BigDecimal.ONE, User.Status.F),
                 new User("殷离", new Date(2020 - 1900, 6 - 1, 5), 18, "女", "灵蛇岛", "123", "123", BigDecimal.ONE, User.Status.F),
                 new User("小昭", new Date(2020 - 1900, 5 - 1, 5), 17, "女", "波斯", "123", "123", BigDecimal.ONE, User.Status.F));
-
+      log.info("获取adminId:{}",adminId);
         String templateContent = FreemarkerUtil.getTemplateContent("/ftl/userList.ftl");
         Map<String, Object> map = new HashMap<>();
         map.put("content", "【花心大萝卜张无忌身边的女人校验如下】:");//内容
