@@ -1,10 +1,17 @@
 package com.weshare.adapter;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import common.JsonUtil;
 import common.SnowFlake;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 
@@ -14,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -178,8 +186,62 @@ public class DomeTest {
     @Test
     public void test05() {
         System.out.println((long) Math.ceil(13 / 3));
-        System.out.println((int)Math.ceil(13 * 1.0 / 3));
-        System.out.println((int)Math.ceil(13 / (3 * 1.0)));
-        System.out.println((int)Math.ceil(13 / 3 * 1.0));
+        System.out.println((int) Math.ceil(13 * 1.0 / 3));
+        System.out.println((int) Math.ceil(13 / (3 * 1.0)));
+        System.out.println((int) Math.ceil(13 / 3 * 1.0));
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class Teacher {
+        @JsonProperty(value = "teach_name", index = 1)
+        private String teachName;
+        @JsonProperty(value = "sex", index = 2)
+        private Sex sex;
+        @JsonProperty(value = "student_list", index = 4)
+        private String students;
+        @JsonProperty(value = "batch_date", index = 5)
+        @JsonFormat(pattern = "yyyyMMdd")
+        private LocalDate batchDate;
+        @JsonProperty(value = "create_date", index = 6)
+        @JsonFormat(pattern = "yyyyMMddHHmmss")
+        private LocalDateTime createDate;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class Student {
+        @JsonProperty(value = "student_name", index = 1)
+        private String studentName;
+        @JsonProperty(value = "batch_date", index = 2)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
+        private LocalDate batchDate;
+    }
+
+    enum Sex {
+        MAN,
+        WOMAN;
+    }
+
+    @Test
+    public void testJson() {
+        Teacher teacher = new Teacher("张老师", Sex.MAN, JsonUtil.toJson(new Student("小明", LocalDate.now())), LocalDate.now(), LocalDateTime.now());
+        String jsonStr = JsonUtil.toJson(teacher, true);
+        System.out.println(jsonStr);
+        System.out.println("================================================");
+        teacher = JsonUtil.fromJson(jsonStr, Teacher.class);
+        System.out.println(JsonUtil.toJson(teacher, true));
+        System.out.println("================================================");
+        System.out.println(teacher);
+        System.out.println("================================================");
+        //String students = teacher.getStudents();
+        String studentJson = JsonUtil.toJsonNode(jsonStr, "student_list");
+        Student student = JsonUtil.fromJson(studentJson, Student.class);
+        System.out.println(JsonUtil.toJson(student, true));
+        System.out.println("================================================");
+        System.out.println(student);
+
     }
 }

@@ -613,7 +613,7 @@ public class YxmsTasklet {
             File file = new File(upLocalPath);
             List<File> files = Arrays.stream(Objects.requireNonNull(file.listFiles())).filter(e -> e.getName().startsWith(ZipUtil.ZIP_EXT)).collect(Collectors.toList());
             for (File file_ : files) {
-                SftpUtils.uploadFile(channel, file_.getAbsolutePath(), upImagePath);
+                SftpUtils.uploadFile(channel, file_.getAbsolutePath(), upImagePath+"/"+file_.getName());
             }
         } catch (Exception e) {
             e.printStackTrace();
