@@ -358,8 +358,7 @@ class RepayProviderTest {
 
     @Test
     public void testReflect() {
-        //RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance(new RepayProvider());
-        RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance((RepayProvider) context.getBean("repayProvider"));
+        RepayClient proxyInstance = (RepayClient) ProxyUtils.getProxyInstance( RepayProvider.repayProvider);
         //String str = proxyInstance.getStr("WS121212");
         List<DataCheckResult> list = proxyInstance.checkDataResult("WS121212").getData();
         System.out.println(list);

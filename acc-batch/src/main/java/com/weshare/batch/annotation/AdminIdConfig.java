@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
+import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
+import org.springframework.session.web.http.HttpSessionIdResolver;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -23,6 +26,7 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
+@EnableJdbcHttpSession
 public class AdminIdConfig {
 
     private static final String ADMIN_ID = "adminId";
@@ -44,8 +48,9 @@ public class AdminIdConfig {
                                           NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
                 HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-                String adminId = request.getHeader(ADMIN_ID);
-                //String adminId = (String) request.getSession().getAttribute(ADMIN_ID);
+                //String adminId = request.getHeader(ADMIN_ID);
+
+                String adminId = (String) request.getSession().getAttribute(ADMIN_ID);
                 if (adminId != null) {
                     log.info("adminId:{}", adminId);
                     return adminId;
@@ -64,5 +69,15 @@ public class AdminIdConfig {
                 resolvers.add(getResolver());
             }
         };
+    }
+
+    @Bean
+    public HttpSessionIdResolver httpSessionIdResolver() {
+        return new HeaderHttpSessionIdResolver("accessToken");
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+        return new ThreadPoolTaskScheduler();
     }
 }

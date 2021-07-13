@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -59,6 +60,13 @@ public class RepayProvider implements RepayClient {
     private PictureFileRepo pictureFileRepo;
     @Resource
     private RepayDao repayDao;
+
+    public static RepayProvider repayProvider;
+
+    @PostConstruct
+    public void init() {
+        repayProvider = this;
+    }
 
     private Integer pageSize = 1;
 
