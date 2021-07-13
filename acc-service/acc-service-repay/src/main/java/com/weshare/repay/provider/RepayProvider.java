@@ -62,13 +62,23 @@ public class RepayProvider implements RepayClient {
     private RepayDao repayDao;
 
     public static RepayProvider repayProvider;
+    private static Map<String, Object> map;
+
+    public RepayProvider() {
+        log.info("构造方法...");
+    }
 
     @PostConstruct
     public void init() {
         repayProvider = this;
+        log.info("初始化...");
     }
 
-    private Integer pageSize = 1;
+    static {
+        log.info("静态代码块执行...");
+    }
+
+    private static final Integer pageSize = 1;
 
     @Override
     public String getRepayClient(String repayClient, Boolean isInvoking) {
@@ -356,6 +366,7 @@ public class RepayProvider implements RepayClient {
 
     @Override
     public Result<List<DataCheckResult>> checkDataResult(String projectNo) {
+        log.info("数据校验开始...");
         List<DataCheckResult> list = new ArrayList<>();
 
         List<Tuple3<String, BigDecimal, BigDecimal>> tuple3s_1 = repayDao.checkLoanAmount(projectNo);
