@@ -273,6 +273,69 @@ public class StringUtils {
         return sql.toString();
     }
 
+    public static <T> String getUpdateSql(Class<T> clazz, String... conditionFields) {
+        //获取表名
+        String table_name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, clazz.getSimpleName());
+        StringBuilder sql = new StringBuilder("update " + table_name + " set ");
+        Field[] fields = clazz.getDeclaredFields();
+        List<String> fieldList = Arrays.stream(conditionFields).collect(Collectors.toList());
+        List<String> nameList = new ArrayList<>();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            String fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName());
+            if (!fieldList.contains(fieldName)) {
+                nameList.add(fieldName + "=?");
+            }
+        }
+        sql.append(String.join(",", nameList));
+        if (conditionFields.length > 0) {
+            nameList.clear();
+            sql.append(" where ");
+            for (String fieldName : conditionFields) {
+                nameList.add(fieldName + "=?");
+            }
+            sql.append(String.join(" and ", nameList));
+        }
+        return sql.toString();
+    }
+
+    public static <T> Object[] getFieldUpdateValue(T t, String... conditionFields) {
+
+        Class<?> clazz = t.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        List<String> fieldList = Arrays.stream(conditionFields).collect(Collectors.toList());
+        List<Object> setList = new ArrayList<>();
+        List<Object> whereList = new ArrayList<>();
+
+        try {
+            for (Field field : fields) {
+                field.setAccessible(true);
+                String fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName());
+                if (!fieldList.contains(fieldName)) {
+                    setList.add(field.get(t) instanceof Enum ? ((Enum) field.get(t)).name() : field.get(t));
+                }
+//                else { 无法保证where字段后面的顺序
+//                    whereList.add(field.get(t) instanceof Enum ? ((Enum) field.get(t)).name() : field.get(t));
+//                }
+            }
+            for (String name : conditionFields) {
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    String fieldName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName());
+                    if (name.equals(fieldName)) {
+                        whereList.add(field.get(t) instanceof Enum ? ((Enum) field.get(t)).name() : field.get(t));
+                        break;
+                    }
+                }
+            }
+            setList.addAll(whereList);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        //System.out.println(setList);
+        return setList.toArray(new Object[setList.size()]);
+    }
+
     @Test
     public void test_() {
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "batchData"));

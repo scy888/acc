@@ -1,7 +1,12 @@
+import common.JsonUtil;
 import common.ReflectUtil;
 import lombok.Value;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +45,15 @@ public class User {
                 new user("小昭", 18, user.AddressEnum.波斯, LocalDate.parse("2021-05-12"), LocalDateTime.now()),
                 new user("阿离", 17, user.AddressEnum.明教, LocalDate.parse("2021-05-12"), LocalDateTime.now()));
 
-        List<String> list = userList.stream().map(e -> ReflectUtil.getFieldValues(e).replace(",","|")).collect(Collectors.toList());
+        List<String> list = userList.stream().map(e -> ReflectUtil.getFieldValues(e).replace(",", "|")).collect(Collectors.toList());
         System.out.println(String.join(System.lineSeparator(), list));
+    }
+
+    @Test
+    public void revertToStandardJsonString5() throws Exception {
+        String nonStandardJsonString = Files.readString(Paths.get(this.getClass().getClassLoader().getResource("batch_redemption.json").toURI()), Charset.forName("GBK"));
+        System.out.println("转换前的JSON字符串：\n" + nonStandardJsonString);
+        String standardJsonString = JsonUtil.revertToStandardJsonString(nonStandardJsonString, true);
+        System.out.println("\n转换后的JSON字符串：\n" + standardJsonString);
     }
 }
