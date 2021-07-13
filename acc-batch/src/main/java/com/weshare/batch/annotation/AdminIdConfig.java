@@ -50,7 +50,7 @@ public class AdminIdConfig {
                 HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
                 //String adminId = request.getHeader(ADMIN_ID);
 
-                String adminId = (String) request.getSession().getAttribute(ADMIN_ID);
+                String adminId = (String) request.getSession().getId();
                 if (adminId != null) {
                     log.info("adminId:{}", adminId);
                     return adminId;
