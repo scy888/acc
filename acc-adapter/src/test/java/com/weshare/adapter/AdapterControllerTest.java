@@ -3,6 +3,7 @@ package com.weshare.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
+import com.weshare.adapter.entity.InterfaceReqLog;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
 import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
@@ -266,5 +267,6 @@ class AdapterControllerTest {
 
         log.info("还本金+利息:{}", JsonUtil.toJson(prinIntList, true));
         log.info("还本金:{}", JsonUtil.toJson(prinList, true));
+        InterfaceReqLog.originalReqMsg originalReqMsg = new InterfaceReqLog().new originalReqMsg();
     }
 }
