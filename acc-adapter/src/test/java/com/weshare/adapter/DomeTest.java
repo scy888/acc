@@ -4,17 +4,21 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.entity.IncomeApply;
+import com.weshare.adapter.entity.InterfaceReqLog;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import common.JsonUtil;
 import common.SnowFlake;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,10 +26,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -242,6 +243,46 @@ public class DomeTest {
         System.out.println(JsonUtil.toJson(student, true));
         System.out.println("================================================");
         System.out.println(student);
+        System.out.println("==================================");
+        Teacher teacher1 = new Teacher("张老师", Sex.MAN, JsonUtil.toJson(new Student("小明", LocalDate.now())), LocalDate.now(), LocalDateTime.now());
+        String json = JsonUtil.toJson(teacher1);
+        //json = JsonUtil.revertToStandardJsonString(json, true);
+        System.out.println(json);
+        System.out.println("===============================");
+        String student_list = JsonUtil.toJsonNode(json, "student_list");
+        System.out.println(student_list);
+        System.out.println("======================================================");
+        Student studentList = JsonUtil.fromJson(student_list, Student.class);
+        System.out.println(studentList);
+    }
 
+    @Test
+    public void testInterface() {
+
+        InterfaceReqLog reqLog = new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name(), createLoanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now());
+        String originalReqMsg = reqLog.getOriginalReqMsg();
+        System.out.println(originalReqMsg);
+        String content = JsonUtil.toJsonNode(originalReqMsg, "content");
+        List<InterfaceReqLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.LoanDetail>>() {
+        });
+        System.out.println(JsonUtil.toJson(loanDetails,true));
+    }
+
+    private String createLoanMsg() {
+        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name());
+        originalReqMsg.setProjectNo("projectNo");
+        originalReqMsg.setProductName("productName");
+        originalReqMsg.setCreateDate(LocalDateTime.now());
+        originalReqMsg.setBatchDate(LocalDate.now());
+        originalReqMsg.setContent(
+                JsonUtil.toJson(
+                        List.of(
+                                new InterfaceReqLog.OriginalReqMsg.LoanDetail("SCY-101", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "123", "01"),
+                                new InterfaceReqLog.OriginalReqMsg.LoanDetail("SCY-102", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "456", "01")
+                        )
+                )
+        );
+        return JsonUtil.toJson(originalReqMsg);
     }
 }

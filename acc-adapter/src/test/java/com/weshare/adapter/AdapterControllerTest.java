@@ -267,6 +267,6 @@ class AdapterControllerTest {
 
         log.info("还本金+利息:{}", JsonUtil.toJson(prinIntList, true));
         log.info("还本金:{}", JsonUtil.toJson(prinList, true));
-        InterfaceReqLog.originalReqMsg originalReqMsg = new InterfaceReqLog().new originalReqMsg();
+        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
     }
 }
