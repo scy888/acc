@@ -5,9 +5,7 @@ import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.entity.InterfaceReqLog;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
-import com.weshare.adapter.migration.DataMigration;
 import com.weshare.adapter.migration.DataMigrationFactory;
-import com.weshare.adapter.migration.ServiceLocator;
 import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
@@ -25,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -275,10 +272,14 @@ class AdapterControllerTest {
     }
 
     @Test
-    public void test(@Autowired DataMigrationFactory dataMigrationFactory) {
-        for (Map.Entry<String, DataMigration> entry : dataMigrationFactory.map.entrySet()) {
-            System.out.println(entry.getValue());
-            System.out.println(entry.getValue().getClassName());
-        }
+    public void test(@Autowired DataMigrationFactory dataMigrationFactory,
+                     @Autowired DataMigrationFactory.MigrationRepayPlan migrationRepayPlan,
+                     @Autowired DataMigrationFactory.MigrationLoanDetail migrationLoanDetail) {
+
+        System.out.println("=============================");
+        System.out.println(migrationLoanDetail.getClassName());
+        System.out.println(migrationRepayPlan.getClassName());
+        System.out.println(dataMigrationFactory.getDataMigration(migrationRepayPlan.getClassName()).dataMigration("", "", ""));
+        System.out.println(dataMigrationFactory.getDataMigration(migrationLoanDetail.getClassName()).dataMigration("", "", ""));
     }
 }

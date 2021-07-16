@@ -1,20 +1,15 @@
 package com.weshare.adapter;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.CaseFormat;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.entity.InterfaceReqLog;
-import com.weshare.adapter.migration.DataMigration;
-import com.weshare.adapter.migration.DataMigrationFactory;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import common.JsonUtil;
 import common.SnowFlake;
-import jdk.swing.interop.SwingInterOpUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -377,11 +371,22 @@ public class DomeTest {
     @Test
     public void test002() {
         System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "LOAN_DETAIL"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "LOAN_DETAIL"));
         System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "repay_plan"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "repay_plan"));
         System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "REDUCE"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, "REDUCE"));
         System.out.println("=======================");
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "loanDate"));
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "RepayPlan"));
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "reduce"));
+    }
+    @Test
+    public void test003(){
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "TestData"));//test_data
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "testData"));//test_data
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, "LoanDetail"));//LOAN_DETAIL
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, "loanDetail"));//LOAN_DETAIL
+
     }
 }

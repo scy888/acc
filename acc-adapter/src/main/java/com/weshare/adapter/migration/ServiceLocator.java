@@ -5,7 +5,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Map;
 @Component
 public class ServiceLocator implements ApplicationContextAware {
 
-    private Map<String, DataMigration> map;
+    private Map<String, Migration> map;
 
     @Override
     //@PostConstruct
@@ -26,10 +25,10 @@ public class ServiceLocator implements ApplicationContextAware {
         /**
          * 用于保存接口实现类名及对应的类
          */
-        map = applicationContext.getBeansOfType(DataMigration.class);
+        map = applicationContext.getBeansOfType(Migration.class);
     }
 
-    public Map<String, DataMigration> getMap() {
+    public Map<String, Migration> getMap() {
         return map;
     }
 }
