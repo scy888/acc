@@ -49,7 +49,7 @@ public class InterfaceReqLog {
         private String service;
         @JsonProperty(value = "content")
         private String content;
-        @JsonProperty(value = "product_ame")
+        @JsonProperty(value = "product_name")
         private String productName;
         @JsonProperty(value = "project_no")
         private String projectNo;
@@ -110,10 +110,28 @@ public class InterfaceReqLog {
                 private BigDecimal shouldInterestMoney;//应还利息(元)
             }
         }
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public class RefundTicket {
+
+            @JsonProperty("due_bill_no")
+            private String dueBillNo;
+            @JsonProperty("loan_amount")
+            private BigDecimal loanAmount;
+            @JsonProperty("refund_status")
+            private String refundStatus;
+            @JsonProperty("account_num")
+            private String accountNum;
+            @JsonProperty("refund_date")
+            private LocalDateTime refundDate;
+        }
     }
 
     public enum ServiceEnum {
         LOAN_DETAIL,
-        REPAY_PLAN;
+        REPAY_PLAN,
+        REFUND_TICKET,
     }
 }

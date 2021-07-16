@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -257,15 +259,56 @@ public class DomeTest {
     }
 
     @Test
-    public void testInterface() {
+    public void testInterface() throws Exception {
+        List<InterfaceReqLog> interfaceReqLogs = List.of(
+                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name(), createLoanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
+                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.REPAY_PLAN.name(), createPlanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
+                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.REFUND_TICKET.name(), createRefundMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
 
-        InterfaceReqLog reqLog = new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name(), createLoanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now());
-        String originalReqMsg = reqLog.getOriginalReqMsg();
-        System.out.println(originalReqMsg);
-        String content = JsonUtil.toJsonNode(originalReqMsg, "content");
-        List<InterfaceReqLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.LoanDetail>>() {
-        });
-        System.out.println(JsonUtil.toJson(loanDetails,true));
+        );
+        Path path = Paths.get("/interface");
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
+        for (File file : Objects.requireNonNull(new File(path.toUri()).listFiles())) {
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+        Files.writeString(Paths.get(String.valueOf(path), "interface.json"), JsonUtil.toJson(interfaceReqLogs, true), StandardOpenOption.CREATE);
+
+        for (InterfaceReqLog reqLog : interfaceReqLogs) {
+            String originalReqMsg = reqLog.getOriginalReqMsg();
+            // System.out.println(originalReqMsg);
+            String content;
+            switch (reqLog.getServiceId()) {
+                case "LOAN_DETAIL":
+                    content = JsonUtil.toJsonNode(originalReqMsg, "content");
+                    if (content!=null){
+                        List<InterfaceReqLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.LoanDetail>>() {
+                        });
+                        System.out.println(JsonUtil.toJson(loanDetails, true));
+                    }
+                    System.out.println("==================================================");
+                    break;
+                case "REPAY_PLAN":
+                    content = JsonUtil.toJsonNode(originalReqMsg, "content");
+                    if (content!=null){
+                        List<InterfaceReqLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RepayPlan>>() {
+                        });
+                        System.out.println(JsonUtil.toJson(repayPlans, true));
+                    }
+                    break;
+                case "REFUND_TICKET":
+                    content = JsonUtil.toJsonNode(originalReqMsg, "content");
+                    if (content!=null){
+                        List<InterfaceReqLog.OriginalReqMsg.RefundTicket> refundTickets = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RefundTicket>>() {
+                        });
+                        System.out.println(JsonUtil.toJson(refundTickets, true));
+                    }
+                    break;
+            }
+        }
     }
 
     private String createLoanMsg() {
@@ -283,6 +326,48 @@ public class DomeTest {
                         )
                 )
         );
+        return JsonUtil.toJson(originalReqMsg);
+    }
+
+    private String createPlanMsg() {
+        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.REPAY_PLAN.name());
+        originalReqMsg.setProjectNo("projectNo");
+        originalReqMsg.setProductName("productName");
+        originalReqMsg.setCreateDate(LocalDateTime.now());
+        originalReqMsg.setBatchDate(LocalDate.now());
+        originalReqMsg.setContent(
+                JsonUtil.toJson(
+                        List.of(
+                                new InterfaceReqLog.OriginalReqMsg.RepayPlan("SCY-101", 6, List.of(
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
+                                )),
+                                new InterfaceReqLog.OriginalReqMsg.RepayPlan("SCY-102", 6, List.of(
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
+                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
+                                )))
+                )
+        );
+        return JsonUtil.toJson(originalReqMsg);
+    }
+
+    private String createRefundMsg() {
+        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.REFUND_TICKET.name());
+        originalReqMsg.setProjectNo("projectNo");
+        originalReqMsg.setProductName("productName");
+        originalReqMsg.setCreateDate(LocalDateTime.now());
+        originalReqMsg.setBatchDate(LocalDate.now());
+        originalReqMsg.setContent(null);
         return JsonUtil.toJson(originalReqMsg);
     }
 }
