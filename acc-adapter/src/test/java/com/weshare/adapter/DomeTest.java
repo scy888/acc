@@ -5,8 +5,11 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.CaseFormat;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.entity.InterfaceReqLog;
+import com.weshare.adapter.migration.DataMigration;
+import com.weshare.adapter.migration.DataMigrationFactory;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import common.JsonUtil;
@@ -284,7 +287,7 @@ public class DomeTest {
             switch (reqLog.getServiceId()) {
                 case "LOAN_DETAIL":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
-                    if (content!=null){
+                    if (content != null) {
                         List<InterfaceReqLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.LoanDetail>>() {
                         });
                         System.out.println(JsonUtil.toJson(loanDetails, true));
@@ -293,7 +296,7 @@ public class DomeTest {
                     break;
                 case "REPAY_PLAN":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
-                    if (content!=null){
+                    if (content != null) {
                         List<InterfaceReqLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RepayPlan>>() {
                         });
                         System.out.println(JsonUtil.toJson(repayPlans, true));
@@ -301,7 +304,7 @@ public class DomeTest {
                     break;
                 case "REFUND_TICKET":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
-                    if (content!=null){
+                    if (content != null) {
                         List<InterfaceReqLog.OriginalReqMsg.RefundTicket> refundTickets = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RefundTicket>>() {
                         });
                         System.out.println(JsonUtil.toJson(refundTickets, true));
@@ -369,5 +372,16 @@ public class DomeTest {
         originalReqMsg.setBatchDate(LocalDate.now());
         originalReqMsg.setContent(null);
         return JsonUtil.toJson(originalReqMsg);
+    }
+
+    @Test
+    public void test002() {
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "LOAN_DETAIL"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "repay_plan"));
+        System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, "REDUCE"));
+        System.out.println("=======================");
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "loanDate"));
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "RepayPlan"));
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "reduce"));
     }
 }

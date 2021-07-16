@@ -5,6 +5,9 @@ import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
 import com.weshare.adapter.entity.InterfaceReqLog;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
+import com.weshare.adapter.migration.DataMigration;
+import com.weshare.adapter.migration.DataMigrationFactory;
+import com.weshare.adapter.migration.ServiceLocator;
 import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -268,5 +272,12 @@ class AdapterControllerTest {
         log.info("还本金+利息:{}", JsonUtil.toJson(prinIntList, true));
         log.info("还本金:{}", JsonUtil.toJson(prinList, true));
         InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
+    }
+
+    @Test
+    public void test(@Autowired DataMigrationFactory dataMigrationFactory) {
+        for (Map.Entry<String, DataMigration> entry : dataMigrationFactory.map.entrySet()) {
+            System.out.println(entry.getValue());
+        }
     }
 }
