@@ -278,6 +278,7 @@ class AdapterControllerTest {
     public void test(@Autowired DataMigrationFactory dataMigrationFactory) {
         for (Map.Entry<String, DataMigration> entry : dataMigrationFactory.map.entrySet()) {
             System.out.println(entry.getValue());
+            System.out.println(entry.getValue().getClassName());
         }
     }
 }

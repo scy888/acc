@@ -48,7 +48,7 @@ public class DataMigrationFactory {
     }
 
     @Service("migrationLoanDetail")
-    public class MigrationLoanDetail implements DataMigration {
+    public class MigrationLoanDetail extends DataMigration {
 
         @Override
         public String dataMigration(String contextJson, String batchDate, String dataLogId) {
@@ -58,7 +58,7 @@ public class DataMigrationFactory {
     }
 
     @Service("migrationRepayPlan")
-    public class MigrationRepayPlan implements DataMigration {
+    public class MigrationRepayPlan extends DataMigration {
 
         @Override
         public String dataMigration(String contextJson, String batchDate, String dataLogId) {
