@@ -1,0 +1,22 @@
+[ {
+  "id" : "ab93eef9-10d6-49b2-9681-9a8e82ed90f8",
+  "serviceId" : "LOAN_DETAIL",
+  "originalReqMsg" : "{\"service\":\"LOAN_DETAIL\",\"content\":\"[{\\\"due_bill_no\\\":\\\"SCY-101\\\",\\\"loan_date\\\":\\\"2021-07-16\\\",\\\"loan_amount\\\":1200.00,\\\"serial_num\\\":\\\"203900164565000192\\\",\\\"term\\\":6,\\\"account_num\\\":\\\"123\\\",\\\"loan_status\\\":\\\"01\\\"},{\\\"due_bill_no\\\":\\\"SCY-102\\\",\\\"loan_date\\\":\\\"2021-07-16\\\",\\\"loan_amount\\\":1200.00,\\\"serial_num\\\":\\\"203900164653080576\\\",\\\"term\\\":6,\\\"account_num\\\":\\\"456\\\",\\\"loan_status\\\":\\\"01\\\"}]\",\"product_name\":\"productName\",\"project_no\":\"projectNo\",\"batch_date\":\"20210716\",\"create_date\":\"20210716154627\"}",
+  "batchDate" : "2021-07-16",
+  "createDate" : "2021-07-16 15:46:28",
+  "modifyDate" : "2021-07-16 15:46:28"
+}, {
+  "id" : "1b1bd85c-2739-4e2a-8f7e-4db184297f03",
+  "serviceId" : "REPAY_PLAN",
+  "originalReqMsg" : "{\"service\":\"REPAY_PLAN\",\"content\":\"[{\\\"due_bill_no\\\":\\\"SCY-101\\\",\\\"total_term\\\":6,\\\"due_bill_no_list\\\":[{\\\"term\\\":1,\\\"repayment_date\\\":\\\"2020-06-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":170.00,\\\"should_interest_money\\\":130.00},{\\\"term\\\":2,\\\"repayment_date\\\":\\\"2020-07-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":180.00,\\\"should_interest_money\\\":120.00},{\\\"term\\\":3,\\\"repayment_date\\\":\\\"2020-08-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":190.00,\\\"should_interest_money\\\":110.00},{\\\"term\\\":4,\\\"repayment_date\\\":\\\"2020-09-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":200.00,\\\"should_interest_money\\\":100.00},{\\\"term\\\":5,\\\"repayment_date\\\":\\\"2020-10-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":210.00,\\\"should_interest_money\\\":90.00},{\\\"term\\\":6,\\\"repayment_date\\\":\\\"2020-11-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":250.00,\\\"should_interest_money\\\":50.00}]},{\\\"due_bill_no\\\":\\\"SCY-102\\\",\\\"total_term\\\":6,\\\"due_bill_no_list\\\":[{\\\"term\\\":1,\\\"repayment_date\\\":\\\"2020-06-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":170.00,\\\"should_interest_money\\\":130.00},{\\\"term\\\":2,\\\"repayment_date\\\":\\\"2020-07-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":180.00,\\\"should_interest_money\\\":120.00},{\\\"term\\\":3,\\\"repayment_date\\\":\\\"2020-08-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":190.00,\\\"should_interest_money\\\":110.00},{\\\"term\\\":4,\\\"repayment_date\\\":\\\"2020-09-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":200.00,\\\"should_interest_money\\\":100.00},{\\\"term\\\":5,\\\"repayment_date\\\":\\\"2020-10-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":210.00,\\\"should_interest_money\\\":90.00},{\\\"term\\\":6,\\\"repayment_date\\\":\\\"2020-11-15\\\",\\\"should_month_money\\\":300.00,\\\"should_capital_money\\\":250.00,\\\"should_interest_money\\\":50.00}]}]\",\"product_name\":\"productName\",\"project_no\":\"projectNo\",\"batch_date\":\"20210716\",\"create_date\":\"20210716154628\"}",
+  "batchDate" : "2021-07-16",
+  "createDate" : "2021-07-16 15:46:28",
+  "modifyDate" : "2021-07-16 15:46:28"
+}, {
+  "id" : "dcbbaead-dbc1-41d3-8a3f-5e32e95bf838",
+  "serviceId" : "REFUND_TICKET",
+  "originalReqMsg" : "{\"service\":\"REFUND_TICKET\",\"product_name\":\"productName\",\"project_no\":\"projectNo\",\"batch_date\":\"20210716\",\"create_date\":\"20210716154628\"}",
+  "batchDate" : "2021-07-16",
+  "createDate" : "2021-07-16 15:46:28",
+  "modifyDate" : "2021-07-16 15:46:28"
+} ]

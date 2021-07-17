@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -52,6 +53,8 @@ public class MsgLog {
     @Version
     private Integer version;
 
+    private LocalDate batchDate;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
@@ -63,7 +66,8 @@ public class MsgLog {
 
     public enum MsgTypeEnum {
         LOAN_DETAIL,
-        REPAYMENT_PLAN
+        REPAYMENT_PLAN,
+        REFUND_TICKET,
     }
 }
 

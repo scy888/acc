@@ -10,7 +10,7 @@ import com.google.common.base.CaseFormat;
  * @describe 数据迁移
  */
 public abstract class Migration {
-    public abstract String dataMigration(String contextJson, String batchDate, String dataLogId);
+    public abstract String dataMigration(String msgJson, String batchDate, String dataLogId);
 
     public String getClassName() {
         Class<?> clazz = this.getClass();

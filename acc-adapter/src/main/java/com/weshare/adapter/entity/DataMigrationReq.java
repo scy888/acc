@@ -24,12 +24,12 @@ public class DataMigrationReq {
      * 接口名
      */
     @NotBlank
-    private List<String> serviceIdList;
+    private String serviceId;
     /**
      * 请求发起日期
      */
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
     private LocalDate batchDate;
     /**
      * 项目编号

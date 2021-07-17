@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @describe:
  */
 @SpringBootApplication
-//@EnableJpaAuditing//自动加载时间的
+@EnableJpaAuditing//自动加载时间的
 @EnableAsync
 @EnableEurekaClient
 @EnableFeignClients

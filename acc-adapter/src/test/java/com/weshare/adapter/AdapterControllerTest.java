@@ -3,9 +3,10 @@ package com.weshare.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.weshare.adapter.dao.AdapterDao;
 import com.weshare.adapter.entity.IncomeApply;
-import com.weshare.adapter.entity.InterfaceReqLog;
+import com.weshare.adapter.entity.InterfaceLog;
 import com.weshare.adapter.feignCilent.RepayFeignClient;
 import com.weshare.adapter.migration.DataMigrationFactory;
+import com.weshare.adapter.repo.InterfaceLogRepo;
 import com.weshare.adapter.repo.RebackDetailRepo;
 import com.weshare.adapter.service.AdapterService;
 import com.weshare.service.api.client.AdapterClient;
@@ -19,6 +20,7 @@ import common.JsonUtil;
 import common.ReflectUtil;
 import common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.io.Resources;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -268,7 +273,7 @@ class AdapterControllerTest {
 
         log.info("还本金+利息:{}", JsonUtil.toJson(prinIntList, true));
         log.info("还本金:{}", JsonUtil.toJson(prinList, true));
-        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
+        InterfaceLog.OriginalReqMsg originalReqMsg = new InterfaceLog.OriginalReqMsg();
     }
 
     @Test
@@ -279,7 +284,7 @@ class AdapterControllerTest {
         System.out.println("=============================");
         System.out.println(migrationLoanDetail.getClassName());
         System.out.println(migrationRepayPlan.getClassName());
-        System.out.println(dataMigrationFactory.getDataMigration(migrationRepayPlan.getClassName()).dataMigration("", "", ""));
-        System.out.println(dataMigrationFactory.getDataMigration(migrationLoanDetail.getClassName()).dataMigration("", "", ""));
+        //System.out.println(dataMigrationFactory.getDataMigration(migrationRepayPlan.getClassName()).dataMigration("", "", ""));
+        //System.out.println(dataMigrationFactory.getDataMigration(migrationLoanDetail.getClassName()).dataMigration("", "", ""));
     }
 }

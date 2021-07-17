@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.CaseFormat;
 import com.weshare.adapter.entity.IncomeApply;
-import com.weshare.adapter.entity.InterfaceReqLog;
+import com.weshare.adapter.entity.InterfaceLog;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.enums.ProjectEnum;
 import common.JsonUtil;
@@ -257,10 +257,10 @@ public class DomeTest {
 
     @Test
     public void testInterface() throws Exception {
-        List<InterfaceReqLog> interfaceReqLogs = List.of(
-                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name(), createLoanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
-                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.REPAY_PLAN.name(), createPlanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
-                new InterfaceReqLog(UUID.randomUUID().toString(), InterfaceReqLog.ServiceEnum.REFUND_TICKET.name(), createRefundMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
+        List<InterfaceLog> interfaceLogs = List.of(
+                new InterfaceLog(UUID.randomUUID().toString(), InterfaceLog.ServiceEnum.LOAN_DETAIL.name(), createLoanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
+                new InterfaceLog(UUID.randomUUID().toString(), InterfaceLog.ServiceEnum.REPAY_PLAN.name(), createPlanMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now()),
+                new InterfaceLog(UUID.randomUUID().toString(), InterfaceLog.ServiceEnum.REFUND_TICKET.name(), createRefundMsg(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now())
 
         );
         Path path = Paths.get("/interface");
@@ -272,9 +272,9 @@ public class DomeTest {
                 file.delete();
             }
         }
-        Files.writeString(Paths.get(String.valueOf(path), "interface.json"), JsonUtil.toJson(interfaceReqLogs, true), StandardOpenOption.CREATE);
+        Files.writeString(Paths.get(String.valueOf(path), "interface.json"), JsonUtil.toJson(interfaceLogs, true), StandardOpenOption.CREATE);
 
-        for (InterfaceReqLog reqLog : interfaceReqLogs) {
+        for (InterfaceLog reqLog : interfaceLogs) {
             String originalReqMsg = reqLog.getOriginalReqMsg();
             // System.out.println(originalReqMsg);
             String content;
@@ -282,7 +282,7 @@ public class DomeTest {
                 case "LOAN_DETAIL":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
                     if (content != null) {
-                        List<InterfaceReqLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.LoanDetail>>() {
+                        List<InterfaceLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.LoanDetail>>() {
                         });
                         System.out.println(JsonUtil.toJson(loanDetails, true));
                     }
@@ -291,7 +291,7 @@ public class DomeTest {
                 case "REPAY_PLAN":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
                     if (content != null) {
-                        List<InterfaceReqLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RepayPlan>>() {
+                        List<InterfaceLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.RepayPlan>>() {
                         });
                         System.out.println(JsonUtil.toJson(repayPlans, true));
                     }
@@ -299,7 +299,7 @@ public class DomeTest {
                 case "REFUND_TICKET":
                     content = JsonUtil.toJsonNode(originalReqMsg, "content");
                     if (content != null) {
-                        List<InterfaceReqLog.OriginalReqMsg.RefundTicket> refundTickets = JsonUtil.fromJson(content, new TypeReference<List<InterfaceReqLog.OriginalReqMsg.RefundTicket>>() {
+                        List<InterfaceLog.OriginalReqMsg.RefundTicket> refundTickets = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.RefundTicket>>() {
                         });
                         System.out.println(JsonUtil.toJson(refundTickets, true));
                     }
@@ -309,8 +309,8 @@ public class DomeTest {
     }
 
     private String createLoanMsg() {
-        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
-        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.LOAN_DETAIL.name());
+        InterfaceLog.OriginalReqMsg originalReqMsg = new InterfaceLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceLog.ServiceEnum.LOAN_DETAIL.name());
         originalReqMsg.setProjectNo("projectNo");
         originalReqMsg.setProductName("productName");
         originalReqMsg.setCreateDate(LocalDateTime.now());
@@ -318,8 +318,8 @@ public class DomeTest {
         originalReqMsg.setContent(
                 JsonUtil.toJson(
                         List.of(
-                                new InterfaceReqLog.OriginalReqMsg.LoanDetail("SCY-101", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "123", "01"),
-                                new InterfaceReqLog.OriginalReqMsg.LoanDetail("SCY-102", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "456", "01")
+                                new InterfaceLog.OriginalReqMsg.LoanDetail("SCY-101", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "123", "01"),
+                                new InterfaceLog.OriginalReqMsg.LoanDetail("SCY-102", LocalDate.now(), new BigDecimal("1200.00"), SnowFlake.getInstance().nextId() + "", 6, "456", "01")
                         )
                 )
         );
@@ -327,8 +327,8 @@ public class DomeTest {
     }
 
     private String createPlanMsg() {
-        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
-        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.REPAY_PLAN.name());
+        InterfaceLog.OriginalReqMsg originalReqMsg = new InterfaceLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceLog.ServiceEnum.REPAY_PLAN.name());
         originalReqMsg.setProjectNo("projectNo");
         originalReqMsg.setProductName("productName");
         originalReqMsg.setCreateDate(LocalDateTime.now());
@@ -336,21 +336,21 @@ public class DomeTest {
         originalReqMsg.setContent(
                 JsonUtil.toJson(
                         List.of(
-                                new InterfaceReqLog.OriginalReqMsg.RepayPlan("SCY-101", 6, List.of(
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
+                                new InterfaceLog.OriginalReqMsg.RepayPlan("SCY-101", 6, List.of(
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
                                 )),
-                                new InterfaceReqLog.OriginalReqMsg.RepayPlan("SCY-102", 6, List.of(
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
-                                        new InterfaceReqLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
+                                new InterfaceLog.OriginalReqMsg.RepayPlan("SCY-102", 6, List.of(
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(1, LocalDate.parse("2020-06-15"), new BigDecimal("300.00"), new BigDecimal("170.00"), new BigDecimal("130.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(2, LocalDate.parse("2020-07-15"), new BigDecimal("300.00"), new BigDecimal("180.00"), new BigDecimal("120.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(3, LocalDate.parse("2020-08-15"), new BigDecimal("300.00"), new BigDecimal("190.00"), new BigDecimal("110.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(4, LocalDate.parse("2020-09-15"), new BigDecimal("300.00"), new BigDecimal("200.00"), new BigDecimal("100.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(5, LocalDate.parse("2020-10-15"), new BigDecimal("300.00"), new BigDecimal("210.00"), new BigDecimal("90.00")),
+                                        new InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList(6, LocalDate.parse("2020-11-15"), new BigDecimal("300.00"), new BigDecimal("250.00"), new BigDecimal("50.00"))
                                 )))
                 )
         );
@@ -358,8 +358,8 @@ public class DomeTest {
     }
 
     private String createRefundMsg() {
-        InterfaceReqLog.OriginalReqMsg originalReqMsg = new InterfaceReqLog.OriginalReqMsg();
-        originalReqMsg.setService(InterfaceReqLog.ServiceEnum.REFUND_TICKET.name());
+        InterfaceLog.OriginalReqMsg originalReqMsg = new InterfaceLog.OriginalReqMsg();
+        originalReqMsg.setService(InterfaceLog.ServiceEnum.REFUND_TICKET.name());
         originalReqMsg.setProjectNo("projectNo");
         originalReqMsg.setProductName("productName");
         originalReqMsg.setCreateDate(LocalDateTime.now());
