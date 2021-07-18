@@ -1,13 +1,12 @@
 package com.weshare.adapter.migration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.weshare.adapter.entity.InterfaceLog;
-import com.weshare.adapter.entity.LoanDetail;
-import com.weshare.adapter.entity.MsgLog;
-import com.weshare.adapter.entity.RepaymentPlan;
+import com.weshare.adapter.entity.*;
 import com.weshare.adapter.repo.LoanDetailRepo;
 import com.weshare.adapter.repo.MsgLogRepo;
+import com.weshare.adapter.repo.RefundTicketRepo;
 import com.weshare.adapter.repo.RepaymentPlanRepo;
+import com.weshare.service.api.enums.ProjectEnum;
 import common.ChangeEnumUtils;
 import common.JsonUtil;
 import common.SnowFlake;
@@ -25,8 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toCollection;
-
 /**
  * @author: scyang
  * @program: acc
@@ -42,6 +39,8 @@ public class DataMigrationFactory {
     private Migration migrationLoanDetail;
     @Autowired
     private Migration migrationRepayPlan;
+    @Autowired
+    private Migration migrationRefundTicket;
 
     @Autowired
     private MsgLogRepo msgLogRepo;
@@ -57,6 +56,7 @@ public class DataMigrationFactory {
         System.out.println("初始化了....");
         map.put(migrationLoanDetail.getClassName(), migrationLoanDetail);
         map.put(migrationRepayPlan.getClassName(), migrationRepayPlan);
+        map.put(migrationRefundTicket.getClassName(), migrationRefundTicket);
         //map.put("repayPlan", new MigrationRepayPlan());
         staticMsgLogRepo = msgLogRepo;
         staticRequest = request;
@@ -84,7 +84,7 @@ public class DataMigrationFactory {
             });
             InterfaceLog.OriginalReqMsg.LoanDetail loanDetail = loanDetails.get(0);
             MsgLog msgLog = staticMsgLogRepo.findByOriginalDataLogId(dataLogId);
-            Optional.ofNullable(msgLog).ifPresent(e->{
+            Optional.ofNullable(msgLog).ifPresent(e -> {
                 staticMsgLogRepo.deleteMsgLogByOriginalDataLogId(e.getOriginalDataLogId());
             });
             //保存日志信息
@@ -128,7 +128,7 @@ public class DataMigrationFactory {
             List<InterfaceLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.RepayPlan>>() {
             });
             MsgLog msgLog = staticMsgLogRepo.findByOriginalDataLogId(dataLogId);
-            Optional.ofNullable(msgLog).ifPresent(e->{
+            Optional.ofNullable(msgLog).ifPresent(e -> {
                 staticMsgLogRepo.deleteMsgLogByOriginalDataLogId(e.getOriginalDataLogId());
             });
             InterfaceLog.OriginalReqMsg.RepayPlan repayPlan = repayPlans.get(0);
@@ -153,6 +153,49 @@ public class DataMigrationFactory {
                                     .setLastModifiedDate(LocalDateTime.now())
                     );
                 }
+            });
+            return "success";
+        }
+    }
+
+    @Service("migrationRefundTicket")
+    @Transactional
+    public static class MigrationRefundTicket extends Migration {
+        @Autowired
+        private RefundTicketRepo refundTicketRepo;
+
+        @Override
+        public String dataMigration(String msgJson, String batchDate, String dataLogId) {
+            log.info(InterfaceLog.ServiceEnum.REFUND_TICKET.name() + " 数据落库开始...");
+            String projectNo = JsonUtil.toJsonNode(msgJson, "project_no");
+            String productNo = JsonUtil.toJsonNode(msgJson, "product_no");
+            String createDate = JsonUtil.toJsonNode(msgJson, "create_date");
+            String content = JsonUtil.toJsonNode(msgJson, "content");
+
+            List<InterfaceLog.OriginalReqMsg.RefundTicket> refundTickets = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.RefundTicket>>() {
+            });
+            MsgLog msgLog = staticMsgLogRepo.findByOriginalDataLogId(dataLogId);
+            Optional.ofNullable(msgLog).ifPresent(e -> {
+                staticMsgLogRepo.deleteMsgLogByOriginalDataLogId(e.getOriginalDataLogId());
+            });
+            InterfaceLog.OriginalReqMsg.RefundTicket refundTicket = refundTickets.get(0);
+            //保存日志信息
+            msgLog = getMsgLog(batchDate, dataLogId, projectNo, productNo, content, refundTicket.getDueBillNo(), MsgLog.MsgTypeEnum.REFUND_TICKET);
+            staticMsgLogRepo.save(msgLog);
+            refundTicketRepo.deleteByDueBillNoList(refundTickets.stream().map(InterfaceLog.OriginalReqMsg.RefundTicket::getDueBillNo).collect(Collectors.toList()));
+            //保存退票数据
+            refundTickets.forEach(e -> {
+                refundTicketRepo.save(
+                        new RefundTicket()
+                                .setId(SnowFlake.getInstance().nextId() + "")
+                                .setRefundStatus(ChangeEnumUtils.changeEnum(ProjectEnum.YXMS.getProjectNo(), "refundStatus", e.getRefundStatus(), RefundTicket.RefundStatusEnum.class))
+                                .setAccountNum(e.getAccountNum())
+                                .setDueBillNo(e.getDueBillNo())
+                                .setLoanAmount(e.getLoanAmount())
+                                .setRefundDate(e.getRefundDate())
+                                .setBatchDate(LocalDate.parse(batchDate))
+                                .setCreateDate(LocalDateTime.parse(createDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                );
             });
             return "success";
         }

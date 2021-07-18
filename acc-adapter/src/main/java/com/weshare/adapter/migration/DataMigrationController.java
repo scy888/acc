@@ -71,7 +71,7 @@ public class DataMigrationController {
             dataMigration.dataMigration(originalReqMsg, batchDate.toString(), originalDataLogId);
             return "success";
         }
-        log.info("originalReqMsg json串上的节点content数据为空...");
+        log.info("serviceId:{} =>originalReqMsg的json串上的节点content数据为空...",serviceId);
         return "success";
     }
 
