@@ -22,10 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * @author: scyang
@@ -49,7 +49,7 @@ public class DataMigrationFactory {
     private HttpServletRequest request;
 
     private static final Map<String, Migration> map = new HashMap<>();
-    private static MsgLogRepo staticmMgLogRepo;
+    private static MsgLogRepo staticMsgLogRepo;
     private static HttpServletRequest staticRequest;
 
     @PostConstruct
@@ -58,7 +58,7 @@ public class DataMigrationFactory {
         map.put(migrationLoanDetail.getClassName(), migrationLoanDetail);
         map.put(migrationRepayPlan.getClassName(), migrationRepayPlan);
         //map.put("repayPlan", new MigrationRepayPlan());
-        staticmMgLogRepo = msgLogRepo;
+        staticMsgLogRepo = msgLogRepo;
         staticRequest = request;
     }
 
@@ -82,32 +82,32 @@ public class DataMigrationFactory {
             String content = JsonUtil.toJsonNode(msgJson, "content");
             List<InterfaceLog.OriginalReqMsg.LoanDetail> loanDetails = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.LoanDetail>>() {
             });
-            MsgLog msgLog = staticmMgLogRepo.findByOriginalDataLogId(dataLogId);
-            if (Objects.isNull(msgLog)) {
-                InterfaceLog.OriginalReqMsg.LoanDetail loanDetail = loanDetails.get(0);
-                //保存日子信息
-                msgLog = getMsgLog(batchDate, dataLogId, projectNo, productNo, content, loanDetail.getDueBillNo(),MsgLog.MsgTypeEnum.LOAN_DETAIL);
-                staticmMgLogRepo.save(msgLog);
-                //保存放款库数据
-                loanDetails.forEach(e -> {
-                    loanDetailRepo.save(
-                            new LoanDetail()
-                                    .setId(SnowFlake.getInstance().nextId() + "")
-                                    .setDueBillNo(e.getDueBillNo())
-                                    .setLoanStatus(ChangeEnumUtils.changeEnum(ChangeEnumUtils.YXMS.getProjectNo(), "loanStatus", e.getLoanStatus(), LoanDetail.LoanStatusEnum.class))
-                                    .setAccountNum(e.getAccountNum())
-                                    .setLoanAmount(e.getLoanAmount())
-                                    .setLoanDate(e.getLoanDate())
-                                    .setTerm(e.getTerm())
-                                    .setSerialNum(e.getSerialNum())
-                                    .setBatchDate(LocalDate.parse(batchDate))
-                                    .setCreatedDate(LocalDateTime.parse(createDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
-                                    .setLastModifiedDate(LocalDateTime.now())
-                    );
-                });
-            } else {
-                staticmMgLogRepo.save(msgLog);
-            }
+            InterfaceLog.OriginalReqMsg.LoanDetail loanDetail = loanDetails.get(0);
+            MsgLog msgLog = staticMsgLogRepo.findByOriginalDataLogId(dataLogId);
+            Optional.ofNullable(msgLog).ifPresent(e->{
+                staticMsgLogRepo.deleteMsgLogByOriginalDataLogId(e.getOriginalDataLogId());
+            });
+            //保存日志信息
+            msgLog = getMsgLog(batchDate, dataLogId, projectNo, productNo, content, loanDetail.getDueBillNo(), MsgLog.MsgTypeEnum.LOAN_DETAIL);
+            staticMsgLogRepo.save(msgLog);
+            //保存放款库数据
+            loanDetailRepo.deleteByDueBillNoList(loanDetails.stream().map(InterfaceLog.OriginalReqMsg.LoanDetail::getDueBillNo).collect(Collectors.toList()));
+            loanDetails.forEach(e -> {
+                loanDetailRepo.save(
+                        new LoanDetail()
+                                .setId(SnowFlake.getInstance().nextId() + "")
+                                .setDueBillNo(e.getDueBillNo())
+                                .setLoanStatus(ChangeEnumUtils.changeEnum(ChangeEnumUtils.YXMS.getProjectNo(), "loanStatus", e.getLoanStatus(), LoanDetail.LoanStatusEnum.class))
+                                .setAccountNum(e.getAccountNum())
+                                .setLoanAmount(e.getLoanAmount())
+                                .setLoanDate(e.getLoanDate())
+                                .setTerm(e.getTerm())
+                                .setSerialNum(e.getSerialNum())
+                                .setBatchDate(LocalDate.parse(batchDate))
+                                .setCreatedDate(LocalDateTime.parse(createDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                                .setLastModifiedDate(LocalDateTime.now())
+                );
+            });
             return "success";
         }
     }
@@ -127,33 +127,33 @@ public class DataMigrationFactory {
             String content = JsonUtil.toJsonNode(msgJson, "content");
             List<InterfaceLog.OriginalReqMsg.RepayPlan> repayPlans = JsonUtil.fromJson(content, new TypeReference<List<InterfaceLog.OriginalReqMsg.RepayPlan>>() {
             });
-            MsgLog msgLog = staticmMgLogRepo.findByOriginalDataLogId(dataLogId);
-            if (Objects.isNull(msgLog)) {
-                InterfaceLog.OriginalReqMsg.RepayPlan repayPlan = repayPlans.get(0);
-                //保存日子信息
-                msgLog = getMsgLog(batchDate, dataLogId, projectNo, productNo, content, repayPlan.getDueBillNo(),MsgLog.MsgTypeEnum.REPAYMENT_PLAN);
-                staticmMgLogRepo.save(msgLog);
-                //保存放款库数据
-                repayPlans.forEach(e -> {
-                    for (InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList dueBillNoList : e.getDueBillNoList()) {
-                        RepaymentPlanRepo.save(
-                                new RepaymentPlan()
-                                        .setId(SnowFlake.getInstance().nextId() + "")
-                                        .setDueBillNo(e.getDueBillNo())
-                                        .setRepaymentDate(dueBillNoList.getRepaymentDate())
-                                        .setTerm(dueBillNoList.getTerm())
-                                        .setShouldMonthMoney(dueBillNoList.getShouldMonthMoney())
-                                        .setShouldCapitalMoney(dueBillNoList.getShouldCapitalMoney())
-                                        .setShouldInterestMoney(dueBillNoList.getShouldInterestMoney())
-                                        .setBatchDate(LocalDate.parse(batchDate))
-                                        .setCreatedDate(LocalDateTime.parse(createDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
-                                        .setLastModifiedDate(LocalDateTime.now())
-                        );
-                    }
-                });
-            } else {
-                staticmMgLogRepo.save(msgLog);
-            }
+            MsgLog msgLog = staticMsgLogRepo.findByOriginalDataLogId(dataLogId);
+            Optional.ofNullable(msgLog).ifPresent(e->{
+                staticMsgLogRepo.deleteMsgLogByOriginalDataLogId(e.getOriginalDataLogId());
+            });
+            InterfaceLog.OriginalReqMsg.RepayPlan repayPlan = repayPlans.get(0);
+            //保存日志信息
+            msgLog = getMsgLog(batchDate, dataLogId, projectNo, productNo, content, repayPlan.getDueBillNo(), MsgLog.MsgTypeEnum.REPAY_PLAN);
+            staticMsgLogRepo.save(msgLog);
+            RepaymentPlanRepo.deleteByDueBillNoList(repayPlans.stream().map(InterfaceLog.OriginalReqMsg.RepayPlan::getDueBillNo).collect(Collectors.toList()));
+            //保存还款计划库数据
+            repayPlans.forEach(e -> {
+                for (InterfaceLog.OriginalReqMsg.RepayPlan.DueBillNoList dueBillNoList : e.getDueBillNoList()) {
+                    RepaymentPlanRepo.save(
+                            new RepaymentPlan()
+                                    .setId(SnowFlake.getInstance().nextId() + "")
+                                    .setDueBillNo(e.getDueBillNo())
+                                    .setRepaymentDate(dueBillNoList.getRepaymentDate())
+                                    .setTerm(dueBillNoList.getTerm())
+                                    .setShouldMonthMoney(dueBillNoList.getShouldMonthMoney())
+                                    .setShouldCapitalMoney(dueBillNoList.getShouldCapitalMoney())
+                                    .setShouldInterestMoney(dueBillNoList.getShouldInterestMoney())
+                                    .setBatchDate(LocalDate.parse(batchDate))
+                                    .setCreatedDate(LocalDateTime.parse(createDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                                    .setLastModifiedDate(LocalDateTime.now())
+                    );
+                }
+            });
             return "success";
         }
     }
@@ -162,7 +162,7 @@ public class DataMigrationFactory {
         MsgLog msgLog = new MsgLog()
                 .setApplyNo(dueBillNo)
                 .setProjectNo(projectNo)
-                .setProductNo(productNo)//MsgLog.MsgTypeEnum.LOAN_DETAIL
+                .setProductNo(productNo)
                 .setMsgType(msgTypeEnum)
                 .setOriginalDataLogId(dataLogId)
                 .setReqData(content)

@@ -66,7 +66,7 @@ public class MsgLog {
 
     public enum MsgTypeEnum {
         LOAN_DETAIL,
-        REPAYMENT_PLAN,
+        REPAY_PLAN,
         REFUND_TICKET,
     }
 }

@@ -381,12 +381,32 @@ public class DomeTest {
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "RepayPlan"));
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "reduce"));
     }
+
     @Test
-    public void test003(){
+    public void test003() {
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "TestData"));//test_data
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "testData"));//test_data
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, "LoanDetail"));//LOAN_DETAIL
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, "loanDetail"));//LOAN_DETAIL
+    }
 
+    @Test
+    public void test004() {
+        System.out.println(Optional.of("1").orElse(getStr()));
+        System.out.println(Optional.of("1").orElseGet(() -> getStr()));
+        System.out.println(Optional.of("1").or(() -> Optional.of("1"))
+                .or(() -> Optional.of("2")).get());
+
+        Optional<String> s = Optional.ofNullable("25");
+        String s1 = s.or(() -> Optional.of("2"))
+                .or(() -> Optional.of("3"))
+                .or(() -> Optional.of("4"))
+                .or(() -> Optional.of("5")).orElse("0");
+        System.out.println(s1);
+    }
+
+    private String getStr() {
+        System.out.println("哈哈...");
+        return "2";
     }
 }
