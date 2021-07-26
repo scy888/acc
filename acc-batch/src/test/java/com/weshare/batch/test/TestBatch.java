@@ -64,6 +64,17 @@ public class TestBatch {
     }
 
     @Test
+    public void test005() {
+        List<String> list = Collections.singletonList("a");
+        //list.set(0,"b");
+        System.out.println(list);
+        List<String> list1 = Arrays.asList("a");
+        list1.set(0,"b");
+        System.out.println(list1);
+
+    }
+
+    @Test
     public void test02() throws Exception {
 
         List<Person> personList = List.of(new Person().setId(SnowFlake.getInstance().nextId() + "").setName("赵敏").setAddress("蒙古").setAge(20).setBirthday(LocalDate.parse("1992-06-18")).setSalary(new BigDecimal("1992.0618")).setStatus(Person.Status.F),
