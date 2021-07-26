@@ -221,6 +221,7 @@ public class YxmsTasklet {
 
         return new FlatFileItemReaderBuilder<LoanDetailReq>()
                 .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/loan_detail_" + dateStr + ".csv"))
+                .strict(false)
                 .name("放款明细.csv")
                 .addComment("放款明细.csv")
                 .linesToSkip(1)
@@ -259,6 +260,7 @@ public class YxmsTasklet {
 
         return new FlatFileItemReaderBuilder<RepaymentPlanReq>()
                 .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/repayment_plan_" + dateStr + ".csv"))
+                .strict(false)
                 .name("还款计划.csv")
                 .addComment("还款计划.csv")
                 .linesToSkip(1)
@@ -297,6 +299,7 @@ public class YxmsTasklet {
 
         return new FlatFileItemReaderBuilder<RefundTicketReq>()
                 .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/refund_ticket_" + dateStr + ".csv"))
+                .strict(false)
                 .name("退票文件.csv")
                 .addComment("退票文件.csv")
                 .linesToSkip(1)
@@ -335,6 +338,7 @@ public class YxmsTasklet {
 
         return new FlatFileItemReaderBuilder<RebackDetailReq>()
                 .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/reback_detail_" + dateStr + ".csv"))
+                .strict(false)
                 .name("扣款明细文件.csv")
                 .addComment("扣款明细文件.csv")
                 .linesToSkip(1)
@@ -373,6 +377,7 @@ public class YxmsTasklet {
 
         return new FlatFileItemReaderBuilder<RepaymentDetailReq>()
                 .resource(new FileSystemResource(appConfig.getUnzip() + "/" + dateStr + "/repayment_detail_" + dateStr + ".csv"))
+                .strict(false)
                 .name("还款明细文件.csv")
                 .addComment("还款明细文件.csv")
                 .linesToSkip(1)
