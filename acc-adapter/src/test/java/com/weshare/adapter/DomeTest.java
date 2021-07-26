@@ -409,4 +409,12 @@ public class DomeTest {
         System.out.println("哈哈...");
         return "2";
     }
+
+    @Test
+    public void test005() {
+        System.out.println(Boolean.toString(true));
+        System.out.println(Boolean.toString(false));
+        System.out.println(Boolean.parseBoolean("true"));
+        System.out.println(Boolean.parseBoolean("false"));
+    }
 }
