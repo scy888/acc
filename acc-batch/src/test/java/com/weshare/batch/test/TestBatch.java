@@ -423,6 +423,10 @@ public class TestBatch {
         System.out.println(LocalDate.parse("2020-05-30").toEpochDay() - LocalDate.parse("2020-05-15").toEpochDay());
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"), ChronoUnit.DAYS));
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30")).get(ChronoUnit.DAYS));
+        System.out.println(ChronoUnit.DAYS.between(LocalDate.parse("2020-05-15"),LocalDate.parse("2020-05-30")));
         System.out.println(Inet4Address.getLocalHost().getHostAddress());
+        System.out.println("===========================================");
+        System.out.println(LocalDateTime.parse("2020-05-15T15:30:27").until(LocalDateTime.parse("2020-05-30T10:30:27"),ChronoUnit.DAYS));
+        System.out.println(Duration.between(LocalDateTime.parse("2020-05-15T15:30:27"), LocalDateTime.parse("2020-05-30T10:30:27")).toDays());
     }
 }

@@ -13,7 +13,7 @@ eureka:
 spring:
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost/acc_adapter?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost/acc_adapter?createDatabaseIfNotExist=true&characterEncoding=UTF8&rewriteBatchedStatements=true&allowMultiQueries=true
     username: root
     password: root
 
