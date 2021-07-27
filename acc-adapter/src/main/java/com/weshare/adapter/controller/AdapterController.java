@@ -5,6 +5,7 @@ import com.weshare.adapter.feignCilent.LoanFeignClient;
 import com.weshare.service.api.entity.User;
 import com.weshare.service.api.entity.UserBaseReq;
 import com.weshare.service.api.result.Result;
+import common.HttpClientUtil;
 import common.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,9 +66,9 @@ public class AdapterController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
-        Result result = restTemplate.exchange(url, HttpMethod.GET, httpEntity, Result.class).getBody();
+
+        Result result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null), Result.class).getBody();
         System.out.println(result);
         return result;
     }
@@ -103,7 +104,7 @@ public class AdapterController {
                 Map.entry("age", age)
         );
         HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(map, headers);
-        Result result = restTemplate.exchange(url, HttpMethod.POST, httpEntity, Result.class).getBody();
+        Result result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(new User(name,age)), Result.class).getBody();
         System.out.println(result);
         return result;
     }
