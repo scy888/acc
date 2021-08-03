@@ -7,6 +7,9 @@ import common.ChangeEnumUtils;
 import common.ReflectUtil;
 import common.SnowFlake;
 import jodd.io.ZipUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -69,7 +72,7 @@ public class TestBatch {
         //list.set(0,"b");
         System.out.println(list);
         List<String> list1 = Arrays.asList("a");
-        list1.set(0,"b");
+        list1.set(0, "b");
         System.out.println(list1);
 
     }
@@ -423,10 +426,75 @@ public class TestBatch {
         System.out.println(LocalDate.parse("2020-05-30").toEpochDay() - LocalDate.parse("2020-05-15").toEpochDay());
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30"), ChronoUnit.DAYS));
         System.out.println(LocalDate.parse("2020-05-15").until(LocalDate.parse("2020-05-30")).get(ChronoUnit.DAYS));
-        System.out.println(ChronoUnit.DAYS.between(LocalDate.parse("2020-05-15"),LocalDate.parse("2020-05-30")));
+        System.out.println(ChronoUnit.DAYS.between(LocalDate.parse("2020-05-15"), LocalDate.parse("2020-05-30")));
         System.out.println(Inet4Address.getLocalHost().getHostAddress());
         System.out.println("===========================================");
-        System.out.println(LocalDateTime.parse("2020-05-15T15:30:27").until(LocalDateTime.parse("2020-05-30T10:30:27"),ChronoUnit.DAYS));
+        System.out.println(LocalDateTime.parse("2020-05-15T15:30:27").until(LocalDateTime.parse("2020-05-30T10:30:27"), ChronoUnit.DAYS));
         System.out.println(Duration.between(LocalDateTime.parse("2020-05-15T15:30:27"), LocalDateTime.parse("2020-05-30T10:30:27")).toDays());
+
+        List<String> list = new ArrayList<>(List.of("b", "c", "d"));
+        list.add(0, "a");
+        System.out.println(list);
+        Object[] array = list.toArray();
+        for (Object s : array) {
+            System.out.println(s);
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Plan {
+        private String dueBillNo;
+        private Integer term;
+        private BigDecimal amount;
+    }
+
+    @Test
+    public void test_() {
+        List<Plan> list1 = new ArrayList<>(
+                List.of(new Plan("scy", 1, new BigDecimal("100.0")),
+                        new Plan("scy", 2, new BigDecimal("200.0")))
+        );
+        List<Plan> list2 = list1.stream().filter(e -> e.getTerm() == 1).collect(Collectors.toList());
+        list2.get(0).setAmount(new BigDecimal("90.0"));
+
+        System.out.println(list1);
+        System.out.println("============================");
+        list1.removeAll(list2);
+        System.out.println(list1);
+        System.out.println("===============================");
+        list1.addAll(list2);
+        System.out.println(list1);
+    }
+
+    @Test
+    public void test__() {
+        List<Plan> list1 = List.of(new Plan("scy", 1, new BigDecimal("100.0")), new Plan("scy", 2, new BigDecimal("200.0")));
+        List<Plan> list2 = List.of(new Plan("scy", 1, new BigDecimal("200.0")));
+        list1 = new ArrayList<>(list1);
+        list2 = new ArrayList<>(list2);
+        list2.get(0).setAmount(new BigDecimal("90.0"));
+        list1.removeAll(list2);
+        System.out.println(list1);
+        System.out.println("====================");
+        list1.addAll(list2);
+        System.out.println(list1);
+    }
+
+    @Test
+    public void testPageList() {
+        List<String> list = new ArrayList<>();
+        for (int i = 1; i <= 198; i++) {
+            list.add("value_" + i);
+        }
+        int pageSize = 20;
+        int pageNum = (int) Math.ceil(list.size() * 1.0 / pageSize);
+        for (int i = 1; i <= pageNum; i++) {
+           List<String> subList=list.subList((i-1)*pageSize,Math.min(i*pageSize,list.size()));
+            for (String s : subList) {
+                System.out.println(s);
+            }
+        }
     }
 }
