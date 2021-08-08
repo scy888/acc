@@ -25,10 +25,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,14 +64,15 @@ public class BatchController {
     private String[] sendTos;
 
     @GetMapping("/sendMsg/{message}")
-    public String sendMsg(@PathVariable String message) throws MessagingException {
-
+    public String sendMsg(@PathVariable String message) throws Exception {
+        File file = new File("");
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();//创建模拟量
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "utf-8");
         mimeMessageHelper.setText(message);//设置内容
         mimeMessageHelper.setSubject("【邮件主题】");//设置主题
         mimeMessageHelper.setFrom(sendFrom);//设置邮箱发送方
         mimeMessageHelper.setTo(sendTos);//设置邮件接收方
+        // mimeMessageHelper.addAttachment(MimeUtility.encodeWord(file.getName(),"utf-8","B"),file);//发送附件
         javaMailSender.send(mimeMessage);//发送邮件
         return "success";
     }
@@ -79,7 +83,7 @@ public class BatchController {
                 new User("周芷若", new Date(2020 - 1900, 8 - 1, 9), 19, "女", "峨嵋", "123", "123", BigDecimal.ONE, User.Status.F),
                 new User("殷离", new Date(2020 - 1900, 6 - 1, 5), 18, "女", "灵蛇岛", "123", "123", BigDecimal.ONE, User.Status.F),
                 new User("小昭", new Date(2020 - 1900, 5 - 1, 5), 17, "女", "波斯", "123", "123", BigDecimal.ONE, User.Status.F));
-      log.info("获取adminId:{}",adminId);
+        log.info("获取adminId:{}", adminId);
         String templateContent = FreemarkerUtil.getTemplateContent("/ftl/userList.ftl");
         Map<String, Object> map = new HashMap<>();
         map.put("content", "【花心大萝卜张无忌身边的女人校验如下】:");//内容

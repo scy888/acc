@@ -3,9 +3,8 @@ package com.weshare.batch.test;
 import com.weshare.batch.entity.Person;
 import com.weshare.service.api.entity.RepaymentPlanReq;
 import com.weshare.service.api.enums.TermStatusEnum;
-import common.ChangeEnumUtils;
-import common.ReflectUtil;
-import common.SnowFlake;
+import com.weshare.service.api.vo.Tuple2;
+import common.*;
 import jodd.io.ZipUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -491,10 +490,25 @@ public class TestBatch {
         int pageSize = 20;
         int pageNum = (int) Math.ceil(list.size() * 1.0 / pageSize);
         for (int i = 1; i <= pageNum; i++) {
-           List<String> subList=list.subList((i-1)*pageSize,Math.min(i*pageSize,list.size()));
+            List<String> subList = list.subList((i - 1) * pageSize, Math.min(i * pageSize, list.size()));
             for (String s : subList) {
                 System.out.println(s);
             }
+        }
+    }
+
+    @Test
+    public void testDistinct() {
+        List<Tuple2<String, Integer>> tuple2s = List.of(
+                Tuple2.of("YX-101", 1), Tuple2.of("YX-101", 1),
+                Tuple2.of("YX-101", 2), Tuple2.of("YX-101", 2),
+                Tuple2.of("YX-102", 1), Tuple2.of("YX-102", 1),
+                Tuple2.of("YX-102", 2), Tuple2.of("YX-102", 2), Tuple2.of("YX-103", 1)
+        );
+
+        List<Tuple2<String, Integer>> tuple2List = tuple2s.stream().map(e -> Tuple2.of(e.getFirst(), e.getSecond())).distinct().collect(Collectors.toList());
+        for (Tuple2<String, Integer> tuple2 : tuple2List) {
+            System.out.println(JsonUtil.toJson(tuple2,true));
         }
     }
 }
