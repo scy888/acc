@@ -4,9 +4,12 @@ import com.weshare.batch.annotation.AdminId;
 import com.weshare.batch.feignClient.RepayFeignClient;
 import com.weshare.batch.task.repo.BatchJobControlRepo;
 import com.weshare.service.api.entity.PictureFileReq;
+import com.weshare.service.api.vo.Tuple2;
 import common.FreemarkerUtil;
 import common.SnowFlake;
 import entity.User;
+import jodd.io.ZipUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -28,15 +31,18 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author: scyang
@@ -161,7 +167,7 @@ public class BatchController {
     }
 
 
-    @GetMapping("testBatch/{jobName}")
+    @GetMapping("/testBatch/{jobName}")
     public String testBatch(@PathVariable String jobName, @RequestParam String remark) throws Exception {
         Job job = jobRegistry.getJob(jobName);//注册job名
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
@@ -238,6 +244,43 @@ public class BatchController {
         } finally {
             outputStream.close();
         }
+        return "success";
+    }
+
+    // @SneakyThrows
+    @Autowired
+    HttpServletResponse response;
+
+    @GetMapping("/sendEmailZip")
+    public String sendEmailZip(@RequestParam String url) throws Exception {
+
+        List<Tuple2<String, byte[]>> tuple2s = repayFeignClient.repayByte(url);
+        Path zipPath = Paths.get("/zip");
+        if (Files.notExists(zipPath)) {
+            Files.createDirectories(zipPath);
+        }
+        File zipFile = Paths.get(String.valueOf(zipPath), "照片.zip").toFile();
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile));
+             ServletOutputStream outputStream = response.getOutputStream()
+        ) {
+            for (Tuple2<String, byte[]> tuple2 : tuple2s) {
+                ZipUtil.addToZip(zipOutputStream, tuple2.getSecond(), tuple2.getFirst(), "zip");
+            }
+            outputStream.write(new FileInputStream(zipFile).readAllBytes());
+            String fileName = zipFile.getName();
+            log.info("文件下载的名称:{}", fileName);
+            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            outputStream.flush();
+        }
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+        mimeMessageHelper.setFrom(sendFrom);
+        mimeMessageHelper.setTo(sendTos);
+        mimeMessageHelper.setSubject("照片压缩文件");
+        mimeMessageHelper.setText("");
+        mimeMessageHelper.addAttachment(MimeUtility.encodeWord(zipFile.getName()), zipFile);
+        javaMailSender.send(mimeMessage);
         return "success";
     }
 

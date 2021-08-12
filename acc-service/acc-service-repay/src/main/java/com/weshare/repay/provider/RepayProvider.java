@@ -13,7 +13,7 @@ import com.weshare.service.api.vo.Tuple2;
 import com.weshare.service.api.vo.Tuple3;
 import com.weshare.service.api.vo.Tuple4;
 import common.*;
-import lombok.*;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -451,4 +454,21 @@ public class RepayProvider implements RepayClient {
         // return msg;
     }
 
+    @SneakyThrows
+    @Override
+    public List<Tuple2<String, byte[]>> repayByte(String url) {//F:\zhaopian\chengjiaci
+        //url = URLEncoder.encode(url, "utf-8");
+        log.info("url:{}",url);
+        File file = new File(url);
+        File[] files = file.listFiles(e -> e.getName().endsWith(".JPG"));
+        List<Tuple2<String, byte[]>> tuple2s = Arrays.stream(files).map(e -> {
+            try {
+                return Tuple2.of(e.getName(), new FileInputStream(e).readAllBytes());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        return tuple2s;
+    }
 }

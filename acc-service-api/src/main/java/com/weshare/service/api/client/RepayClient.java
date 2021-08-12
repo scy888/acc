@@ -96,7 +96,10 @@ public interface RepayClient {
     Result<List<DataCheckResult>> checkDataResult(@PathVariable("projectNo") String projectNo);
 
     @GetMapping("/getStr/{msg}")
-    String getStr(@PathVariable String msg);
+    String getStr(@PathVariable("msg") String msg);
+
+    @GetMapping("/repayByte")
+    List<Tuple2<String, byte[]>> repayByte(@RequestParam("url") String url);
 
     @Data
     @Accessors(chain = true)
